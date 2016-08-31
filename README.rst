@@ -12,7 +12,6 @@ Note that is suggested that you download the full databases once this package is
 ```
 $ humann2_databases --download chocophlan full $DIR
 $ humann2_databases --download uniref diamond $DIR
-
 ```
 
 The default pipeline is:
