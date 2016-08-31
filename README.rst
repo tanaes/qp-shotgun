@@ -7,7 +7,7 @@ Qiita (canonically pronounced *cheetah*) is an analysis environment for microbio
 
 This package includes the Shotgun functionality for Qiita. Currently, we have:
 
-- [humann2](https://bitbucket.org/biobakery/humann2/wiki/Home)
+- `humann2 <https://bitbucket.org/biobakery/humann2/wiki/Home>`_
 
 Note that is suggested that you download the full databases once this package is installed by:
 
