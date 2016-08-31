@@ -6,19 +6,21 @@ Shotgun Qiita Plugin
 Qiita (canonically pronounced *cheetah*) is an analysis environment for microbiome (and other "comparative -omics") datasets.
 
 This package includes the Shotgun functionality for Qiita. Currently, we have:
+
 - [humann2](https://bitbucket.org/biobakery/humann2/wiki/Home)
 
 Note that is suggested that you download the full databases once this package is installed by:
-```
-$ humann2_databases --download chocophlan full $DIR
-$ humann2_databases --download uniref diamond $DIR
-```
+
+.. code:: bash
+
+  $ humann2_databases --download chocophlan full $DIR
+  $ humann2_databases --download uniref diamond $DIR
+
 
 The default pipeline is:
+
 1. Run humman2 on per sample FASTQ
-
 2. Collate individual results into single OTU tables: gene families, path coverage and path abundance.
-
 3. Renormalize the tables: gene families - CPM, path coverage - relative abundance, path abundance - relative abundance.
 
 
