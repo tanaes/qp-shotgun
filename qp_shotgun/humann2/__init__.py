@@ -6,4 +6,8 @@
 # The full license is in the file LICENSE, distributed with this software.
 # -----------------------------------------------------------------------------
 
-from .humann2 import *
+from .humann2 import (
+    generate_humann2_analysis_commands, get_sample_names_by_run_prefix)
+
+__all__ = [
+    'generate_humann2_analysis_commands', 'get_sample_names_by_run_prefix']

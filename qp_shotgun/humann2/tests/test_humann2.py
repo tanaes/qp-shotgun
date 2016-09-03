@@ -64,25 +64,28 @@ class Humann2Tests(TestCase):
             f.write(MAPPING_FILE)
         self._clean_up_files.append(fp)
         with self.assertRaises(ValueError):
-            generate_humann2_analysis_commands(['a', 'b', 'c'], [], fp, 'output', {})
+            generate_humann2_analysis_commands(['a', 'b', 'c'], [], fp,
+                                               'output', {})
 
-    def test_generate_humann2_analysis_commands_forward_reverse_not_match(self):
+    def test_generate_humann2_analysis_commands_fwd_rev_not_match(self):
         fd, fp = mkstemp()
         close(fd)
         with open(fp, 'w') as f:
             f.write(MAPPING_FILE)
         self._clean_up_files.append(fp)
         with self.assertRaises(ValueError):
-            generate_humann2_analysis_commands(['s1', 's2', 's3'], ['a'], fp, 'output', {})
+            generate_humann2_analysis_commands(['s1', 's2', 's3'], ['a'], fp,
+                                               'output', {})
 
-    def test_generate_humann2_analysis_commands_only_forward(self):
+    def test_generate_humann2_analysis_commands_only_fwd(self):
         fd, fp = mkstemp()
         close(fd)
         with open(fp, 'w') as f:
             f.write(MAPPING_FILE)
         self._clean_up_files.append(fp)
 
-        params = {"--nucleotide-database": "chocophlan", "--protein-database": "uniref"}
+        params = {"--nucleotide-database": "chocophlan",
+                  "--protein-database": "uniref"}
         exp = [
             'humann2 --input fastq/s1.fastq --output output/s1 '
             '--output-basename SKB8.640193 --output-format biom '
@@ -95,7 +98,7 @@ class Humann2Tests(TestCase):
             '--protein-database uniref --nucleotide-database chocophlan']
         obs = generate_humann2_analysis_commands(
             ['fastq/s1.fastq', 'fastq/s2.fastq.gz', 'fastq/s3.fastq'], [],
-             fp, 'output', params)
+            fp, 'output', params)
         self.assertEqual(obs, exp)
 
     def test_generate_humann2_analysis_commands_forward_reverse(self):
@@ -129,7 +132,7 @@ class Humann2Tests(TestCase):
         obs = generate_humann2_analysis_commands(
             ['fastq/s1.fastq', 'fastq/s2.fastq.gz', 'fastq/s3.fastq'],
             ['fastq/s1.R2.fastq', 'fastq/s2.R2.fastq.gz', 'fastq/s3.R2.fastq'],
-             fp, 'output', params)
+            fp, 'output', params)
         self.assertEqual(obs, exp)
 
 MAPPING_FILE = (

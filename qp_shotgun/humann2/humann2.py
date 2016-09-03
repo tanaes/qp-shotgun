@@ -49,8 +49,10 @@ def generate_humann2_analysis_commands(forward_seqs, reverse_seqs, map_file,
     forward_seqs.sort()
     if reverse_seqs:
         if len(forward_seqs) != len(reverse_seqs):
-            raise ValueError('Your reverse and forward files are of different length. Forward: %s. '
-                             'Reverse: %s.' % (', '.join(forward_seqs), ', '.join(reverse_seqs)))
+            raise ValueError('Your reverse and forward files are of different '
+                             'length. Forward: %s. Reverse: %s.' %
+                             (', '.join(forward_seqs),
+                              ', '.join(reverse_seqs)))
         reverse_seqs.sort()
 
     sn_by_rp = get_sample_names_by_run_prefix(map_file)
@@ -102,7 +104,8 @@ def generate_humann2_analysis_commands(forward_seqs, reverse_seqs, map_file,
     params = ' '.join(["%s %s" % (k, v) for k, v in viewitems(parameters)])
     for ffn, fn, s in samples:
         cmds.append('humann2 --input %s --output %s --output-basename %s '
-                    '--output-format biom %s' % (ffn, join(out_dir, fn), s, params))
+                    '--output-format biom %s' % (ffn, join(out_dir, fn), s,
+                                                 params))
 
     return cmds
 
