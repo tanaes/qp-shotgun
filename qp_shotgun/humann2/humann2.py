@@ -7,7 +7,6 @@
 # -----------------------------------------------------------------------------
 
 from os.path import basename, join
-import re
 
 from future.utils import viewitems
 import pandas as pd
@@ -37,7 +36,9 @@ def generate_humann2_analysis_commands(forward_seqs, reverse_seqs, map_file,
 
     Raises
     ------
-
+    ValueError
+        If the rev is not an empty list and the same length than fwd seqs
+        The prefixes of the run_prefix don't match the file names
 
     Notes
     -----
@@ -61,9 +62,6 @@ def generate_humann2_analysis_commands(forward_seqs, reverse_seqs, map_file,
     samples = []
     for i, fname in enumerate(forward_seqs):
         f = basename(fname)
-        if re.match("^[0-9]+\_.*", f):
-            # getting just the main filename
-            f = basename(f).split('_', 1)[1]
         # removing extentions: fastq or fastq.gz
         if 'fastq' in f.lower().rsplit('.', 2):
             f = f[:f.lower().rindex('.fastq')]
@@ -78,21 +76,6 @@ def generate_humann2_analysis_commands(forward_seqs, reverse_seqs, map_file,
                 samples.append((reverse_seqs[i], fr, sn_by_rp[f]))
             del sn_by_rp[f]
         except KeyError:
-            # if we get to this point it's possible that we removed
-            # unnecessarily the prefix number of the sample names so let's
-            # try again without that step
-            f = basename(fname)
-            if 'fastq' in f.lower().rsplit('.', 2):
-                f = f[:f.lower().rindex('.fastq')]
-            try:
-                samples.append((fname, f, sn_by_rp[f]))
-                if reverse_seqs:
-                    fr = basename(reverse_seqs[i])
-                    if 'fastq' in fr.lower().rsplit('.', 2):
-                        fr = fr[:fr.lower().rindex('.fastq')]
-                    samples.append((reverse_seqs[i], fr, sn_by_rp[f]))
-                del sn_by_rp[f]
-            except KeyError:
                 pass
 
     if sn_by_rp:

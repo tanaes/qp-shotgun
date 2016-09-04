@@ -15,7 +15,7 @@ from qiita_client import QiitaClient
 # , ArtifactInfo
 
 
-from qp_shotgun.humann2 import (
+from qp_shotgun.humann2.humann2 import (
     get_sample_names_by_run_prefix, generate_humann2_analysis_commands)
 
 
