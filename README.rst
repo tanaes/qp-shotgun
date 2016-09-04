@@ -19,7 +19,7 @@ Note that is suggested that you download the full databases once this package is
 
 The default pipeline is:
 
-1. Run humman2 on per sample FASTQ
+1. Run humann2 on per sample FASTQ
 2. Collate individual results into single OTU tables: gene families, path coverage and path abundance.
 3. Renormalize the tables: gene families - CPM, path coverage - relative abundance, path abundance - relative abundance.
 
