@@ -87,14 +87,14 @@ class Humann2Tests(TestCase):
         params = {"--nucleotide-database": "chocophlan",
                   "--protein-database": "uniref"}
         exp = [
-            'humann2 --input fastq/s1.fastq --output output/s1 '
-            '--output-basename SKB8.640193 --output-format biom '
+            'humann2 --input "fastq/s1.fastq" --output "output/s1" '
+            '--output-basename "SKB8.640193" --output-format biom '
             '--protein-database uniref --nucleotide-database chocophlan',
-            'humann2 --input fastq/s2.fastq.gz --output output/s2 '
-            '--output-basename SKD8.640184 --output-format biom '
+            'humann2 --input "fastq/s2.fastq.gz" --output "output/s2" '
+            '--output-basename "SKD8.640184" --output-format biom '
             '--protein-database uniref --nucleotide-database chocophlan',
-            'humann2 --input fastq/s3.fastq --output output/s3 '
-            '--output-basename SKB7.640196 --output-format biom '
+            'humann2 --input "fastq/s3.fastq" --output "output/s3" '
+            '--output-basename "SKB7.640196" --output-format biom '
             '--protein-database uniref --nucleotide-database chocophlan']
         obs = generate_humann2_analysis_commands(
             ['fastq/s1.fastq', 'fastq/s2.fastq.gz', 'fastq/s3.fastq'], [],
@@ -111,23 +111,23 @@ class Humann2Tests(TestCase):
         params = {"--nucleotide-database": "chocophlan",
                   "--protein-database": "uniref"}
         exp = [
-            'humann2 --input fastq/s1.fastq --output output/s1 '
-            '--output-basename SKB8.640193 --output-format biom '
+            'humann2 --input "fastq/s1.fastq" --output "output/s1" '
+            '--output-basename "SKB8.640193" --output-format biom '
             '--protein-database uniref --nucleotide-database chocophlan',
-            'humann2 --input fastq/s1.R2.fastq --output output/s1.R2 '
-            '--output-basename SKB8.640193 --output-format biom '
+            'humann2 --input "fastq/s1.R2.fastq" --output "output/s1.R2" '
+            '--output-basename "SKB8.640193" --output-format biom '
             '--protein-database uniref --nucleotide-database chocophlan',
-            'humann2 --input fastq/s2.fastq.gz --output output/s2 '
-            '--output-basename SKD8.640184 --output-format biom '
+            'humann2 --input "fastq/s2.fastq.gz" --output "output/s2" '
+            '--output-basename "SKD8.640184" --output-format biom '
             '--protein-database uniref --nucleotide-database chocophlan',
-            'humann2 --input fastq/s2.R2.fastq.gz --output output/s2.R2 '
-            '--output-basename SKD8.640184 --output-format biom '
+            'humann2 --input "fastq/s2.R2.fastq.gz" --output "output/s2.R2" '
+            '--output-basename "SKD8.640184" --output-format biom '
             '--protein-database uniref --nucleotide-database chocophlan',
-            'humann2 --input fastq/s3.fastq --output output/s3 '
-            '--output-basename SKB7.640196 --output-format biom '
+            'humann2 --input "fastq/s3.fastq" --output "output/s3" '
+            '--output-basename "SKB7.640196" --output-format biom '
             '--protein-database uniref --nucleotide-database chocophlan',
-            'humann2 --input fastq/s3.R2.fastq --output output/s3.R2 '
-            '--output-basename SKB7.640196 --output-format biom '
+            'humann2 --input "fastq/s3.R2.fastq" --output "output/s3.R2" '
+            '--output-basename "SKB7.640196" --output-format biom '
             '--protein-database uniref --nucleotide-database chocophlan']
         obs = generate_humann2_analysis_commands(
             ['fastq/s1.fastq', 'fastq/s2.fastq.gz', 'fastq/s3.fastq'],

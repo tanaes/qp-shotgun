@@ -76,7 +76,7 @@ def generate_humann2_analysis_commands(forward_seqs, reverse_seqs, map_file,
                 samples.append((reverse_seqs[i], fr, sn_by_rp[f]))
             del sn_by_rp[f]
         except KeyError:
-                pass
+            pass
 
     if sn_by_rp:
         raise ValueError(
@@ -86,9 +86,9 @@ def generate_humann2_analysis_commands(forward_seqs, reverse_seqs, map_file,
     cmds = []
     params = ' '.join(["%s %s" % (k, v) for k, v in viewitems(parameters)])
     for ffn, fn, s in samples:
-        cmds.append('humann2 --input %s --output %s --output-basename %s '
-                    '--output-format biom %s' % (ffn, join(out_dir, fn), s,
-                                                 params))
+        cmds.append('humann2 --input "%s" --output "%s" --output-basename '
+                    '"%s" --output-format biom %s' % (ffn, join(out_dir, fn),
+                                                      s, params))
 
     return cmds
 
@@ -112,7 +112,8 @@ def get_sample_names_by_run_prefix(mapping_file):
         If there is more than 1 sample per run_prefix
     """
     qiime_map = pd.read_csv(mapping_file, delimiter='\t', dtype=str,
-                            encoding='utf-8')
+                            encoding='utf-8', keep_default_na=False,
+                            na_values=[])
     qiime_map.set_index('#SampleID', inplace=True)
 
     samples = {}
@@ -123,7 +124,7 @@ def get_sample_names_by_run_prefix(mapping_file):
             errors.append('%s has %d samples (%s)' % (prefix, len_df,
                                                       ', '.join(df.index)))
         else:
-            samples[prefix] = df.index.values[0]
+            samples[prefix] = df.index[0]
 
     if errors:
         raise ValueError("You have run_prefix values with multiple "
