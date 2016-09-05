@@ -9,14 +9,13 @@
 from unittest import TestCase, main
 from os import close, environ
 from tempfile import mkstemp
-
+from json import dumps
 
 from qiita_client import QiitaClient
-# , ArtifactInfo
-
 
 from qp_shotgun.humann2.humann2 import (
-    get_sample_names_by_run_prefix, generate_humann2_analysis_commands)
+    get_sample_names_by_run_prefix,
+    generate_humann2_analysis_commands)
 
 
 CLIENT_ID = '19ndkO3oMKsoChjVVWluF7QkxHRfYhTKSFbAVt8IhK7gZgDaO4'
@@ -30,6 +29,8 @@ class Humann2Tests(TestCase):
         server_cert = environ.get('QIITA_SERVER_CERT', None)
         cls.qclient = QiitaClient("https://localhost:21174", CLIENT_ID,
                                   CLIENT_SECRET, server_cert=server_cert)
+        cls.params = {"--nucleotide-database": "chocophlan",
+                      "--protein-database": "uniref"}
         cls._clean_up_files = []
 
     @classmethod
@@ -84,8 +85,6 @@ class Humann2Tests(TestCase):
             f.write(MAPPING_FILE)
         self._clean_up_files.append(fp)
 
-        params = {"--nucleotide-database": "chocophlan",
-                  "--protein-database": "uniref"}
         exp = [
             'humann2 --input "fastq/s1.fastq" --output "output/s1" '
             '--output-basename "SKB8.640193" --output-format biom '
@@ -98,7 +97,7 @@ class Humann2Tests(TestCase):
             '--protein-database uniref --nucleotide-database chocophlan']
         obs = generate_humann2_analysis_commands(
             ['fastq/s1.fastq', 'fastq/s2.fastq.gz', 'fastq/s3.fastq'], [],
-            fp, 'output', params)
+            fp, 'output', self.params)
         self.assertEqual(obs, exp)
 
     def test_generate_humann2_analysis_commands_forward_reverse(self):
@@ -108,8 +107,6 @@ class Humann2Tests(TestCase):
             f.write(MAPPING_FILE)
         self._clean_up_files.append(fp)
 
-        params = {"--nucleotide-database": "chocophlan",
-                  "--protein-database": "uniref"}
         exp = [
             'humann2 --input "fastq/s1.fastq" --output "output/s1" '
             '--output-basename "SKB8.640193" --output-format biom '
@@ -132,8 +129,20 @@ class Humann2Tests(TestCase):
         obs = generate_humann2_analysis_commands(
             ['fastq/s1.fastq', 'fastq/s2.fastq.gz', 'fastq/s3.fastq'],
             ['fastq/s1.R2.fastq', 'fastq/s2.R2.fastq.gz', 'fastq/s3.R2.fastq'],
-            fp, 'output', params)
+            fp, 'output', self.params)
         self.assertEqual(obs, exp)
+
+    def test_humann2(self):
+        self.params['input_data'] = 2
+        # Create a new job
+        data = {'user': 'demo@microbio.me',
+                'command': 8,
+                'status': 'running',
+                'parameters': dumps(self.params)}
+        job_id = self.qclient.post(
+            '/apitest/processing_job/', data=data)['job']
+        print job_id
+
 
 MAPPING_FILE = (
     "#SampleID\tplatform\tbarcode\texperiment_design_description\t"

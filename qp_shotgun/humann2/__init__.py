@@ -5,3 +5,7 @@
 #
 # The full license is in the file LICENSE, distributed with this software.
 # -----------------------------------------------------------------------------
+
+from .humann2 import humann2
+
+__all__ = ['humann2']

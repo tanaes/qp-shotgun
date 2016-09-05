@@ -13,11 +13,13 @@ from os import makedirs, environ
 from future import standard_library
 
 from qiita_client import QiitaClient
+from qp_shotgun.humann2 import humann2
 
 with standard_library.hooks():
     from configparser import ConfigParser
 
 TASK_DICT = {
+    'HUMAnN2 processing': humann2,
 }
 
 
