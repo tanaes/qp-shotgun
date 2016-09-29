@@ -11,6 +11,11 @@ from os.path import basename, join
 from future.utils import viewitems
 import pandas as pd
 
+from .humann2.humann2 import get_sample_names_by_run_prefix
+
+def generate_humann2_analysis_commands(forward_seqs, reverse_seqs, map_file,
+                                       out_dir, parameters):
+
 
 
 def kneaddata(qclient, job_id, parameters, out_dir):

@@ -9,21 +9,21 @@
 from unittest import main
 from os import close, remove
 from shutil import copyfile, rmtree
-from tempfile import mkstemp
+from tempfile import mkstemp, mkdtemp
 from json import dumps
-from os.path import exists, isdir
+from os.path import exists, isdir, basename
 
 from qiita_client.testing import PluginTestCase
 
-from qp_shotgun import plugin
+
+from qp_shotgun.humann2 import plugin
 from qp_shotgun.humann2.humann2 import (
-    humann2, get_sample_names_by_run_prefix,
-    generate_humann2_analysis_commands)
+    humann2, generate_humann2_analysis_commands)
 
 
 class Humann2Tests(PluginTestCase):
     def setUp(self):
-        # plugin("https://localhost:21174", 'register', 'ignored')
+        plugin("https://localhost:21174", 'register', 'ignored')
         self.params = {
             'nucleotide-database': 'chocophlan', 'protein-database': 'uniref',
             'bypass-prescreen': False, 'bypass-nucleotide-index': False,
@@ -35,7 +35,7 @@ class Humann2Tests(PluginTestCase):
             'prescreen-threshold': 0.01, 'identity-threshold': 50.0,
             'translated-subject-coverage-threshold': 50.0,
             'translated-query-coverage-threshold': 90.0,
-            'taxonomic-profile': True, 'translated-alignment': 'diamond',
+            'translated-alignment': 'diamond',
             'xipe': 'off', 'minpath': 'on', 'pick-frames': 'off',
             'gap-fill': 'off', 'minpath': 'on', 'output-format': 'biom',
             'output-max-decimals': 10, 'remove-stratified-output': False,
@@ -49,27 +49,6 @@ class Humann2Tests(PluginTestCase):
                     rmtree(fp)
                 else:
                     remove(fp)
-
-    def test_get_sample_names_by_run_prefix(self):
-        fd, fp = mkstemp()
-        close(fd)
-        with open(fp, 'w') as f:
-            f.write(MAPPING_FILE)
-        self._clean_up_files.append(fp)
-
-        obs = get_sample_names_by_run_prefix(fp)
-        exp = {'s3': 'SKB7.640196', 's2': 'SKD8.640184', 's1': 'SKB8.640193'}
-        self.assertEqual(obs, exp)
-
-    def test_get_sample_names_by_run_prefix_error(self):
-        fd, fp = mkstemp()
-        close(fd)
-        with open(fp, 'w') as f:
-            f.write(MAPPING_FILE_2)
-        self._clean_up_files.append(fp)
-
-        with self.assertRaises(ValueError):
-            get_sample_names_by_run_prefix(fp)
 
     def test_generate_humann2_analysis_commands_names_no_match(self):
         fd, fp = mkstemp()
@@ -101,7 +80,7 @@ class Humann2Tests(PluginTestCase):
         exp = [
             'humann2 --input "fastq/s1.fastq" --output "output/s1" '
             '--output-basename "SKB8.640193" --output-format biom '
-            '--gap-fill "off" --taxonomic-profile "True" '
+            '--gap-fill "off" '
             '--identity-threshold "50.0" --output-format "biom" '
             '--metaphlan-options "-t rel_ab" '
             '--translated-query-coverage-threshold "90.0" '
@@ -115,7 +94,7 @@ class Humann2Tests(PluginTestCase):
             '--log-level "DEBUG"',
             'humann2 --input "fastq/s2.fastq.gz" --output "output/s2" '
             '--output-basename "SKD8.640184" --output-format biom '
-            '--gap-fill "off" --taxonomic-profile "True" '
+            '--gap-fill "off" '
             '--identity-threshold "50.0" --output-format "biom" '
             '--metaphlan-options "-t rel_ab" '
             '--translated-query-coverage-threshold "90.0" '
@@ -129,7 +108,7 @@ class Humann2Tests(PluginTestCase):
             '--log-level "DEBUG"',
             'humann2 --input "fastq/s3.fastq" --output "output/s3" '
             '--output-basename "SKB7.640196" --output-format biom '
-            '--gap-fill "off" --taxonomic-profile "True" '
+            '--gap-fill "off" '
             '--identity-threshold "50.0" --output-format "biom" '
             '--metaphlan-options "-t rel_ab" '
             '--translated-query-coverage-threshold "90.0" '
@@ -156,7 +135,7 @@ class Humann2Tests(PluginTestCase):
         exp = [
             'humann2 --input "fastq/s1.fastq" --output "output/s1" '
             '--output-basename "SKB8.640193" --output-format biom '
-            '--gap-fill "off" --taxonomic-profile "True" '
+            '--gap-fill "off" '
             '--identity-threshold "50.0" --output-format "biom" '
             '--metaphlan-options "-t rel_ab" '
             '--translated-query-coverage-threshold "90.0" '
@@ -170,7 +149,7 @@ class Humann2Tests(PluginTestCase):
             '--log-level "DEBUG"',
             'humann2 --input "fastq/s1.R2.fastq" --output "output/s1.R2" '
             '--output-basename "SKB8.640193" --output-format biom '
-            '--gap-fill "off" --taxonomic-profile "True" '
+            '--gap-fill "off" '
             '--identity-threshold "50.0" --output-format "biom" '
             '--metaphlan-options "-t rel_ab" '
             '--translated-query-coverage-threshold "90.0" '
@@ -184,7 +163,7 @@ class Humann2Tests(PluginTestCase):
             '--translated-alignment "diamond" --log-level "DEBUG"',
             'humann2 --input "fastq/s2.fastq.gz" --output "output/s2" '
             '--output-basename "SKD8.640184" --output-format biom '
-            '--gap-fill "off" --taxonomic-profile "True" '
+            '--gap-fill "off" '
             '--identity-threshold "50.0" --output-format "biom" '
             '--metaphlan-options "-t rel_ab" '
             '--translated-query-coverage-threshold "90.0" '
@@ -197,7 +176,7 @@ class Humann2Tests(PluginTestCase):
             '--translated-alignment "diamond" --log-level "DEBUG"',
             'humann2 --input "fastq/s2.R2.fastq.gz" --output "output/s2.R2" '
             '--output-basename "SKD8.640184" --output-format biom '
-            '--gap-fill "off" --taxonomic-profile "True" '
+            '--gap-fill "off" '
             '--identity-threshold "50.0" --output-format "biom" '
             '--metaphlan-options "-t rel_ab" '
             '--translated-query-coverage-threshold "90.0" '
@@ -211,7 +190,7 @@ class Humann2Tests(PluginTestCase):
             '--log-level "DEBUG"',
             'humann2 --input "fastq/s3.fastq" --output "output/s3" '
             '--output-basename "SKB7.640196" --output-format biom '
-            '--gap-fill "off" --taxonomic-profile "True" '
+            '--gap-fill "off" '
             '--identity-threshold "50.0" --output-format "biom" '
             '--metaphlan-options "-t rel_ab" '
             '--translated-query-coverage-threshold "90.0" '
@@ -225,7 +204,7 @@ class Humann2Tests(PluginTestCase):
             '--log-level "DEBUG"',
             'humann2 --input "fastq/s3.R2.fastq" --output "output/s3.R2" '
             '--output-basename "SKB7.640196" --output-format biom '
-            '--gap-fill "off" --taxonomic-profile "True" '
+            '--gap-fill "off" '
             '--identity-threshold "50.0" --output-format "biom" '
             '--metaphlan-options "-t rel_ab" '
             '--translated-query-coverage-threshold "90.0" '
@@ -244,10 +223,22 @@ class Humann2Tests(PluginTestCase):
         self.assertEqual(obs, exp)
 
     def test_humann2(self):
+        # generating filepaths
+        fd, fp1 = mkstemp(prefix='demo_SKB7_', suffix='_seqs.fastq.gz')
+        close(fd)
+        self._clean_up_files.append(fp1)
+        fd, fp2 = mkstemp(prefix='demo_SKB8_', suffix='_seqs.fastq.gz')
+        close(fd)
+        self._clean_up_files.append(fp2)
+        copyfile('support_files/demo.fastq.gz', fp1)
+        copyfile('support_files/demo.fastq.gz', fp2)
+
         # inserting new prep template
         prep_info_dict = {
-            'SKB7.640196': {'run_prefix': 'demo_SKB7'},
-            'SKB8.640193': {'run_prefix': 'demo_SKB8'}
+            'SKB7.640196': {
+                'run_prefix': basename(fp1).replace('.fastq.gz', '')},
+            'SKB8.640193': {
+                'run_prefix': basename(fp2).replace('.fastq.gz', '')}
         }
         data = {'prep_info': dumps(prep_info_dict),
                 # magic #1 = testing study
@@ -256,14 +247,6 @@ class Humann2Tests(PluginTestCase):
         pid = self.qclient.post('/apitest/prep_template/', data=data)['prep']
 
         # inserting artifacts
-        fd, fp1 = mkstemp(prefix='demo_SKB7', suffix='_seqs.fastq.gz')
-        close(fd)
-        self._clean_up_files.append(fp1)
-        fd, fp2 = mkstemp(prefix='demo_SKB8', suffix='_seqs.fastq.gz')
-        close(fd)
-        self._clean_up_files.append(fp2)
-        copyfile('support_files/demo.fastq.gz', fp1)
-        copyfile('support_files/demo.fastq.gz', fp2)
         data = {
             'filepaths': dumps([
                 (fp1, 'raw_forward_seqs'),
@@ -274,14 +257,21 @@ class Humann2Tests(PluginTestCase):
         aid = self.qclient.post('/apitest/artifact/', data=data)['artifact']
 
         self.params['input'] = aid
+        # overwriting so the run uses the defaults
+        self.params['nucleotide-database'] = ''
+        self.params['protein-database'] = ''
         data = {'user': 'demo@microbio.me',
                 'command': dumps(['HUMAnN2', '0.9.1', 'HUMAnN2']),
                 'status': 'running',
                 'parameters': dumps(self.params)}
-        # jid = self.qclient.post('/apitest/processing_job/', data=data)['job']
-        jid = 'foo'
+        jid = self.qclient.post('/apitest/processing_job/', data=data)['job']
+
+        out_dir = mkdtemp()
+        self._clean_up_files.append(out_dir)
 
         humann2(self.qclient, jid, self.params, out_dir)
+
+        # TODO: test that the files are created properly
 
 
 MAPPING_FILE = (
