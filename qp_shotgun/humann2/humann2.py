@@ -9,48 +9,8 @@
 from os.path import basename, join
 
 from future.utils import viewitems
-import pandas as pd
 
-
-def get_sample_names_by_run_prefix(mapping_file):
-    """Generates a dictionary of run_prefix and sample names
-
-    Parameters
-    ----------
-    mapping_file : str
-        The mapping file
-
-    Returns
-    -------
-    dict
-        Dict mapping run_prefix to sample id
-
-    Raises
-    ------
-    ValueError
-        If there is more than 1 sample per run_prefix
-    """
-
-    qiime_map = pd.read_csv(mapping_file, delimiter='\t', dtype=str,
-                            encoding='utf-8', keep_default_na=False,
-                            na_values=[])
-    qiime_map.set_index('#SampleID', inplace=True)
-
-    samples = {}
-    errors = []
-    for prefix, df in qiime_map.groupby('run_prefix'):
-        len_df = len(df)
-        if len_df != 1:
-            errors.append('%s has %d samples (%s)' % (prefix, len_df,
-                                                      ', '.join(df.index)))
-        else:
-            samples[prefix] = df.index.values[0]
-
-    if errors:
-        raise ValueError("You have run_prefix values with multiple "
-                         "samples: %s" % ' -- '.join(errors))
-
-    return samples
+from qiita_client.util import system_call, get_sample_names_by_run_prefix
 
 
 def generate_humann2_analysis_commands(forward_seqs, reverse_seqs, map_file,
@@ -125,7 +85,6 @@ def generate_humann2_analysis_commands(forward_seqs, reverse_seqs, map_file,
             % ', '.join(sn_by_rp.keys()))
 
     cmds = []
-
     params = ['--%s "%s"' % (k, v) for k, v in viewitems(parameters) if v]
     for ffn, fn, s in samples:
         cmds.append('humann2 --input "%s" --output "%s" --output-basename '
@@ -151,19 +110,18 @@ def humann2(qclient, job_id, parameters, out_dir):
 
     Returns
     -------
-    bool, list, str
+    boolean, list, str
         The results of the job
     """
     # Step 1 get the rest of the information need to run humann2
     qclient.update_job_step(job_id, "Step 1 of 5: Collecting information")
-    artifact_id = parameters['input_data']
+    artifact_id = parameters['input']
+    # removing input from parameters so it's not part of the final command
+    del parameters['input']
 
     # Get the artifact filepath information
     artifact_info = qclient.get("/qiita_db/artifacts/%s/" % artifact_id)
     fps = artifact_info['files']
-
-    # Get the artifact type
-    artifact_type = artifact_info['type']
 
     # Get the artifact metadata
     prep_info = qclient.get('/qiita_db/prep_template/%s/'
@@ -172,11 +130,26 @@ def humann2(qclient, job_id, parameters, out_dir):
 
     # Step 2 generating command humann2
     qclient.update_job_step(job_id, "Step 2 of 5: Generating HUMANn2 command")
+    if 'raw_reverse_seqs' in fps:
+        rs = fps['raw_reverse_seqs']
+    else:
+        rs = []
+    commands = generate_humann2_analysis_commands(fps['raw_forward_seqs'], rs,
+                                                  qiime_map, out_dir,
+                                                  parameters)
 
-    # Step 3 execute humann2: TODO
-    qclient.update_job_step(job_id, "Step 3 of 5: Executing HUMANn2")
+    # Step 3 execute humann2
+    commands_len = len(commands)
+    for i, cmd in enumerate(commands):
+        qclient.update_job_step(job_id, "Step 3 of 5: Executing HUMANn2"
+                                ", job %d/%d" % (i, commands_len))
+        std_out, std_err, return_value = system_call(cmd)
+        if return_value != 0:
+            error_msg = ("Error running HUMANn2:\nStd out: %s\nStd err: %s"
+                         % (std_out, std_err))
+            return False, None, error_msg
 
-    # Step 4 merge tables: TODO
+    # Step 4 merge tables
     qclient.update_job_step(job_id, "Step 4 of 5: Merging resulting tables")
 
     # Step 5 generating re-normalized tables: TODO
