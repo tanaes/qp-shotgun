@@ -99,14 +99,14 @@ def humann2(qclient, job_id, parameters, out_dir):
 
     Parameters
     ----------
-    qclient : tgp.qiita_client.QiitaClient
+    qclient : qiita_client.QiitaClient
         The Qiita server client
     job_id : str
         The job id
     parameters : dict
-        The parameter values to run split libraries
+        The parameter values to run HUMAnN2
     out_dir : str
-        Yhe path to the job's output directory
+        The path to the job's output directory
 
     Returns
     -------
@@ -130,10 +130,7 @@ def humann2(qclient, job_id, parameters, out_dir):
 
     # Step 2 generating command humann2
     qclient.update_job_step(job_id, "Step 2 of 5: Generating HUMANn2 command")
-    if 'raw_reverse_seqs' in fps:
-        rs = fps['raw_reverse_seqs']
-    else:
-        rs = []
+    rs = fps['raw_reverse_seqs'] if 'raw_reverse_seqs' in fps else []
     commands = generate_humann2_analysis_commands(fps['raw_forward_seqs'], rs,
                                                   qiime_map, out_dir,
                                                   parameters)
