@@ -13,32 +13,107 @@ from json import dumps
 
 from qiita_client import QiitaClient
 
-from qp_shotgun.humann2.humann2 import (
-    get_sample_names_by_run_prefix)
-
-from qp_shotgun.kneaddata.kneaddata import (
+from qp_shotgun.kneaddata.kneaddata import (make_read_pairs_per_sample
     )
 
 
-CLIENT_ID = '19ndkO3oMKsoChjVVWluF7QkxHRfYhTKSFbAVt8IhK7gZgDaO4'
-CLIENT_SECRET = ('J7FfQ7CQdOxuKhQAf1eoGgBAE81Ns8Gu3EKaWFm3IO2JKh'
-                 'AmmCWZuabe0O5Mp28s1')
 
+class Humann2Tests(PluginTestCase):
+    def setUp(self):
+        plugin("https://localhost:21174", 'register', 'ignored')
+        self.params = {}
+        self._clean_up_files = []
 
-class KneaddataTests(TestCase):
-    @classmethod
-    def setUpClass(cls):
-        server_cert = environ.get('QIITA_SERVER_CERT', None)
-        cls.qclient = QiitaClient("https://localhost:21174", CLIENT_ID,
-                                  CLIENT_SECRET, server_cert=server_cert)
-        cls.params = {}
-        cls._clean_up_files = []
+    def tearDown(self):
+        for fp in self._clean_up_files:
+            if exists(fp):
+                if isdir(fp):
+                    rmtree(fp)
+                else:
+                    remove(fp)
 
-    @classmethod
-    def tearDownClass(cls):
-        cls.qclient.post('/apitest/reset/')
+    def test_make_read_pairs_per_sample_match_fwd_rev(self):
+        fd, fp = mkstemp()
+        close(fd)
+        with open(fp, 'w') as f:
+            f.write(MAPPING_FILE)
+        self._clean_up_files.append(fp)
 
+        fwd_fp = ['./folder/s3_S013_L001_R1.fastq.gz',
+                  './folder/s2_S011_L001_R1.fastq.gz',
+                  './folder/s1_S009_L001_R1.fastq.gz']
 
+        rev_fp = ['./folder/s3_S013_L001_R2.fastq.gz',
+                  './folder/s2_S011_L001_R2.fastq.gz',
+                  './folder/s1_S009_L001_R2.fastq.gz']
+
+        exp = [('s1','SKB8.640193','./folder/s1_S009_L001_R1.fastq.gz',
+                './folder/s1_S009_L001_R2.fastq.gz'),
+               ('s2','SKD8.640184','./folder/s2_S011_L001_R1.fastq.gz',
+                './folder/s2_S011_L001_R2.fastq.gz'),
+               ('s3','SKB7.640196','./folder/s3_S013_L001_R1.fastq.gz',
+                './folder/s3_S013_L001_R2.fastq.gz')]
+
+        obs = make_read_pairs_per_sample(fwd_fp, rev_fp, fp)
+
+        self.assertEqual(obs, exp)
+
+    def test_make_read_pairs_per_sample_match_fwd_only(self):
+        fd, fp = mkstemp()
+        close(fd)
+        with open(fp, 'w') as f:
+            f.write(MAPPING_FILE)
+        self._clean_up_files.append(fp)
+
+        fwd_fp = ['./folder/s3_S013_L001_R1.fastq.gz',
+                  './folder/s2_S011_L001_R1.fastq.gz',
+                  './folder/s1_S009_L001_R1.fastq.gz']
+
+        rev_fp = []
+
+        exp = [('s1','SKB8.640193','./folder/s1_S009_L001_R1.fastq.gz',
+                None),
+               ('s2','SKD8.640184','./folder/s2_S011_L001_R1.fastq.gz',
+                None),
+               ('s3','SKB7.640196','./folder/s3_S013_L001_R1.fastq.gz',
+                None)]
+
+        obs = make_read_pairs_per_sample(fwd_fp, rev_fp, fp)
+
+        self.assertEqual(obs, exp)
+
+    def test_make_read_pairs_per_sample_match_fwd_rev_notmatch(self):
+        fd, fp = mkstemp()
+        close(fd)
+        with open(fp, 'w') as f:
+            f.write(MAPPING_FILE)
+        self._clean_up_files.append(fp)
+
+        fwd_fp = ['./folder/s3_S013_L001_R1.fastq.gz',
+                  './folder/s2_S011_L001_R1.fastq.gz',
+                  './folder/s1_S009_L001_R1.fastq.gz']
+
+        rev_fp = ['./folder/s3_S013_L001_R2.fastq.gz',
+                  './folder/s2_S011_L001_R2.fastq.gz']
+
+        with self.assertRaises(ValueError):
+            obs = make_read_pairs_per_sample(fwd_fp, rev_fp, fp)
+
+    def test_make_read_pairs_per_sample_match_fwd_no_rp(self):
+        fd, fp = mkstemp()
+        close(fd)
+        with open(fp, 'w') as f:
+            f.write(MAPPING_FILE)
+        self._clean_up_files.append(fp)
+
+        fwd_fp = ['./folder/s3_S013_L001_R1.fastq.gz',
+                  './folder/s2_S011_L001_R1.fastq.gz',
+                  './folder/s4_S009_L001_R1.fastq.gz']
+
+        rev_fp = []
+
+        with self.assertRaises(ValueError):
+            obs = make_read_pairs_per_sample(fwd_fp, rev_fp, fp)
 
 MAPPING_FILE = (
     "#SampleID\tplatform\tbarcode\texperiment_design_description\t"
