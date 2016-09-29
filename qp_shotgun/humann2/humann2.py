@@ -43,9 +43,10 @@ def generate_humann2_analysis_commands(forward_seqs, reverse_seqs, map_file,
 
     Notes
     -----
-    The forward and reverse files are going to have different filenames but
-    the sample name is going to be the same so the results are merged when
-    joining the outputs
+    The forward reads filename has to be a perfect match with the value stored
+    in run_prefix. This is not a requirement for the reverse reads. However,
+    note that we assume that the filenames of the forward and reverse reads
+    are pretty similar so if sorted they will have matching orders.
     """
     # making sure the forward and reverse reads are in the same order
     forward_seqs.sort()
