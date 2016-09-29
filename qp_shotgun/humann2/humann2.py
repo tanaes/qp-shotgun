@@ -125,11 +125,12 @@ def generate_humann2_analysis_commands(forward_seqs, reverse_seqs, map_file,
             % ', '.join(sn_by_rp.keys()))
 
     cmds = []
-    params = ' '.join(["%s %s" % (k, v) for k, v in viewitems(parameters)])
+
+    params = ['--%s "%s"' % (k, v) for k, v in viewitems(parameters) if v]
     for ffn, fn, s in samples:
         cmds.append('humann2 --input "%s" --output "%s" --output-basename '
                     '"%s" --output-format biom %s' % (ffn, join(out_dir, fn),
-                                                      s, params))
+                                                      s, ' '.join(params)))
 
     return cmds
 
@@ -160,13 +161,14 @@ def humann2(qclient, job_id, parameters, out_dir):
     # Get the artifact filepath information
     artifact_info = qclient.get("/qiita_db/artifacts/%s/" % artifact_id)
     fps = artifact_info['files']
+
     # Get the artifact type
     artifact_type = artifact_info['type']
+
     # Get the artifact metadata
     prep_info = qclient.get('/qiita_db/prep_template/%s/'
                             % artifact_info['prep_information'][0])
     qiime_map = prep_info['qiime-map']
-    print artifact_type, prep_info, fps, qiime_map
 
     # Step 2 generating command humann2
     qclient.update_job_step(job_id, "Step 2 of 5: Generating HUMANn2 command")
