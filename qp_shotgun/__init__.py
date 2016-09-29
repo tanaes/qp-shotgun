@@ -9,8 +9,9 @@
 from qiita_client import QiitaPlugin, QiitaCommand
 
 from .humann2.humann2 import humann2
+from .kneaddata.kneaddata import kneaddata
 
-__all__ = ['humann2']
+__all__ = ['humann2', 'kneaddata']
 
 
 # Initialize the plugin
