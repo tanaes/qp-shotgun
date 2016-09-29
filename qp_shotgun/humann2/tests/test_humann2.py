@@ -37,7 +37,7 @@ class Humann2Tests(PluginTestCase):
             'translated-query-coverage-threshold': 90.0,
             'translated-alignment': 'diamond',
             'xipe': 'off', 'minpath': 'on', 'pick-frames': 'off',
-            'gap-fill': 'off', 'minpath': 'on', 'output-format': 'biom',
+            'gap-fill': 'off', 'output-format': 'biom',
             'output-max-decimals': 10, 'remove-stratified-output': False,
             'input-format': '', 'pathways': 'metacyc', 'memory-use': 'minimum'}
         self._clean_up_files = []

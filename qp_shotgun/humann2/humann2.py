@@ -43,9 +43,10 @@ def generate_humann2_analysis_commands(forward_seqs, reverse_seqs, map_file,
 
     Notes
     -----
-    The forward and reverse files are going to have different filenames but
-    the sample name is going to be the same so the results are merged when
-    joining the outputs
+    The forward reads filename has to be a perfect match with the value stored
+    in run_prefix. This is not a requirement for the reverse reads. However,
+    note that we assume that the filenames of the forward and reverse reads
+    are pretty similar so if sorted they will have matching orders.
     """
     # making sure the forward and reverse reads are in the same order
     forward_seqs.sort()
@@ -99,14 +100,14 @@ def humann2(qclient, job_id, parameters, out_dir):
 
     Parameters
     ----------
-    qclient : tgp.qiita_client.QiitaClient
+    qclient : qiita_client.QiitaClient
         The Qiita server client
     job_id : str
         The job id
     parameters : dict
-        The parameter values to run split libraries
+        The parameter values to run HUMAnN2
     out_dir : str
-        Yhe path to the job's output directory
+        The path to the job's output directory
 
     Returns
     -------
@@ -130,10 +131,7 @@ def humann2(qclient, job_id, parameters, out_dir):
 
     # Step 2 generating command humann2
     qclient.update_job_step(job_id, "Step 2 of 5: Generating HUMANn2 command")
-    if 'raw_reverse_seqs' in fps:
-        rs = fps['raw_reverse_seqs']
-    else:
-        rs = []
+    rs = fps['raw_reverse_seqs'] if 'raw_reverse_seqs' in fps else []
     commands = generate_humann2_analysis_commands(fps['raw_forward_seqs'], rs,
                                                   qiime_map, out_dir,
                                                   parameters)

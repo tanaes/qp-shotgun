@@ -56,7 +56,6 @@ opt_params = {
     'minpath': ['choice:["on", "off"]', 'on'],
     'pick-frames': ['choice:["on", "off"]', 'off'],
     'gap-fill': ['choice:["on", "off"]', 'off'],
-    'minpath': ['choice:["on", "off"]', 'on'],
     'output-format': ['choice:["tsv", "biom"]', 'biom'],
     'output-max-decimals': ['integer', '10'],
     'remove-stratified-output': ['boolean', 'False'],
@@ -78,7 +77,7 @@ dflt_param_set = {
         'translated-query-coverage-threshold': 90.0,
         'translated-alignment': 'diamond',
         'xipe': 'off', 'minpath': 'on', 'pick-frames': 'off',
-        'gap-fill': 'off', 'minpath': 'on', 'output-format': 'biom',
+        'gap-fill': 'off', 'output-format': 'biom',
         'output-max-decimals': 10, 'remove-stratified-output': False,
         'input-format': '', 'pathways': 'metacyc', 'memory-use': 'minimum'}
 }

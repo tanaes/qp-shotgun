@@ -28,7 +28,7 @@ before_script:
   - qiita pet webserver start &
 script:
   - sleep 5 # give enough time to the webserver to start
-  - psql -d qiita_test -f install-plugin.sql
+  - configure_shotgun --env-script "source activate qp-shotgun" --server-cert $QIITA_SERVER_CERT
   - nosetests --with-doctest --with-coverage
   - flake8 qp_shotgun setup.py scripts
 addons:
