@@ -44,7 +44,6 @@ setup(name='qp-shotgun',
       scripts=glob('scripts/*'),
       extras_require={'test': ["nose >= 0.10.1", "pep8"]},
       install_requires=['click >= 3.3', 'future', 'requests', 'pandas >= 0.15',
-                        'h5py >= 2.3.1', 'humann2', 'biom-format',
-                        'qiime == 1.9.1'],
+                        'h5py >= 2.3.1', 'humann2', 'biom-format'],
       classifiers=classifiers
       )
