@@ -22,9 +22,9 @@ opt_params = {
     # trimmomatic
     # bowtie2
 
-    # --input # input FASTQ file (add a second argument instance to run with paired input files)
+    # --input # input FASTQ file (add a second argument for paired input files)
     # --output # directory to write output files
-    # --output-prefix # prefix for all output files [ DEFAULT : $SAMPLE_kneaddata ]
+    # --output-prefix # prefix for output files [ DEFAULT : $SAMPLE_kneaddata ]
     # --log # filepath for log [ DEFAULT : $OUTPUT_DIR/$SAMPLE_kneaddata.log ]
     # --trimmomatic # path to trimmomatic executable
     # --bowtie2 # path to bowtie executable
@@ -34,7 +34,7 @@ opt_params = {
     'bypass-trim': ['bool', 'False'], # bypass the trim step
     'threads': ['integer', '1'], # threads to run 
     'processes': ['integer', '1'], # processes to run
-    'quality-scores': ['choice:["phred33","phred64"]', 'phred33'], # quality mapping
+    'quality-scores': ['choice:["phred33","phred64"]', 'phred33'], # quality
     'run-bmtagger': ['bool', 'False'], # run BMTagger instead of Bowtie2
     'run-trf': ['bool', 'False'], # run TRF repeat finder tool
     'run-fastqc-start': ['bool', 'True'], # run FastQC on original data

@@ -15,6 +15,83 @@ from .humann2.humann2 import get_sample_names_by_run_prefix
 
 def generate_humann2_analysis_commands(forward_seqs, reverse_seqs, map_file,
                                        out_dir, parameters):
+        """Generates the KneadData commands
+
+    Parameters
+    ----------
+    forward_seqs : list of str
+        The list of forward seqs filepaths
+    reverse_seqs : list of str
+        The list of reverse seqs filepaths
+    map_file : str
+        The path to the mapping file
+    out_dir : str
+        The job output directory
+    parameters : dict
+        The command's parameters, keyed by parameter name
+
+    Returns
+    -------
+    list of str
+        The KneadData commands
+
+    Raises
+    ------
+    ValueError
+        If the rev is not an empty list and the same length than fwd seqs
+        The prefixes of the run_prefix don't match the file names
+
+    Notes
+    -----
+    """
+    # making sure the forward and reverse reads are in the same order
+    forward_seqs.sort()
+    if reverse_seqs:
+        if len(forward_seqs) != len(reverse_seqs):
+            raise ValueError('Your reverse and forward files are of different '
+                             'length. Forward: %s. Reverse: %s.' %
+                             (', '.join(forward_seqs),
+                              ', '.join(reverse_seqs)))
+        reverse_seqs.sort()
+
+    sn_by_rp = get_sample_names_by_run_prefix(map_file)
+
+    # we match sample name and forward filename
+    samples = []
+
+    for i, fname in enumerate(forward_seqs):
+        # here fname is the actual filepath
+        f = basename(fname)
+        # removing extentions: fastq or fastq.gz
+        if 'fastq' in f.lower().rsplit('.', 2):
+            f = f[:f.lower().rindex('.fastq')]
+        # this try/except block is simply to retrieve all possible errors
+        # and display them in the next if block
+        try:
+            samples.append((fname, f, sn_by_rp[f]))
+            if reverse_seqs:
+                fr = basename(reverse_seqs[i])
+                if 'fastq' in fr.lower().rsplit('.', 2):
+                    fr = fr[:fr.lower().rindex('.fastq')]
+                samples.append((reverse_seqs[i], fr, sn_by_rp[f]))
+            del sn_by_rp[f]
+        except KeyError:
+            pass
+
+    if sn_by_rp:
+        raise ValueError(
+            'Some run_prefix values do not match your sample names: %s'
+            % ', '.join(sn_by_rp.keys()))
+
+    cmds = []
+
+    params = ['--%s "%s"' % (k, v) for k, v in viewitems(parameters) if v]
+    for ffn, fn, s in samples:
+        cmds.append('humann2 --input "%s" --output "%s" --output-basename '
+                    '"%s" --output-format biom %s' % (ffn, join(out_dir, fn),
+                                                      s, ' '.join(params)))
+
+    return cmds
 
 
 
