@@ -17,7 +17,7 @@ from qiita_client.util import system_call, get_sample_names_by_run_prefix
 
 
 def generate_humann2_analysis_commands(forward_seqs, reverse_seqs, map_file,
-                                       out_dir, parameters):
+                                       out_dir, parameters, assure_od=True):
     """Generates the HUMAnN2 commands
 
     Parameters
@@ -32,6 +32,8 @@ def generate_humann2_analysis_commands(forward_seqs, reverse_seqs, map_file,
         The job output directory
     parameters : dict
         The command's parameters, keyed by parameter name
+    assure_od : boolean, optional
+        Assure that the output dirs for HUMAnN2 exist. Useful for testing.
 
     Returns
     -------
@@ -93,7 +95,7 @@ def generate_humann2_analysis_commands(forward_seqs, reverse_seqs, map_file,
     for ffn, fn, s in samples:
         od = join(out_dir, fn)
         # just making sure the output directory exists
-        if not exists(od):
+        if assure_od and not exists(od):
             mkdir(od)
         cmds.append('humann2 --input "%s" --output "%s" --output-basename '
                     '"%s" --output-format biom %s' % (ffn, od, s,

@@ -122,7 +122,7 @@ class Humann2Tests(PluginTestCase):
             '--log-level "DEBUG"']
         obs = generate_humann2_analysis_commands(
             ['fastq/s1.fastq', 'fastq/s2.fastq.gz', 'fastq/s3.fastq'], [],
-            fp, 'output', self.params)
+            fp, 'output', self.params, assure_od=False)
         self.assertEqual(obs, exp)
 
     def test_generate_humann2_analysis_commands_forward_reverse(self):
@@ -219,7 +219,7 @@ class Humann2Tests(PluginTestCase):
         obs = generate_humann2_analysis_commands(
             ['fastq/s1.fastq', 'fastq/s2.fastq.gz', 'fastq/s3.fastq'],
             ['fastq/s1.R2.fastq', 'fastq/s2.R2.fastq.gz', 'fastq/s3.R2.fastq'],
-            fp, 'output', self.params)
+            fp, 'output', self.params, assure_od=False)
         self.assertEqual(obs, exp)
 
     def test_humann2(self):
