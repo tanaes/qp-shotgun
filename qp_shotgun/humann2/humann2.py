@@ -102,6 +102,7 @@ def _run_commands(qclient, job_id, commands, msg):
         qclient.update_job_step(job_id, msg % i)
         std_out, std_err, return_value = system_call(cmd)
         if return_value != 0:
+            print '-->', cmd
             error_msg = ("Error running HUMANn2:\nStd out: %s\nStd err: %s"
                          % (std_out, std_err))
             return False, error_msg
