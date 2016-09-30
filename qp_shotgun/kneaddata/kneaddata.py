@@ -82,8 +82,8 @@ def make_read_pairs_per_sample(forward_seqs, reverse_seqs, map_file):
         if reverse_seqs and not reverse_seqs[i].startswith(run_prefix):
             raise ValueError('Reverse read does not match this run prefix. '
                              'Run prefix: %s\nForward read: %s\n'
-                             'Reverse read: %s\n' % (run_prefix, f_fn,
-                                           basename(reverse_seqs[i])))
+                             'Reverse read: %s\n' %
+                             (run_prefix, f_fn, basename(reverse_seqs[i])))
 
         # create the tuple for this read set
         if reverse_seqs:
@@ -129,7 +129,7 @@ def generate_kneaddata_commands(forward_seqs, reverse_seqs, map_file,
     # making sure the forward and reverse reads are in the same order
 
     # we match filenames, samples, and run prefixes
-    samples = make_read_pairs_per_sample
+    samples = make_read_pairs_per_sample(forward_seqs, reverse_seqs, map_file)
 
     cmds = []
 
@@ -175,7 +175,7 @@ def kneaddata(qclient, job_id, parameters, out_dir):
     fps = artifact_info['files']
 
     # Get the artifact type
-    artifact_type = artifact_info['type']
+    # artifact_type = artifact_info['type']
 
     # Get the artifact metadata
     prep_info = qclient.get('/qiita_db/prep_template/%s/'
@@ -191,6 +191,8 @@ def kneaddata(qclient, job_id, parameters, out_dir):
                                            parameters)
     # Step 3 execute kneaddata: TODO
     qclient.update_job_step(job_id, "Step 3 of 3: Executing kneaddata")
+
+    commands_len = len(commands)
 
     artifacts_info = []
 
