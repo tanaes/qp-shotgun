@@ -6,7 +6,7 @@
 # The full license is in the file LICENSE, distributed with this software.
 # -----------------------------------------------------------------------------
 
-from os.path import basename
+from os.path import basename, join
 
 from future.utils import viewitems
 
@@ -84,8 +84,8 @@ def make_read_pairs_per_sample(forward_seqs, reverse_seqs, map_file):
 
         # if we have reverse reads, make sure the matching pair also
         # matches the run prefix:
-        if (reverse_seqs and not 
-            basename(reverse_seqs[i]).startswith(run_prefix)):
+        if (reverse_seqs and not
+                         basename(reverse_seqs[i]).startswith(run_prefix)):
             raise ValueError('Reverse read does not match this run prefix. '
                              'Run prefix: %s\nForward read: %s\n'
                              'Reverse read: %s\n' %
@@ -144,12 +144,13 @@ def generate_kneaddata_commands(forward_seqs, reverse_seqs, map_file,
     for run_prefix, sample, f_fp, r_fp in samples:
         if r_fp is None:
             cmds.append('kneaddata --input "%s" --output "%s" --output-prefix '
-                        '"%s" %s' % (f_fp, out_dir, run_prefix,
-                                     ' '.join(params)))
+                        '"%s" %s' % (f_fp, join(out_dir, run_prefix),
+                                     run_prefix, ' '.join(params)))
         else:
             cmds.append('kneaddata --input "%s" --input "%s" --output "%s" '
                         '--output-prefix "%s" %s'
-                        % (f_fp, r_fp, out_dir, run_prefix, ' '.join(params)))
+                        % (f_fp, r_fp, join(out_dir, run_prefix),
+                           run_prefix, ' '.join(params)))
 
     return cmds
 
@@ -181,9 +182,6 @@ def kneaddata(qclient, job_id, parameters, out_dir):
     artifact_info = qclient.get("/qiita_db/artifacts/%s/" % artifact_id)
     fps = artifact_info['files']
 
-    # Get the artifact type
-    # artifact_type = artifact_info['type']
-
     # Get the artifact metadata
     prep_info = qclient.get('/qiita_db/prep_template/%s/'
                             % artifact_info['prep_information'][0])
@@ -192,14 +190,14 @@ def kneaddata(qclient, job_id, parameters, out_dir):
     # Step 2 generating command kneaddata
     qclient.update_job_step(job_id, "Step 2 of 3: "
                             "Generating kneaddata command")
-    # rs = fps['raw_reverse_seqs'] if 'raw_reverse_seqs' in fps else []
-    # commands = generate_kneaddata_commands(fps['raw_forward_seqs'], rs,
-    #                                        qiime_map, out_dir,
-    #                                        parameters)
-    # # Step 3 execute kneaddata: TODO
-    # qclient.update_job_step(job_id, "Step 3 of 3: Executing kneaddata")
+    rs = fps['raw_reverse_seqs'] if 'raw_reverse_seqs' in fps else []
+    commands = generate_kneaddata_commands(fps['raw_forward_seqs'], rs,
+                                           qiime_map, out_dir,
+                                           parameters)
+    # Step 3 execute kneaddata: TODO
+    qclient.update_job_step(job_id, "Step 3 of 3: Executing kneaddata")
 
-    # commands_len = len(commands)
+    commands_len = len(commands)
 
     # artifacts_info = []
 

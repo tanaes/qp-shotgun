@@ -159,21 +159,21 @@ class KneaddataTests(PluginTestCase):
 
         exp = [
             'kneaddata --input "fastq/s1.fastq" --output "output/s1" '
-            '--output-prefix s1 --reference-db human_genome --threads 1 '
+            '--output-prefix "s1" --reference-db human_genome --threads 1 '
             '--processes 1 --quality-scores phred33 --run-fastqc-start '
             '--run-fastqc-end --log-level DEBUG --max-memory 500 '
             '--trimmomatic-options "ILLUMINACLIP:$trimmomatic/adapters/'
             'TruSeq3-PE-2.fa:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 '
             'MINLEN:36" --bowtie2-options "--very-sensitive"',
             'kneaddata --input "fastq/s2.fastq" --output "output/s2" '
-            '--output-prefix s2 --reference-db human_genome --threads 1 '
+            '--output-prefix "s2" --reference-db human_genome --threads 1 '
             '--processes 1 --quality-scores phred33 --run-fastqc-start '
             '--run-fastqc-end --log-level DEBUG --max-memory 500 '
             '--trimmomatic-options "ILLUMINACLIP:$trimmomatic/adapters/'
             'TruSeq3-PE-2.fa:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 '
             'MINLEN:36" --bowtie2-options "--very-sensitive"',
             'kneaddata --input "fastq/s3.fastq" --output "output/s3" '
-            '--output-prefix s3 --reference-db human_genome --threads 1 '
+            '--output-prefix "s3" --reference-db human_genome --threads 1 '
             '--processes 1 --quality-scores phred33 --run-fastqc-start '
             '--run-fastqc-end --log-level DEBUG --max-memory 500 '
             '--trimmomatic-options "ILLUMINACLIP:$trimmomatic/adapters/'
@@ -196,7 +196,7 @@ class KneaddataTests(PluginTestCase):
         exp = [
             'kneaddata --input "fastq/s1.fastq" --input "fastq/s1.R2.fastq"'
             ' --output "output/s1" '
-            '--output-prefix s1 --reference-db human_genome --threads 1 '
+            '--output-prefix "s1" --reference-db human_genome --threads 1 '
             '--processes 1 --quality-scores phred33 --run-fastqc-start '
             '--run-fastqc-end --log-level DEBUG --max-memory 500 '
             '--trimmomatic-options "ILLUMINACLIP:$trimmomatic/adapters/'
@@ -204,7 +204,7 @@ class KneaddataTests(PluginTestCase):
             'MINLEN:36" --bowtie2-options "--very-sensitive"',
             'kneaddata --input "fastq/s2.fastq" --input "fastq/s2.R2.fastq" '
             ' --output "output/s2" '
-            '--output-prefix s2 --reference-db human_genome --threads 1 '
+            '--output-prefix "s2" --reference-db human_genome --threads 1 '
             '--processes 1 --quality-scores phred33 --run-fastqc-start '
             '--run-fastqc-end --log-level DEBUG --max-memory 500 '
             '--trimmomatic-options "ILLUMINACLIP:$trimmomatic/adapters/'
@@ -212,7 +212,7 @@ class KneaddataTests(PluginTestCase):
             'MINLEN:36" --bowtie2-options "--very-sensitive"',
             'kneaddata --input "fastq/s3.fastq" --input "fastq/s3.R2.fastq" '
             ' --output "output/s3" '
-            '--output-prefix s3 --reference-db human_genome --threads 1 '
+            '--output-prefix "s3" --reference-db human_genome --threads 1 '
             '--processes 1 --quality-scores phred33 --run-fastqc-start '
             '--run-fastqc-end --log-level DEBUG --max-memory 500 '
             '--trimmomatic-options "ILLUMINACLIP:$trimmomatic/adapters/'
