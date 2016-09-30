@@ -225,6 +225,7 @@ class KneaddataTests(PluginTestCase):
             fp, 'output', self.params)
         self.assertEqual(obs, exp)
 
+
 MAPPING_FILE = (
     "#SampleID\tplatform\tbarcode\texperiment_design_description\t"
     "library_construction_protocol\tcenter_name\tprimer\trun_prefix\t"
@@ -242,6 +243,7 @@ MAPPING_FILE_2 = (
     "SKB8.640193\tILLUMINA\tA\tA\tA\tANL\tA\ts1\tIllumina MiSeq\tdesc2\n"
     "SKD8.640184\tILLUMINA\tA\tA\tA\tANL\tA\ts1\tIllumina MiSeq\tdesc3\n"
 )
+
 
 if __name__ == '__main__':
     main()
