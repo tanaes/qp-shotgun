@@ -6,7 +6,8 @@
 # The full license is in the file LICENSE, distributed with this software.
 # -----------------------------------------------------------------------------
 
-from os.path import basename, join
+from os import mkdir
+from os.path import basename, join, exists
 
 from future.utils import viewitems
 from functools import partial
@@ -90,9 +91,13 @@ def generate_humann2_analysis_commands(forward_seqs, reverse_seqs, map_file,
     cmds = []
     params = ['--%s "%s"' % (k, v) for k, v in viewitems(parameters) if v]
     for ffn, fn, s in samples:
+        od = join(out_dir, fn)
+        # just making sure the output directory exists
+        if not exists(od):
+            mkdir(od)
         cmds.append('humann2 --input "%s" --output "%s" --output-basename '
-                    '"%s" --output-format biom %s' % (ffn, join(out_dir, fn),
-                                                      s, ' '.join(params)))
+                    '"%s" --output-format biom %s' % (ffn, od, s,
+                                                      ' '.join(params)))
 
     return cmds
 
