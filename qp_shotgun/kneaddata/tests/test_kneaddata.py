@@ -187,7 +187,7 @@ class KneaddataTests(PluginTestCase):
             '--trimmomatic-options "ILLUMINACLIP:$trimmomatic/adapters/'
             'TruSeq3-PE-2.fa:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 '
             'MINLEN:36"',
-            'kneaddata --input "fastq/s2.fastq" '
+            'kneaddata --input "fastq/s2.fastq.gz" '
             '--output "output/s2" --output-prefix "s2" --bowtie2-options '
             '"--very-sensitive" --log-level DEBUG --max-memory 500 '
             '--processes 1 --quality-scores phred33 --reference-db '
@@ -226,14 +226,14 @@ class KneaddataTests(PluginTestCase):
             '--trimmomatic-options "ILLUMINACLIP:$trimmomatic/adapters/'
             'TruSeq3-PE-2.fa:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 '
             'MINLEN:36"',
-            'kneaddata --input "fastq/s2.fastq" --input "fastq/s2.R2.fastq" '
-            '--output "output/s2" --output-prefix "s2" --bowtie2-options '
-            '"--very-sensitive" --log-level DEBUG --max-memory 500 '
-            '--processes 1 --quality-scores phred33 --reference-db '
-            'human_genome --run-fastqc-end --run-fastqc-start --threads 1 '
-            '--trimmomatic-options "ILLUMINACLIP:$trimmomatic/adapters/'
-            'TruSeq3-PE-2.fa:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 '
-            'MINLEN:36"',
+            'kneaddata --input "fastq/s2.fastq.gz" --input '
+            '"fastq/s2.R2.fastq.gz" --output "output/s2" --output-prefix "s2" '
+            '--bowtie2-options "--very-sensitive" --log-level DEBUG '
+            '--max-memory 500 --processes 1 --quality-scores phred33 '
+            '--reference-db human_genome --run-fastqc-end --run-fastqc-start '
+            '--threads 1 --trimmomatic-options "ILLUMINACLIP:$trimmomatic/'
+            'adapters/TruSeq3-PE-2.fa:2:30:10 LEADING:3 TRAILING:3 '
+            'SLIDINGWINDOW:4:15 MINLEN:36"',
             'kneaddata --input "fastq/s3.fastq" --input "fastq/s3.R2.fastq" '
             '--output "output/s3" --output-prefix "s3" --bowtie2-options '
             '"--very-sensitive" --log-level DEBUG --max-memory 500 '

@@ -169,7 +169,7 @@ def generate_kneaddata_commands(forward_seqs, reverse_seqs, map_file,
         else:
             cmds.append('kneaddata --input "%s" --input "%s" --output "%s" '
                         '--output-prefix "%s" %s' %
-                        (f_fp, join(out_dir, run_prefix),
+                        (f_fp, r_fp, join(out_dir, run_prefix),
                          run_prefix, param_string))
 
     return cmds
