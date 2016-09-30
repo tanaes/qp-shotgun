@@ -10,7 +10,7 @@ from unittest import main
 from os import close, remove
 from os.path import exists, isdir
 from shutil import rmtree
-from tempfile import mkstemp, mkdtemp
+from tempfile import mkstemp
 
 from qiita_client.testing import PluginTestCase
 
@@ -99,7 +99,7 @@ class KneaddataTests(PluginTestCase):
                   './folder/s1_S009_L001_R2.fastq.gz']
 
         with self.assertRaises(ValueError):
-            obs = make_read_pairs_per_sample(fwd_fp, rev_fp, fp)
+            make_read_pairs_per_sample(fwd_fp, rev_fp, fp)
 
     def test_make_read_pairs_per_sample_match_fwd_rev_notmatch(self):
         fd, fp = mkstemp()
@@ -157,7 +157,8 @@ class KneaddataTests(PluginTestCase):
             f.write(MAPPING_FILE)
         self._clean_up_files.append(fp)
 
-        exp = ['kneaddata --input "fastq/s1.fastq" --output "output/s1" '
+        exp = [
+            'kneaddata --input "fastq/s1.fastq" --output "output/s1" '
             '--output-prefix s1 --reference-db human_genome --threads 1 '
             '--processes 1 --quality-scores phred33 --run-fastqc-start '
             '--run-fastqc-end --log-level DEBUG --max-memory 500 '
@@ -192,7 +193,8 @@ class KneaddataTests(PluginTestCase):
             f.write(MAPPING_FILE)
         self._clean_up_files.append(fp)
 
-        exp = ['kneaddata --input "fastq/s1.fastq" --input "fastq/s1.R2.fastq"'
+        exp = [
+            'kneaddata --input "fastq/s1.fastq" --input "fastq/s1.R2.fastq"'
             ' --output "output/s1" '
             '--output-prefix s1 --reference-db human_genome --threads 1 '
             '--processes 1 --quality-scores phred33 --run-fastqc-start '

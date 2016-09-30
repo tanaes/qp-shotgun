@@ -34,21 +34,21 @@ opt_params = {
     # --bowtie2 # path to bowtie executable
     # --bmtagger # path to bmtagger exectuable
     # --trf # path to TRF executable
-    'reference-db': ['choice:["human_genome"]', 'human_genome'], # ref db
-    'bypass-trim': ['bool', 'False'], # bypass the trim step
-    'threads': ['integer', '1'], # threads to run 
-    'processes': ['integer', '1'], # processes to run
-    'quality-scores': ['choice:["phred33","phred64"]', 'phred33'], # quality
-    'run-bmtagger': ['bool', 'False'], # run BMTagger instead of Bowtie2
-    'run-trf': ['bool', 'False'], # run TRF repeat finder tool
-    'run-fastqc-start': ['bool', 'True'], # run FastQC on original data
-    'run-fastqc-end': ['bool', 'True'], # run FastQC on filtered data
-    'store-temp-output': ['bool', 'False'], # store temp output files
+    'reference-db': ['choice:["human_genome"]', 'human_genome'],  # ref db
+    'bypass-trim': ['boolean', 'False'],  # bypass the trim step
+    'threads': ['integer', '1'],  # threads to run
+    'processes': ['integer', '1'],  # processes to run
+    'quality-scores': ['choice:["phred33","phred64"]', 'phred33'],  # quality
+    'run-bmtagger': ['boolean', 'False'],  # run BMTagger instead of Bowtie2
+    'run-trf': ['boolean', 'False'],  # run TRF repeat finder tool
+    'run-fastqc-start': ['boolean', 'True'],  # run FastQC on original data
+    'run-fastqc-end': ['boolean', 'True'],  # run FastQC on filtered data
+    'store-temp-output': ['boolean', 'False'],  # store temp output files
     'log-level': ['choice:["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]',
                   'DEBUG'],
 
     # Trimmomatic options
-    'max-memory': ['integer', '500'], # max memory in mb [ DEFAULT : 500 ]
+    'max-memory': ['integer', '500'],  # max memory in mb [ DEFAULT : 500 ]
     'trimmomatic-options': ['string', 'ILLUMINACLIP:$trimmomatic/adapters/'
                             'TruSeq3-PE-2.fa:2:30:10 LEADING:3 TRAILING:3 '
                             'SLIDINGWINDOW:4:15 MINLEN:36'],

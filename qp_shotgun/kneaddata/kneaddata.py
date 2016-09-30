@@ -83,7 +83,7 @@ def make_read_pairs_per_sample(forward_seqs, reverse_seqs, map_file):
             raise ValueError('Reverse read does not match this run prefix. '
                              'Run prefix: %s\nForward read: %s\n'
                              'Reverse read: %s\n' % (run_prefix, f_fn,
-                             basename(reverse_seqs[i])))
+                                           basename(reverse_seqs[i])))
 
         # create the tuple for this read set
         if reverse_seqs:
@@ -183,7 +183,8 @@ def kneaddata(qclient, job_id, parameters, out_dir):
     qiime_map = prep_info['qiime-map']
 
     # Step 2 generating command kneaddata
-    qclient.update_job_step(job_id, "Step 2 of 3: Generating kneaddata command")
+    qclient.update_job_step(job_id, "Step 2 of 3: "
+                            "Generating kneaddata command")
     rs = fps['raw_reverse_seqs'] if 'raw_reverse_seqs' in fps else []
     commands = generate_kneaddata_commands(fps['raw_forward_seqs'], rs,
                                            qiime_map, out_dir,
