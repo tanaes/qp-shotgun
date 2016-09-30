@@ -85,7 +85,7 @@ def make_read_pairs_per_sample(forward_seqs, reverse_seqs, map_file):
         # if we have reverse reads, make sure the matching pair also
         # matches the run prefix:
         if (reverse_seqs and not
-                         basename(reverse_seqs[i]).startswith(run_prefix)):
+                basename(reverse_seqs[i]).startswith(run_prefix)):
             raise ValueError('Reverse read does not match this run prefix. '
                              'Run prefix: %s\nForward read: %s\n'
                              'Reverse read: %s\n' %

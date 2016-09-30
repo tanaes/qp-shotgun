@@ -22,7 +22,15 @@ from qp_shotgun.kneaddata.kneaddata import (make_read_pairs_per_sample,
 class KneaddataTests(PluginTestCase):
     def setUp(self):
         plugin("https://localhost:21174", 'register', 'ignored')
-        self.params = {}
+        self.params = {
+            'reference-db': 'human_genome', 'bypass-trim': False, 'threads': 1,
+            'processes': 1, 'quality-scores': 'phred33', 'run-bmtagger': False,
+            'run-trf': False, 'run-fastqc-start': True, 'run-fastqc-end': True,
+            'store-temp-output': False, 'log-level': 'DEBUG', 'max-memory': 500,
+            'trimmomatic-options': '"ILLUMINACLIP:$trimmomatic/adapters/'
+            'TruSeq3-PE-2.fa:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 '
+            'MINLEN:36"', 'bowtie2-options': '"--very-sensitive"'
+        }
         self._clean_up_files = []
 
     def tearDown(self):
