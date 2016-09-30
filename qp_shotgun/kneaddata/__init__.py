@@ -6,6 +6,11 @@
 # The full license is in the file LICENSE, distributed with this software.
 # -----------------------------------------------------------------------------
 
+from qiita_client import QiitaPlugin, QiitaCommand
+
+from .kneaddata import kneaddata
+
+__all__ = ['kneaddata']
 
 # Initialize the plugin
 plugin = QiitaPlugin(
@@ -21,7 +26,6 @@ opt_params = {
     # by the admin installing the tools:
     # trimmomatic
     # bowtie2
-
     # --input # input FASTQ file (add a second argument for paired input files)
     # --output # directory to write output files
     # --output-prefix # prefix for output files [ DEFAULT : $SAMPLE_kneaddata ]
@@ -48,12 +52,9 @@ opt_params = {
     'trimmomatic-options': ['string', 'ILLUMINACLIP:$trimmomatic/adapters/'
                             'TruSeq3-PE-2.fa:2:30:10 LEADING:3 TRAILING:3 '
                             'SLIDINGWINDOW:4:15 MINLEN:36'],
-
     # Bowtie2 options
     'bowtie2-options': ['string', '--very-sensitive']
-
     # BMTagger options
-    
     # # TRF options
     # 'match': ['integer', '2'], # matching weight
     # 'mismatch': ['integer', '7'], # mismatching penalty
@@ -62,7 +63,6 @@ opt_params = {
     # 'pi': ['integer', '10'], # indel probability
     # 'minscore': ['integer', '50'], # mimimum alignment score to report
     # 'maxperiod': ['integer', '500'] # maximum period size to report
-
     # FastQC options
     }
 outputs = {'per_sample_FASTQ': 'per_sample_FASTQ'}
@@ -73,9 +73,8 @@ dflt_param_set = {
         'run-trf': False, 'run-fastqc-start': True, 'run-fastqc-end': True,
         'store-temp-output': False, 'log-level': 'DEBUG', 'max-memory': 500,
         'trimmomatic-options': '"ILLUMINACLIP:$trimmomatic/adapters/'
-                                'TruSeq3-PE-2.fa:2:30:10 LEADING:3 TRAILING:3 '
-                                'SLIDINGWINDOW:4:15 MINLEN:36"',
-        'bowtie2-options': '"--very-sensitive"'
+        'TruSeq3-PE-2.fa:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 '
+        'MINLEN:36"', 'bowtie2-options': '"--very-sensitive"'
         # , 'match': 2, 'mismatch': 7,
         # 'delta': 7, 'pm': 80, 'pi': 10, 'minscore': 50, 'maxperiod': '500'
         }

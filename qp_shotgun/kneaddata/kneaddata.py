@@ -6,12 +6,12 @@
 # The full license is in the file LICENSE, distributed with this software.
 # -----------------------------------------------------------------------------
 
-from os.path import basename, join
+from os.path import basename
 
 from future.utils import viewitems
-import pandas as pd
 
-from qiita_client.util import system_call, get_sample_names_by_run_prefix
+from qiita_client.util import get_sample_names_by_run_prefix
+
 
 def make_read_pairs_per_sample(forward_seqs, reverse_seqs, map_file):
     """Recovers read pairing information
@@ -69,9 +69,9 @@ def make_read_pairs_per_sample(forward_seqs, reverse_seqs, map_file):
             if f_fn.startswith(rp) and run_prefix is None:
                 run_prefix = rp
             elif f_fn.startswith(rp) and run_prefix is not None:
-                raise ValueError('Multiple forward reads match this run prefix:'
-                                 ' %s' % rp)
-        
+                raise ValueError('Multiple forward reads match this run prefix'
+                                 ': %s' % rp)
+
         # make sure that we got one matching run prefix:
         if run_prefix is None:
             raise ValueError('No run prefix matching this fwd read: %s'
@@ -82,12 +82,12 @@ def make_read_pairs_per_sample(forward_seqs, reverse_seqs, map_file):
         if reverse_seqs and not reverse_seqs[i].startswith(run_prefix):
             raise ValueError('Reverse read does not match this run prefix. '
                              'Run prefix: %s\nForward read: %s\n'
-                             'Reverse read: %s\n' % (run_prefix, f_fn, 
-                                                     basename(reverse_seqs[i])))
+                             'Reverse read: %s\n' % (run_prefix, f_fn,
+                             basename(reverse_seqs[i])))
 
         # create the tuple for this read set
         if reverse_seqs:
-            samples.append((run_prefix, sn_by_rp[run_prefix], f_fp, 
+            samples.append((run_prefix, sn_by_rp[run_prefix], f_fp,
                             reverse_seqs[i]))
         else:
             samples.append((run_prefix, sn_by_rp[run_prefix], f_fp, None))
@@ -96,7 +96,7 @@ def make_read_pairs_per_sample(forward_seqs, reverse_seqs, map_file):
 
 
 def generate_kneaddata_commands(forward_seqs, reverse_seqs, map_file,
-                                       out_dir, parameters):
+                                out_dir, parameters):
     """Generates the KneadData commands
 
     Parameters
@@ -138,14 +138,13 @@ def generate_kneaddata_commands(forward_seqs, reverse_seqs, map_file,
         if r_fp is None:
             cmds.append('kneaddata --input "%s" --output "%s" --output-prefix '
                         '"%s" %s' % (f_fp, out_dir, run_prefix,
-                        ' '.join(params)))
+                                     ' '.join(params)))
         else:
             cmds.append('kneaddata --input "%s" --input "%s" --output "%s" '
-                        '--output-prefix "%s" %s' % (f_fp, r_fp, out_dir,
-                        run_prefix, ' '.join(params)))
+                        '--output-prefix "%s" %s'
+                        % (f_fp, r_fp, out_dir, run_prefix, ' '.join(params)))
 
     return cmds
-
 
 
 def kneaddata(qclient, job_id, parameters, out_dir):
