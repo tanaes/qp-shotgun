@@ -11,10 +11,13 @@
 import sys
 from setuptools import setup
 from stat import S_IEXEC
-from os import (chmod, rename, stat)
+from os import (chdir, getcwd, chmod, rename, stat)
 from os.path import join
 from glob import glob
+from tempfile import mkdtemp
 from urllib import FancyURLopener
+from subprocess import Popen, PIPE
+from shutil import rmtree, copy
 
 __version__ = "0.1.0-dev"
 
@@ -28,6 +31,33 @@ class URLOpener(FancyURLopener):
         raise IOError(
             'Could not download %s\nPlease ensure the URL is valid and that '
             'you have an active Internet connection.' % url)
+
+
+def system_call(cmd, error_msg):
+    """Call `cmd` and return whether it was successful or not.
+    This function is taken and modified from qcli (previously
+    `qcli_system_call`).
+    """
+    proc = Popen(cmd,
+                 shell=True,
+                 universal_newlines=True,
+                 stdout=PIPE,
+                 stderr=PIPE)
+    # communicate pulls all stdout/stderr from the PIPEs to
+    # avoid blocking -- don't remove this line!
+    stdout, stderr = proc.communicate()
+    return_value = proc.returncode
+
+    success = return_value == 0
+    if not success:
+        status("Unable to %s:" % error_msg)
+        status("  stdout:")
+        for line in stdout.split('\n'):
+            status("    " + line)
+        status("  stderr:")
+        for line in stderr.split('\n'):
+            status("    " + line)
+    return success
 
 
 def status(msg):
@@ -78,18 +108,35 @@ def download_metaphlan2():
     """Download the metaphlan2 executable and mv to scripts directory"""
     status("Installing metaphlan2.py ...")
 
-    URL = ('https://bitbucket.org/biobakery/metaphlan2/raw/'
-           'ec7727ff1875b56d91f348b001ece8f6bd372624/metaphlan2.py')
+    cwd = getcwd()
+    scripts = join(cwd, 'scripts')
 
-    return_value = download_file(URL, 'scripts/', 'metaphlan2.py')
+    tempdir = mkdtemp()
+    URL = ('https://bitbucket.org/biobakery/metaphlan2/get/default.zip')
+    if download_file(URL, tempdir, 'metaphlan2.py'):
+        status("Could not download SortMeRNA, so cannot install it.\n")
+        return
 
-    # make the file an executable file
-    fname = 'scripts/metaphlan2.py'
-    if not return_value:
+    chdir(tempdir)
+    try:
+        if not system_call('unzip biobakery-metaphlan2-*.zip'):
+            return
+
+        chdir('biobakery-metaphlan2-*')
+        # make the file an executable file
+        fname = 'metaphlan2.py'
         chmod(fname, stat(fname).st_mode | S_IEXEC)
+
+        copy('db_v20', scripts)
+        copy('metaphlan2.py', scripts)
+
         status("metaphlan2.py installed.\n")
-    else:
+    except:
         status("metaphlan2.py could not be installed.\n")
+    finally:
+        # remove the source
+        rmtree(tempdir)
+        chdir(cwd)
 
 
 def catch_install_errors(install_function, name):
