@@ -103,7 +103,20 @@ def make_read_pairs_per_sample(forward_seqs, reverse_seqs, map_file):
 
 
 def format_kneaddata_params(parameters):
-    params = ['--%s "%s"' % (k, v) for k, v in viewitems(parameters) if v]
+
+    params = []
+
+    for param in sorted(parameters):
+        value = parameters[param]
+
+        if value == True
+            params.append('--%s' % param)
+            continue
+        elif value == False
+            continue
+        elif value
+            params.append('--%s %s' % (param, value))
+            continue
 
     param_string = ' '.join(params)
 
