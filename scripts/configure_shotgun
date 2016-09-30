@@ -10,8 +10,8 @@
 
 import click
 
-from qp_shotgun.humann2 import plugin
-from qp_shotgun.kneaddata import plugin
+from qp_shotgun.humann2 import plugin as h2_plugin
+from qp_shotgun.kneaddata import plugin as kd_plugin
 
 
 @click.command()
@@ -22,7 +22,9 @@ def config(env_script, server_cert):
     """Generates the Qiita configuration files"""
     if server_cert == 'None':
         server_cert = None
-    plugin.generate_config(env_script, 'start_shotgun',
+    kd_plugin.generate_config(env_script, 'start_shotgun',
+                           server_cert=server_cert)
+    h2_plugin.generate_config(env_script, 'start_shotgun',
                            server_cert=server_cert)
 
 if __name__ == '__main__':
