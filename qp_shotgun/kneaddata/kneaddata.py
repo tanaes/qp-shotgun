@@ -102,6 +102,14 @@ def make_read_pairs_per_sample(forward_seqs, reverse_seqs, map_file):
     return(samples)
 
 
+def format_kneaddata_params(parameters):
+    params = ['--%s "%s"' % (k, v) for k, v in viewitems(parameters) if v]
+
+    param_string = ' '.join(params)
+
+    return(param_string)
+
+
 def generate_kneaddata_commands(forward_seqs, reverse_seqs, map_file,
                                 out_dir, parameters):
     """Generates the KneadData commands
@@ -140,17 +148,18 @@ def generate_kneaddata_commands(forward_seqs, reverse_seqs, map_file,
 
     cmds = []
 
-    params = ['--%s "%s"' % (k, v) for k, v in viewitems(parameters) if v]
+    param_string = format_kneaddata_params(parameters)
     for run_prefix, sample, f_fp, r_fp in samples:
         if r_fp is None:
-            cmds.append('kneaddata --input "%s" --output "%s" --output-prefix '
-                        '"%s" %s' % (f_fp, join(out_dir, run_prefix),
-                                     run_prefix, ' '.join(params)))
+            cmds.append('kneaddata --input "%s" --output "%s" '
+                        '--output-prefix "%s" %s' % 
+                        (f_fp, join(out_dir, run_prefix),
+                         run_prefix, param_string))
         else:
             cmds.append('kneaddata --input "%s" --input "%s" --output "%s" '
-                        '--output-prefix "%s" %s'
-                        % (f_fp, r_fp, join(out_dir, run_prefix),
-                           run_prefix, ' '.join(params)))
+                        '--output-prefix "%s" %s' % 
+                        (f_fp, join(out_dir, run_prefix),
+                         run_prefix, param_string))
 
     return cmds
 
