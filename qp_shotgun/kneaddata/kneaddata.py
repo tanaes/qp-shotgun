@@ -109,10 +109,10 @@ def format_kneaddata_params(parameters):
     for param in sorted(parameters):
         value = parameters[param]
 
-        if value == True:
+        if str(value) == 'True':
             params.append('--%s' % param)
             continue
-        elif value == False:
+        elif str(value) == 'False':
             continue
         elif value:
             params.append('--%s %s' % (param, value))
