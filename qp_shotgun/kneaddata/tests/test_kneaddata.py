@@ -82,6 +82,24 @@ class Humann2Tests(PluginTestCase):
 
         self.assertEqual(obs, exp)
 
+    def test_make_read_pairs_per_sample_match_fwd_rev_diffnum(self):
+        fd, fp = mkstemp()
+        close(fd)
+        with open(fp, 'w') as f:
+            f.write(MAPPING_FILE)
+        self._clean_up_files.append(fp)
+
+        fwd_fp = ['./folder/s3_S013_L001_R1.fastq.gz',
+                  './folder/s2_S011_L001_R1.fastq.gz',
+                  './folder/s1_S009_L001_R1.fastq.gz']
+
+        rev_fp = ['./folder/s4_S013_L001_R2.fastq.gz',
+                  './folder/s2_S011_L001_R2.fastq.gz',
+                  './folder/s1_S009_L001_R2.fastq.gz']
+
+        with self.assertRaises(ValueError):
+            obs = make_read_pairs_per_sample(fwd_fp, rev_fp, fp)
+
     def test_make_read_pairs_per_sample_match_fwd_rev_notmatch(self):
         fd, fp = mkstemp()
         close(fd)
@@ -114,6 +132,96 @@ class Humann2Tests(PluginTestCase):
 
         with self.assertRaises(ValueError):
             obs = make_read_pairs_per_sample(fwd_fp, rev_fp, fp)
+
+    def test_make_read_pairs_per_sample_match_fwd_2match(self):
+        fd, fp = mkstemp()
+        close(fd)
+        with open(fp, 'w') as f:
+            f.write(MAPPING_FILE)
+        self._clean_up_files.append(fp)
+
+        fwd_fp = ['./folder/s3_S013_L001_R1.fastq.gz',
+                  './folder/s2_S011_L001_R1.fastq.gz',
+                  './folder/s2_S009_L001_R1.fastq.gz']
+
+        rev_fp = []
+
+        with self.assertRaises(ValueError):
+            obs = make_read_pairs_per_sample(fwd_fp, rev_fp, fp)
+
+
+    def test_generate_humann2_analysis_commands_only_fwd(self):
+        fd, fp = mkstemp()
+        close(fd)
+        with open(fp, 'w') as f:
+            f.write(MAPPING_FILE)
+        self._clean_up_files.append(fp)
+
+        exp = ['kneaddata --input "fastq/s1.fastq" --output "output/s1" '
+        '--output-prefix s1 --reference-db human_genome --threads 1 '
+        '--processes 1 --quality-scores phred33 --run-fastqc-start '
+        '--run-fastqc-end --log-level DEBUG --max-memory 500 '
+        '--trimmomatic-options "ILLUMINACLIP:$trimmomatic/adapters/'
+        'TruSeq3-PE-2.fa:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 '
+        'MINLEN:36" --bowtie2-options "--very-sensitive"',
+        'kneaddata --input "fastq/s2.fastq" --output "output/s2" '
+        '--output-prefix s2 --reference-db human_genome --threads 1 '
+        '--processes 1 --quality-scores phred33 --run-fastqc-start '
+        '--run-fastqc-end --log-level DEBUG --max-memory 500 '
+        '--trimmomatic-options "ILLUMINACLIP:$trimmomatic/adapters/'
+        'TruSeq3-PE-2.fa:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 '
+        'MINLEN:36" --bowtie2-options "--very-sensitive"',
+        'kneaddata --input "fastq/s3.fastq" --output "output/s3" '
+        '--output-prefix s3 --reference-db human_genome --threads 1 '
+        '--processes 1 --quality-scores phred33 --run-fastqc-start '
+        '--run-fastqc-end --log-level DEBUG --max-memory 500 '
+        '--trimmomatic-options "ILLUMINACLIP:$trimmomatic/adapters/'
+        'TruSeq3-PE-2.fa:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 '
+        'MINLEN:36" --bowtie2-options "--very-sensitive"']
+
+        obs = generate_kneaddata_commands(
+            ['fastq/s1.fastq', 'fastq/s2.fastq.gz', 'fastq/s3.fastq'], [],
+            fp, 'output', self.params)
+
+        self.assertEqual(obs, exp)
+
+    def test_generate_humann2_analysis_commands_forward_reverse(self):
+        fd, fp = mkstemp()
+        close(fd)
+        with open(fp, 'w') as f:
+            f.write(MAPPING_FILE)
+        self._clean_up_files.append(fp)
+
+        exp = ['kneaddata --input "fastq/s1.fastq" --input "fastq/s1.R2.fastq" '
+        ' --output "output/s1" '
+        '--output-prefix s1 --reference-db human_genome --threads 1 '
+        '--processes 1 --quality-scores phred33 --run-fastqc-start '
+        '--run-fastqc-end --log-level DEBUG --max-memory 500 '
+        '--trimmomatic-options "ILLUMINACLIP:$trimmomatic/adapters/'
+        'TruSeq3-PE-2.fa:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 '
+        'MINLEN:36" --bowtie2-options "--very-sensitive"',
+        'kneaddata --input "fastq/s2.fastq" --input "fastq/s2.R2.fastq" '
+        ' --output "output/s2" '
+        '--output-prefix s2 --reference-db human_genome --threads 1 '
+        '--processes 1 --quality-scores phred33 --run-fastqc-start '
+        '--run-fastqc-end --log-level DEBUG --max-memory 500 '
+        '--trimmomatic-options "ILLUMINACLIP:$trimmomatic/adapters/'
+        'TruSeq3-PE-2.fa:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 '
+        'MINLEN:36" --bowtie2-options "--very-sensitive"',
+        'kneaddata --input "fastq/s3.fastq" --input "fastq/s3.R2.fastq" '
+        ' --output "output/s3" '
+        '--output-prefix s3 --reference-db human_genome --threads 1 '
+        '--processes 1 --quality-scores phred33 --run-fastqc-start '
+        '--run-fastqc-end --log-level DEBUG --max-memory 500 '
+        '--trimmomatic-options "ILLUMINACLIP:$trimmomatic/adapters/'
+        'TruSeq3-PE-2.fa:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 '
+        'MINLEN:36" --bowtie2-options "--very-sensitive"']
+
+        obs = generate_kneaddata_commands(
+            ['fastq/s1.fastq', 'fastq/s2.fastq.gz', 'fastq/s3.fastq'],
+            ['fastq/s1.R2.fastq', 'fastq/s2.R2.fastq.gz', 'fastq/s3.R2.fastq'],
+            fp, 'output', self.params)
+        self.assertEqual(obs, exp)
 
 MAPPING_FILE = (
     "#SampleID\tplatform\tbarcode\texperiment_design_description\t"
