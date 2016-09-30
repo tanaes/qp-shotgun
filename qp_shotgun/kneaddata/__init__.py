@@ -54,14 +54,14 @@ opt_params = {
 
     # BMTagger options
     
-    # TRF options
-    'match': ['integer', '2'], # matching weight
-    'mismatch': ['integer', '7'], # mismatching penalty
-    'delta': ['integer', '7'], # indel penalty
-    'pm': ['integer', '80'], # match probability
-    'pi': ['integer', '10'], # indel probability
-    'minscore': ['integer', '50'], # mimimum alignment score to report
-    'maxperiod': ['integer', '500'] # maximum period size to report
+    # # TRF options
+    # 'match': ['integer', '2'], # matching weight
+    # 'mismatch': ['integer', '7'], # mismatching penalty
+    # 'delta': ['integer', '7'], # indel penalty
+    # 'pm': ['integer', '80'], # match probability
+    # 'pi': ['integer', '10'], # indel probability
+    # 'minscore': ['integer', '50'], # mimimum alignment score to report
+    # 'maxperiod': ['integer', '500'] # maximum period size to report
 
     # FastQC options
     }
@@ -72,11 +72,13 @@ dflt_param_set = {
         'processes': 1, 'quality-scores': 'phred33', 'run-bmtagger': False,
         'run-trf': False, 'run-fastqc-start': True, 'run-fastqc-end': True,
         'store-temp-output': False, 'log-level': 'DEBUG', 'max-memory': 500,
-        'trimmomatic-options': 'ILLUMINACLIP:$trimmomatic/adapters/'
+        'trimmomatic-options': '"ILLUMINACLIP:$trimmomatic/adapters/'
                                 'TruSeq3-PE-2.fa:2:30:10 LEADING:3 TRAILING:3 '
-                                'SLIDINGWINDOW:4:15 MINLEN:36',
-        'bowtie2-options': '--very-sensitive', 'match': 2, 'mismatch': 7,
-        'delta': 7, 'pm': 80, 'pi': 10, 'minscore': 50, 'maxperiod': '500'}
+                                'SLIDINGWINDOW:4:15 MINLEN:36"',
+        'bowtie2-options': '"--very-sensitive"'
+        # , 'match': 2, 'mismatch': 7,
+        # 'delta': 7, 'pm': 80, 'pi': 10, 'minscore': 50, 'maxperiod': '500'
+        }
 }
 kneaddata_cmd = QiitaCommand(
     "KneadData", "Sequence QC", kneaddata, req_params, opt_params,
