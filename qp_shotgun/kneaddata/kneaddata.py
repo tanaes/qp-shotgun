@@ -95,7 +95,7 @@ def make_read_pairs_per_sample(forward_seqs, reverse_seqs, map_file):
     return(samples)
 
 
-def generate_kneaddata_analysis_commands(forward_seqs, reverse_seqs, map_file,
+def generate_kneaddata_commands(forward_seqs, reverse_seqs, map_file,
                                        out_dir, parameters):
     """Generates the KneadData commands
 
@@ -127,51 +127,22 @@ def generate_kneaddata_analysis_commands(forward_seqs, reverse_seqs, map_file,
     -----
     """
     # making sure the forward and reverse reads are in the same order
-    forward_seqs.sort()
-    if reverse_seqs:
-        if len(forward_seqs) != len(reverse_seqs):
-            raise ValueError('Your reverse and forward files are of different '
-                             'length. Forward: %s. Reverse: %s.' %
-                             (', '.join(forward_seqs),
-                              ', '.join(reverse_seqs)))
-        reverse_seqs.sort()
 
-    sn_by_rp = get_sample_names_by_run_prefix(map_file)
-
-    # we match sample name and forward filename
-    samples = []
-
-    for i, fname in enumerate(forward_seqs):
-        # here fname is the actual filepath
-        f = basename(fname)
-        # removing extentions: fastq or fastq.gz
-        if 'fastq' in f.lower().rsplit('.', 2):
-            f = f[:f.lower().rindex('.fastq')]
-        # this try/except block is simply to retrieve all possible errors
-        # and display them in the next if block
-        try:
-            samples.append((fname, f, sn_by_rp[f]))
-            if reverse_seqs:
-                fr = basename(reverse_seqs[i])
-                if 'fastq' in fr.lower().rsplit('.', 2):
-                    fr = fr[:fr.lower().rindex('.fastq')]
-                samples.append((reverse_seqs[i], fr, sn_by_rp[f]))
-            del sn_by_rp[f]
-        except KeyError:
-            pass
-
-    if sn_by_rp:
-        raise ValueError(
-            'Some run_prefix values do not match your sample names: %s'
-            % ', '.join(sn_by_rp.keys()))
+    # we match filenames, samples, and run prefixes
+    samples = make_read_pairs_per_sample
 
     cmds = []
 
     params = ['--%s "%s"' % (k, v) for k, v in viewitems(parameters) if v]
-    for ffn, fn, s in samples:
-        cmds.append('humann2 --input "%s" --output "%s" --output-basename '
-                    '"%s" --output-format biom %s' % (ffn, join(out_dir, fn),
-                                                      s, ' '.join(params)))
+    for run_prefix, sample, f_fp, r_fp in samples:
+        if r_fp is None:
+            cmds.append('kneaddata --input "%s" --output "%s" --output-prefix '
+                        '"%s" %s' % (f_fp, out_dir, run_prefix,
+                        ' '.join(params)))
+        else:
+            cmds.append('kneaddata --input "%s" --input "%s" --output "%s" '
+                        '--output-prefix "%s" %s' % (f_fp, r_fp, out_dir,
+                        run_prefix, ' '.join(params)))
 
     return cmds
 
@@ -212,10 +183,13 @@ def kneaddata(qclient, job_id, parameters, out_dir):
                             % artifact_info['prep_information'][0])
     qiime_map = prep_info['qiime-map']
 
-    # Step 2 generating command humann2
+    # Step 2 generating command kneaddata
     qclient.update_job_step(job_id, "Step 2 of 3: Generating kneaddata command")
-
-    # Step 3 execute humann2: TODO
+    rs = fps['raw_reverse_seqs'] if 'raw_reverse_seqs' in fps else []
+    commands = generate_kneaddata_commands(fps['raw_forward_seqs'], rs,
+                                           qiime_map, out_dir,
+                                           parameters)
+    # Step 3 execute kneaddata: TODO
     qclient.update_job_step(job_id, "Step 3 of 3: Executing kneaddata")
 
     artifacts_info = []
