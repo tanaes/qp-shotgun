@@ -52,7 +52,7 @@ class KneaddataTests(PluginTestCase):
                '"ILLUMINACLIP:$trimmomatic/adapters/TruSeq3-PE-2.fa:2:30:10 '
                'LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:36"')
 
-        self.assertEqual(obs,exp)
+        self.assertEqual(obs, exp)
 
     def test_make_read_pairs_per_sample_match_fwd_rev(self):
         fd, fp = mkstemp()

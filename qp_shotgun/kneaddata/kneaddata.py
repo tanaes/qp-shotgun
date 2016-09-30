@@ -214,10 +214,13 @@ def kneaddata(qclient, job_id, parameters, out_dir):
     commands = generate_kneaddata_commands(fps['raw_forward_seqs'], rs,
                                            qiime_map, out_dir,
                                            parameters)
-    # Step 3 execute kneaddata: TODO
-    qclient.update_job_step(job_id, "Step 3 of 3: Executing kneaddata")
 
     commands_len = len(commands)
+
+    # Step 3 execute kneaddata: TODO
+    qclient.update_job_step(job_id, "Step 3 of 3: Executing kneaddata %s" %
+                            commands_len)
+
 
     # artifacts_info = []
 
