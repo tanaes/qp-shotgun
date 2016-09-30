@@ -8,8 +8,6 @@
 
 from os.path import basename, join
 
-from future.utils import viewitems
-
 from qiita_client.util import get_sample_names_by_run_prefix
 
 
@@ -165,12 +163,12 @@ def generate_kneaddata_commands(forward_seqs, reverse_seqs, map_file,
     for run_prefix, sample, f_fp, r_fp in samples:
         if r_fp is None:
             cmds.append('kneaddata --input "%s" --output "%s" '
-                        '--output-prefix "%s" %s' % 
+                        '--output-prefix "%s" %s' %
                         (f_fp, join(out_dir, run_prefix),
                          run_prefix, param_string))
         else:
             cmds.append('kneaddata --input "%s" --input "%s" --output "%s" '
-                        '--output-prefix "%s" %s' % 
+                        '--output-prefix "%s" %s' %
                         (f_fp, join(out_dir, run_prefix),
                          run_prefix, param_string))
 
