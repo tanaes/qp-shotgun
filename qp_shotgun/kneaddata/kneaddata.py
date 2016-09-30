@@ -192,15 +192,15 @@ def kneaddata(qclient, job_id, parameters, out_dir):
     # Step 2 generating command kneaddata
     qclient.update_job_step(job_id, "Step 2 of 3: "
                             "Generating kneaddata command")
-    rs = fps['raw_reverse_seqs'] if 'raw_reverse_seqs' in fps else []
-    commands = generate_kneaddata_commands(fps['raw_forward_seqs'], rs,
-                                           qiime_map, out_dir,
-                                           parameters)
-    # Step 3 execute kneaddata: TODO
-    qclient.update_job_step(job_id, "Step 3 of 3: Executing kneaddata")
+    # rs = fps['raw_reverse_seqs'] if 'raw_reverse_seqs' in fps else []
+    # commands = generate_kneaddata_commands(fps['raw_forward_seqs'], rs,
+    #                                        qiime_map, out_dir,
+    #                                        parameters)
+    # # Step 3 execute kneaddata: TODO
+    # qclient.update_job_step(job_id, "Step 3 of 3: Executing kneaddata")
 
-    commands_len = len(commands)
+    # commands_len = len(commands)
 
-    artifacts_info = []
+    # artifacts_info = []
 
     return True, artifacts_info, ""
