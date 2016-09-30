@@ -221,4 +221,4 @@ def kneaddata(qclient, job_id, parameters, out_dir):
 
     # artifacts_info = []
 
-    return True, artifacts_info, ""
+    return True, artifact_info, ""

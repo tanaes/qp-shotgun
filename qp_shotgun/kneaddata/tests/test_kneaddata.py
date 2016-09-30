@@ -16,7 +16,8 @@ from qiita_client.testing import PluginTestCase
 
 from qp_shotgun.kneaddata import plugin
 from qp_shotgun.kneaddata.kneaddata import (make_read_pairs_per_sample,
-                                            generate_kneaddata_commands)
+                                            generate_kneaddata_commands,
+                                            format_kneaddata_params)
 
 
 class KneaddataTests(PluginTestCase):
