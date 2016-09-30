@@ -59,6 +59,7 @@ def make_read_pairs_per_sample(forward_seqs, reverse_seqs, map_file):
 
     # make pairings
     samples = []
+    used_prefixes = []
     for i, f_fp in enumerate(forward_seqs):
         # f_fp is the fwd read filepath
         f_fn = basename(f_fp)
@@ -69,22 +70,28 @@ def make_read_pairs_per_sample(forward_seqs, reverse_seqs, map_file):
             if f_fn.startswith(rp) and run_prefix is None:
                 run_prefix = rp
             elif f_fn.startswith(rp) and run_prefix is not None:
-                raise ValueError('Multiple forward reads match this run prefix'
-                                 ': %s' % rp)
+                raise ValueError('Multiple run prefixes match this fwd read: '
+                                 '%s' % f_fn)
 
         # make sure that we got one matching run prefix:
         if run_prefix is None:
             raise ValueError('No run prefix matching this fwd read: %s'
                              % f_fn)
 
+        if run_prefix in used_prefixes:
+            raise ValueError('This run prefix matches multiple fwd reads: '
+                             '%s' % run_prefix)
+
         # if we have reverse reads, make sure the matching pair also
         # matches the run prefix:
-        if reverse_seqs and not reverse_seqs[i].startswith(run_prefix):
+        if (reverse_seqs and not 
+            basename(reverse_seqs[i]).startswith(run_prefix)):
             raise ValueError('Reverse read does not match this run prefix. '
                              'Run prefix: %s\nForward read: %s\n'
                              'Reverse read: %s\n' %
                              (run_prefix, f_fn, basename(reverse_seqs[i])))
 
+        used_prefixes.append(run_prefix)
         # create the tuple for this read set
         if reverse_seqs:
             samples.append((run_prefix, sn_by_rp[run_prefix], f_fp,
