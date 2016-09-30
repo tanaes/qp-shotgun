@@ -123,12 +123,12 @@ def download_metaphlan2():
             return
 
         chdir('biobakery-metaphlan2-*')
-        # make the file an executable file
-        fname = 'metaphlan2.py'
-        chmod(fname, stat(fname).st_mode | S_IEXEC)
-
         copy('db_v20', scripts)
         copy('metaphlan2.py', scripts)
+
+        # make the file an executable file
+        fname = join(scripts, 'metaphlan2.py')
+        chmod(fname, stat(fname).st_mode | S_IEXEC)
 
         status("metaphlan2.py installed.\n")
     except:
