@@ -221,7 +221,4 @@ def kneaddata(qclient, job_id, parameters, out_dir):
     qclient.update_job_step(job_id, "Step 3 of 3: Executing kneaddata %s" %
                             commands_len)
 
-
-    # artifacts_info = []
-
     return True, artifact_info, ""
