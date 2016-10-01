@@ -11,13 +11,13 @@
 import sys
 from setuptools import setup
 from stat import S_IEXEC
-from os import (chdir, getcwd, chmod, rename, stat)
+from os import (chdir, getcwd, chmod, rename, stat, listdir)
 from os.path import join
 from glob import glob
 from tempfile import mkdtemp
 from urllib import FancyURLopener
 from subprocess import Popen, PIPE
-from shutil import rmtree, copy
+from shutil import rmtree, move
 
 __version__ = "0.1.0-dev"
 
@@ -113,18 +113,20 @@ def download_metaphlan2():
 
     tempdir = mkdtemp()
     URL = ('https://bitbucket.org/biobakery/metaphlan2/get/default.zip')
-    if download_file(URL, tempdir, 'metaphlan2.py'):
+    if download_file(URL, tempdir, 'metaphlan2.zip'):
         status("Could not download SortMeRNA, so cannot install it.\n")
         return
 
     chdir(tempdir)
     try:
-        if not system_call('unzip biobakery-metaphlan2-*.zip'):
+        if not system_call('unzip metaphlan2.zip', 'unzip'):
             return
 
-        chdir('biobakery-metaphlan2-*')
-        copy('db_v20', scripts)
-        copy('metaphlan2.py', scripts)
+        # finding dir. It should be only one, thus [0]
+        md = [f for f in listdir(tempdir) if f.startswith('biobakery')][0]
+        chdir(md)
+        move('db_v20', scripts)
+        move('metaphlan2.py', scripts)
 
         # make the file an executable file
         fname = join(scripts, 'metaphlan2.py')
