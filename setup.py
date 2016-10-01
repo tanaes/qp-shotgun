@@ -13,7 +13,6 @@ from setuptools import setup
 from stat import S_IEXEC
 from os import (chdir, getcwd, chmod, rename, stat, listdir)
 from os.path import join
-from glob import glob
 from tempfile import mkdtemp
 from urllib import FancyURLopener
 from subprocess import Popen, PIPE
@@ -190,7 +189,8 @@ setup(name='qp-shotgun',
       packages=['qp_shotgun', 'qp_shotgun/humann2'],
       package_data={'qp_shotgun': ['support_files/config_file.cfg',
                                    'scripts/db_v20']},
-      scripts=glob('scripts/*'),
+      scripts=['scripts/configure_shotgun', 'scripts/start_shotgun',
+               'scripts/metaphlan2.py'],
       extras_require={'test': ["nose >= 0.10.1", "pep8"]},
       install_requires=['click >= 3.3', 'future', 'pandas >= 0.15', 'humann2',
                         'h5py >= 2.3.1', 'biom-format'],
