@@ -235,6 +235,6 @@ setup(name='qp-shotgun',
       dependency_links=[('https://bitbucket.org/biobakery/humann2/get/'
                          '0.9.3.1.tar.gz'),
                         ('https://bitbucket.org/biobakery/kneaddata/get/'
-                         '0.5.1.tar.gz')],
+                         '0.5.1.tar.gz#egg=kneaddata-0.5.1')],
       classifiers=classifiers
       )
