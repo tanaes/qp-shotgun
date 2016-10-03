@@ -274,8 +274,8 @@ class Humann2Tests(PluginTestCase):
 
         success, ainfo, msg = humann2(self.qclient, jid, self.params, out_dir)
 
+        self.assertEqual("", msg)
         self.assertTrue(success)
-
         # there is only one artifact, thus [0]
         ainfo = ainfo[0]
         self.assertEqual("BIOM", ainfo.artifact_type)
@@ -286,8 +286,6 @@ class Humann2Tests(PluginTestCase):
                (join(out_dir, 'pathcoverage_relab.biom'), 'biom'),
                (join(out_dir, 'pathabundance_relab.biom'), 'biom')]
         self.assertEqual(exp, ainfo.files)
-
-        self.assertEqual("", msg)
 
 
 MAPPING_FILE = (
