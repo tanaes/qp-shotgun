@@ -231,10 +231,10 @@ setup(name='qp-shotgun',
                'scripts/metaphlan2.py'],
       extras_require={'test': ["nose >= 0.10.1", "pep8"]},
       install_requires=['click >= 3.3', 'future', 'pandas >= 0.15', 'humann2',
-                        'h5py >= 2.3.1', 'biom-format', 'kneaddata'],
+                        'h5py >= 2.3.1', 'biom-format', 'kneaddata >= 0.5.1'],
       dependency_links=[('https://bitbucket.org/biobakery/humann2/get/'
                          '0.9.3.1.tar.gz'),
-                        ('https://bitbucket.org/biobakery/kneaddata/'
-                         'downloads/kneaddata_v0.5.1.tar.gz')],
+                        ('https://bitbucket.org/biobakery/kneaddata/get/'
+                         '0.5.1.tar.gz')],
       classifiers=classifiers
       )
