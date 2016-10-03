@@ -91,7 +91,8 @@ def generate_humann2_analysis_commands(forward_seqs, reverse_seqs, map_file,
             % ', '.join(sn_by_rp.keys()))
 
     cmds = []
-    params = ['--%s "%s"' % (k, v) for k, v in viewitems(parameters) if v]
+    params = ['--%s "%s"' % (k, v) if v is not True else '--%s' % k
+              for k, v in viewitems(parameters) if v]
     for ffn, fn, s in samples:
         od = join(out_dir, fn)
         # just making sure the output directory exists
@@ -109,7 +110,6 @@ def _run_commands(qclient, job_id, commands, msg):
         qclient.update_job_step(job_id, msg % i)
         std_out, std_err, return_value = system_call(cmd)
         if return_value != 0:
-            print '-->', cmd
             error_msg = ("Error running HUMANn2:\nStd out: %s\nStd err: %s"
                          % (std_out, std_err))
             return False, error_msg
@@ -167,11 +167,14 @@ def humann2(qclient, job_id, parameters, out_dir):
     # Step 4 merge tables
     commands = []
     commands.append(('humann2_join_tables -i {0} -o {0}/genefamilies.biom '
-                     '--file_name genefamilies').format(out_dir))
+                     '--file_name genefamilies --search-subdirectories '
+                     '--verbose').format(out_dir))
     commands.append(('humann2_join_tables -i {0} -o {0}/pathcoverage.biom '
-                     '--file_name pathcoverage').format(out_dir))
+                     '--file_name pathcoverage --search-subdirectories '
+                     '--verbose').format(out_dir))
     commands.append(('humann2_join_tables -i {0} -o {0}/pathabundance.biom '
-                    '--file_name pathabundance_relab').format(out_dir))
+                     '--file_name pathabundance --search-subdirectories '
+                     '--verbose').format(out_dir))
     msg = "Step 4 of 5: Merging resulting tables job (%d/3)"
     success, msg = _run_commands(qclient, job_id, commands, msg)
     if not success:
