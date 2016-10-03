@@ -27,7 +27,7 @@ before_script:
   - export MOI_CONFIG_FP=$HOME/miniconda3/envs/qiita_env/lib/python2.7/site-packages/qiita_core/support_files/config_test.cfg
   - qiita pet webserver start &
 script:
-  - sleep 5 # give enough time to the webserver to start
+  - sleep 10 # give enough time to the webserver to start
   - configure_shotgun --env-script "source activate qp-shotgun" --server-cert $QIITA_SERVER_CERT
   - nosetests --with-doctest --with-coverage
   - flake8 qp_shotgun setup.py scripts

@@ -273,9 +273,6 @@ class Humann2Tests(PluginTestCase):
         self._clean_up_files.append(out_dir)
 
         success, ainfo, msg = humann2(self.qclient, jid, self.params, out_dir)
-        # TODO: the current version of this plugin with the latests version
-        # of humann2 is not working. Once the issues are solved we can test
-        # that it is actually succesful
 
         self.assertTrue(success)
 
