@@ -140,6 +140,43 @@ def download_metaphlan2():
         chdir(cwd)
 
 
+def download_fastqc():
+    """Download the fastqc executable and mv to scripts directory"""
+    status("Installing FastQC...")
+
+    cwd = getcwd()
+    scripts = join(cwd, 'scripts')
+
+    tempdir = mkdtemp()
+    URL = ('http://www.bioinformatics.babraham.ac.uk/'
+           'projects/fastqc/fastqc_v0.11.5.zip')
+    if download_file(URL, tempdir, 'fastqc.zip'):
+        status("Could not download FastQC, so cannot install it.\n")
+        return
+
+    chdir(tempdir)
+    try:
+        if not system_call('unzip fastqc.zip', 'unzip'):
+            return
+
+        # move the directory
+        md = [f for f in listdir(tempdir) if f.startswith('FastQC')][0]
+        move(md, join(scripts,'FastQC'))
+
+        # link and make executable
+        fname = join(scripts,'FastQC','fastqc')
+        symlink(fname, join(scripts,'fastqc'))        
+        chmod(fname, stat(fname).st_mode | S_IEXEC)
+
+        status("FastQC installed.\n")
+    except:
+        status("FastQC could not be installed.\n")
+    finally:
+        # remove the source
+        rmtree(tempdir)
+        chdir(cwd)
+
+
 def catch_install_errors(install_function, name):
     try:
         install_function()
@@ -153,6 +190,7 @@ def catch_install_errors(install_function, name):
             (name, exception_type.__name__, exception_value))
 
 catch_install_errors(download_metaphlan2, 'metaphlan2.py')
+catch_install_errors(download_fastqc, 'FastQC')
 
 #
 # end of block
@@ -193,8 +231,10 @@ setup(name='qp-shotgun',
                'scripts/metaphlan2.py'],
       extras_require={'test': ["nose >= 0.10.1", "pep8"]},
       install_requires=['click >= 3.3', 'future', 'pandas >= 0.15', 'humann2',
-                        'h5py >= 2.3.1', 'biom-format'],
+                        'h5py >= 2.3.1', 'biom-format', 'kneaddata'],
       dependency_links=[('https://bitbucket.org/biobakery/humann2/get/'
-                         '0.9.3.1.tar.gz')],
+                         '0.9.3.1.tar.gz'),
+                        ('https://bitbucket.org/biobakery/kneaddata/'
+                         'downloads/kneaddata_v0.5.1.tar.gz')],
       classifiers=classifiers
       )
