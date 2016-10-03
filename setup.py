@@ -113,7 +113,7 @@ def download_metaphlan2():
     tempdir = mkdtemp()
     URL = ('https://bitbucket.org/biobakery/metaphlan2/get/default.zip')
     if download_file(URL, tempdir, 'metaphlan2.zip'):
-        status("Could not download SortMeRNA, so cannot install it.\n")
+        status("Could not download MetaPhLAn, so cannot install it.\n")
         return
 
     chdir(tempdir)
