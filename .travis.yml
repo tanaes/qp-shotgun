@@ -9,6 +9,7 @@ before_install:
   - export PATH=/home/travis/miniconda3/bin:$PATH
   # Update conda itself
   - conda update --yes conda
+  - pip install -U pip
 install:
   # At this moment, this plugin depends on qiita, so install everything in the same environment
   - travis_retry conda create --yes -n qiita_env python=2.7 pip nose flake8
