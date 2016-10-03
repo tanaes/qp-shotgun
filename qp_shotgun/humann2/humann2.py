@@ -6,15 +6,18 @@
 # The full license is in the file LICENSE, distributed with this software.
 # -----------------------------------------------------------------------------
 
-from os.path import basename, join
+from os import mkdir
+from os.path import basename, join, exists
 
 from future.utils import viewitems
+from functools import partial
 
+from qiita_client import ArtifactInfo
 from qiita_client.util import system_call, get_sample_names_by_run_prefix
 
 
 def generate_humann2_analysis_commands(forward_seqs, reverse_seqs, map_file,
-                                       out_dir, parameters):
+                                       out_dir, parameters, assure_od=True):
     """Generates the HUMAnN2 commands
 
     Parameters
@@ -29,6 +32,8 @@ def generate_humann2_analysis_commands(forward_seqs, reverse_seqs, map_file,
         The job output directory
     parameters : dict
         The command's parameters, keyed by parameter name
+    assure_od : boolean, optional
+        Assure that the output dirs for HUMAnN2 exist. Useful for testing.
 
     Returns
     -------
@@ -86,13 +91,30 @@ def generate_humann2_analysis_commands(forward_seqs, reverse_seqs, map_file,
             % ', '.join(sn_by_rp.keys()))
 
     cmds = []
-    params = ['--%s "%s"' % (k, v) for k, v in viewitems(parameters) if v]
+    params = ['--%s "%s"' % (k, v) if v is not True else '--%s' % k
+              for k, v in viewitems(parameters) if v]
     for ffn, fn, s in samples:
+        od = join(out_dir, fn)
+        # just making sure the output directory exists
+        if assure_od and not exists(od):
+            mkdir(od)
         cmds.append('humann2 --input "%s" --output "%s" --output-basename '
-                    '"%s" --output-format biom %s' % (ffn, join(out_dir, fn),
-                                                      s, ' '.join(params)))
+                    '"%s" --output-format biom %s' % (ffn, od, s,
+                                                      ' '.join(params)))
 
     return cmds
+
+
+def _run_commands(qclient, job_id, commands, msg):
+    for i, cmd in enumerate(commands):
+        qclient.update_job_step(job_id, msg % i)
+        std_out, std_err, return_value = system_call(cmd)
+        if return_value != 0:
+            error_msg = ("Error running HUMANn2:\nStd out: %s\nStd err: %s"
+                         % (std_out, std_err))
+            return False, error_msg
+
+    return True, ""
 
 
 def humann2(qclient, job_id, parameters, out_dir):
@@ -137,21 +159,48 @@ def humann2(qclient, job_id, parameters, out_dir):
                                                   parameters)
 
     # Step 3 execute humann2
-    commands_len = len(commands)
-    for i, cmd in enumerate(commands):
-        qclient.update_job_step(job_id, "Step 3 of 5: Executing HUMANn2"
-                                ", job %d/%d" % (i, commands_len))
-        std_out, std_err, return_value = system_call(cmd)
-        if return_value != 0:
-            error_msg = ("Error running HUMANn2:\nStd out: %s\nStd err: %s"
-                         % (std_out, std_err))
-            return False, None, error_msg
+    msg = "Step 3 of 5: Executing HUMANn2 job (%d/{0})".format(len(commands))
+    success, msg = _run_commands(qclient, job_id, commands, msg)
+    if not success:
+        return False, None, msg
 
     # Step 4 merge tables
-    qclient.update_job_step(job_id, "Step 4 of 5: Merging resulting tables")
+    commands = []
+    commands.append(('humann2_join_tables -i {0} -o {0}/genefamilies.biom '
+                     '--file_name genefamilies --search-subdirectories '
+                     '--verbose').format(out_dir))
+    commands.append(('humann2_join_tables -i {0} -o {0}/pathcoverage.biom '
+                     '--file_name pathcoverage --search-subdirectories '
+                     '--verbose').format(out_dir))
+    commands.append(('humann2_join_tables -i {0} -o {0}/pathabundance.biom '
+                     '--file_name pathabundance --search-subdirectories '
+                     '--verbose').format(out_dir))
+    msg = "Step 4 of 5: Merging resulting tables job (%d/3)"
+    success, msg = _run_commands(qclient, job_id, commands, msg)
+    if not success:
+        return False, None, msg
 
-    # Step 5 generating re-normalized tables: TODO
-    qclient.update_job_step(job_id, "Step 5 of 5: Re-normalizing tables")
-    artifacts_info = []
+    # Step 5 generating re-normalized tables
+    commands = []
+    commands.append(('humann2_renorm_table -i {0}/genefamilies.biom -u cpm '
+                     '-o {0}/genefamilies_cpm.biom').format(out_dir))
+    commands.append(('humann2_renorm_table -i {0}/pathcoverage.biom -u relab '
+                     '-o {0}/pathcoverage_relab.biom').format(out_dir))
+    commands.append(('humann2_renorm_table -i {0}/pathabundance.biom -u relab '
+                     '-o {0}/pathabundance_relab.biom').format(out_dir))
+    msg = "Step 5 of 5: Re-normalizing tables (%d/3)"
+    success, msg = _run_commands(qclient, job_id, commands, msg)
+    if not success:
+        return False, None, msg
 
-    return True, artifacts_info, ""
+    # Generating artifact
+    pb = partial(join, out_dir)
+    filepaths = [(pb('genefamilies.biom'), 'biom'),
+                 (pb('pathcoverage.biom'), 'biom'),
+                 (pb('pathabundance.biom'), 'biom'),
+                 (pb('genefamilies_cpm.biom'), 'biom'),
+                 (pb('pathcoverage_relab.biom'), 'biom'),
+                 (pb('pathabundance_relab.biom'), 'biom')]
+    ainfo = [ArtifactInfo('OTU table', 'BIOM', filepaths)]
+
+    return True, ainfo, ""
