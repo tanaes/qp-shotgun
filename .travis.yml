@@ -23,6 +23,10 @@ install:
   - export QIITA_SERVER_CERT=$HOME/miniconda3/envs/qiita_env/lib/python2.7/site-packages/qiita_core/support_files/server.crt
   - pip install https://github.com/qiita-spots/qiita_client/archive/master.zip
   - travis_retry pip install .
+  - wget https://bitbucket.org/biobakery/metaphlan2/get/default.zip
+  - unzip default.zip
+  - export HUMANN2_DIR=`which humann2`
+  - mv biobakery-metaphlan2*/metaphlan2.py biobakery-metaphlan2*/db_v20 $HUMANN2_DIR
 before_script:
   - export MOI_CONFIG_FP=$HOME/miniconda3/envs/qiita_env/lib/python2.7/site-packages/qiita_core/support_files/config_test.cfg
   - qiita pet webserver start &
