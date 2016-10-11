@@ -13,6 +13,7 @@ from setuptools import setup
 from stat import S_IEXEC
 from os import (chdir, getcwd, chmod, rename, stat, listdir)
 from os.path import join
+from glob import glob
 from tempfile import mkdtemp
 from urllib import FancyURLopener
 from subprocess import Popen, PIPE
@@ -177,6 +178,43 @@ def download_fastqc():
         chdir(cwd)
 
 
+def download_trimmomatic():
+    """Download the trimmomatic executable and mv to scripts directory"""
+    status("Installing Trimmomatic...")
+
+    cwd = getcwd()
+    scripts = join(cwd, 'scripts')
+
+    tempdir = mkdtemp()
+    URL = ('http://www.usadellab.org/cms/uploads/supplementary/Trimmomatic/'
+           'Trimmomatic-0.36.zip')
+    if download_file(URL, tempdir, 'trimmomatic.zip'):
+        status("Could not download Trimmomatic, so cannot install it.\n")
+        return
+
+    chdir(tempdir)
+    try:
+        if not system_call('unzip trimmomatic.zip', 'unzip'):
+            return
+
+        # move the directory
+        md = [f for f in listdir(tempdir) if f.startswith('Trimmomatic')][0]
+        move(md, join(scripts,'trimmomatic'))
+
+        # link and make executable
+        fname = glob(join(scripts,'trimmomatic','trimmomatic-*.jar'))
+        symlink(fname, join(scripts,'trimmomatic'))        
+
+        status("trimmomatic installed.\n")
+    except:
+        status("trimmomatic could not be installed.\n")
+    finally:
+        # remove the source
+        rmtree(tempdir)
+        chdir(cwd)
+
+
+
 def catch_install_errors(install_function, name):
     try:
         install_function()
@@ -231,7 +269,7 @@ setup(name='qp-shotgun',
                'scripts/metaphlan2.py'],
       extras_require={'test': ["nose >= 0.10.1", "pep8"]},
       install_requires=['click >= 3.3', 'future', 'pandas >= 0.15', 'humann2',
-                        'h5py >= 2.3.1', 'biom-format', 'kneaddata >= 0.5.1'],
+                        'h5py >= 2.3.1', 'biom-format', 'kneaddata >= 0.5.2'],
       dependency_links=[('https://bitbucket.org/biobakery/humann2/get/'
                          '0.9.3.1.tar.gz'),
                         ('https://bitbucket.org/biobakery/kneaddata/get/'
