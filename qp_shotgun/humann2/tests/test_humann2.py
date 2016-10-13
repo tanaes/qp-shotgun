@@ -78,8 +78,11 @@ class Humann2Tests(PluginTestCase):
             f.write(MAPPING_FILE)
         self._clean_up_files.append(fp)
 
+        out_dir = mkdtemp()
+        self._clean_up_files.append(out_dir)
+
         exp = [
-            'humann2 --input "fastq/s1.fastq" --output "output/s1" '
+            'humann2 --input "fastq/s1.fastq" --output "%s/s1" '
             '--output-basename "SKB8.640193" --output-format biom '
             '--gap-fill "off" '
             '--identity-threshold "50.0" --output-format "biom" '
@@ -92,8 +95,8 @@ class Humann2Tests(PluginTestCase):
             '--xipe "off" --annotation-gene-index "8" '
             '--protein-database "uniref" --threads "1" --pathways "metacyc" '
             '--pick-frames "off" --translated-alignment "diamond" '
-            '--remove-column-description-output --log-level "DEBUG"',
-            'humann2 --input "fastq/s2.fastq.gz" --output "output/s2" '
+            '--remove-column-description-output --log-level "DEBUG"' % out_dir,
+            'humann2 --input "fastq/s2.fastq.gz" --output "%s/s2" '
             '--output-basename "SKD8.640184" --output-format biom '
             '--gap-fill "off" '
             '--identity-threshold "50.0" --output-format "biom" '
@@ -106,8 +109,8 @@ class Humann2Tests(PluginTestCase):
             '--xipe "off" --annotation-gene-index "8" '
             '--protein-database "uniref" --threads "1" --pathways "metacyc" '
             '--pick-frames "off" --translated-alignment "diamond" '
-            '--remove-column-description-output --log-level "DEBUG"',
-            'humann2 --input "fastq/s3.fastq" --output "output/s3" '
+            '--remove-column-description-output --log-level "DEBUG"' % out_dir,
+            'humann2 --input "fastq/s3.fastq" --output "%s/s3" '
             '--output-basename "SKB7.640196" --output-format biom '
             '--gap-fill "off" '
             '--identity-threshold "50.0" --output-format "biom" '
@@ -120,10 +123,10 @@ class Humann2Tests(PluginTestCase):
             '--xipe "off" --annotation-gene-index "8" '
             '--protein-database "uniref" --threads "1" --pathways "metacyc" '
             '--pick-frames "off" --translated-alignment "diamond" '
-            '--remove-column-description-output --log-level "DEBUG"']
+            '--remove-column-description-output --log-level "DEBUG"' % out_dir]
         obs = generate_humann2_analysis_commands(
             ['fastq/s1.fastq', 'fastq/s2.fastq.gz', 'fastq/s3.fastq'], [],
-            fp, 'output', self.params, assure_od=False)
+            fp, out_dir, self.params)
         self.assertEqual(obs, exp)
 
     def test_generate_humann2_analysis_commands_forward_reverse(self):
@@ -133,8 +136,11 @@ class Humann2Tests(PluginTestCase):
             f.write(MAPPING_FILE)
         self._clean_up_files.append(fp)
 
+        out_dir = mkdtemp()
+        self._clean_up_files.append(out_dir)
+
         exp = [
-            'humann2 --input "fastq/s1.fastq" --output "output/s1" '
+            'humann2 --input "fastq/s1.fastq" --output "%s/s1" '
             '--output-basename "SKB8.640193" --output-format biom '
             '--gap-fill "off" '
             '--identity-threshold "50.0" --output-format "biom" '
@@ -147,8 +153,8 @@ class Humann2Tests(PluginTestCase):
             '--xipe "off" --annotation-gene-index "8" '
             '--protein-database "uniref" --threads "1" --pathways "metacyc" '
             '--pick-frames "off" --translated-alignment "diamond" '
-            '--remove-column-description-output --log-level "DEBUG"',
-            'humann2 --input "fastq/s1.R2.fastq" --output "output/s1.R2" '
+            '--remove-column-description-output --log-level "DEBUG"' % out_dir,
+            'humann2 --input "fastq/s1.R2.fastq" --output "%s/s1.R2" '
             '--output-basename "SKB8.640193" --output-format biom '
             '--gap-fill "off" '
             '--identity-threshold "50.0" --output-format "biom" '
@@ -162,8 +168,8 @@ class Humann2Tests(PluginTestCase):
             '--protein-database "uniref" --threads "1" '
             '--pathways "metacyc" --pick-frames "off" '
             '--translated-alignment "diamond" '
-            '--remove-column-description-output --log-level "DEBUG"',
-            'humann2 --input "fastq/s2.fastq.gz" --output "output/s2" '
+            '--remove-column-description-output --log-level "DEBUG"' % out_dir,
+            'humann2 --input "fastq/s2.fastq.gz" --output "%s/s2" '
             '--output-basename "SKD8.640184" --output-format biom '
             '--gap-fill "off" '
             '--identity-threshold "50.0" --output-format "biom" '
@@ -176,8 +182,8 @@ class Humann2Tests(PluginTestCase):
             '--xipe "off" --annotation-gene-index "8" --protein-database '
             '"uniref" --threads "1" --pathways "metacyc" --pick-frames "off" '
             '--translated-alignment "diamond" '
-            '--remove-column-description-output --log-level "DEBUG"',
-            'humann2 --input "fastq/s2.R2.fastq.gz" --output "output/s2.R2" '
+            '--remove-column-description-output --log-level "DEBUG"' % out_dir,
+            'humann2 --input "fastq/s2.R2.fastq.gz" --output "%s/s2.R2" '
             '--output-basename "SKD8.640184" --output-format biom '
             '--gap-fill "off" '
             '--identity-threshold "50.0" --output-format "biom" '
@@ -190,8 +196,8 @@ class Humann2Tests(PluginTestCase):
             '--xipe "off" --annotation-gene-index "8" '
             '--protein-database "uniref" --threads "1" --pathways "metacyc" '
             '--pick-frames "off" --translated-alignment "diamond" '
-            '--remove-column-description-output --log-level "DEBUG"',
-            'humann2 --input "fastq/s3.fastq" --output "output/s3" '
+            '--remove-column-description-output --log-level "DEBUG"' % out_dir,
+            'humann2 --input "fastq/s3.fastq" --output "%s/s3" '
             '--output-basename "SKB7.640196" --output-format biom '
             '--gap-fill "off" '
             '--identity-threshold "50.0" --output-format "biom" '
@@ -204,8 +210,8 @@ class Humann2Tests(PluginTestCase):
             '--xipe "off" --annotation-gene-index "8" '
             '--protein-database "uniref" --threads "1" --pathways "metacyc" '
             '--pick-frames "off" --translated-alignment "diamond" '
-            '--remove-column-description-output --log-level "DEBUG"',
-            'humann2 --input "fastq/s3.R2.fastq" --output "output/s3.R2" '
+            '--remove-column-description-output --log-level "DEBUG"' % out_dir,
+            'humann2 --input "fastq/s3.R2.fastq" --output "%s/s3.R2" '
             '--output-basename "SKB7.640196" --output-format biom '
             '--gap-fill "off" '
             '--identity-threshold "50.0" --output-format "biom" '
@@ -218,11 +224,11 @@ class Humann2Tests(PluginTestCase):
             '--xipe "off" --annotation-gene-index "8" '
             '--protein-database "uniref" --threads "1" --pathways "metacyc" '
             '--pick-frames "off" --translated-alignment "diamond" '
-            '--remove-column-description-output --log-level "DEBUG"']
+            '--remove-column-description-output --log-level "DEBUG"' % out_dir]
         obs = generate_humann2_analysis_commands(
             ['fastq/s1.fastq', 'fastq/s2.fastq.gz', 'fastq/s3.fastq'],
             ['fastq/s1.R2.fastq', 'fastq/s2.R2.fastq.gz', 'fastq/s3.R2.fastq'],
-            fp, 'output', self.params, assure_od=False)
+            fp, out_dir, self.params)
         self.assertEqual(obs, exp)
 
     def test_humann2(self):
@@ -276,16 +282,20 @@ class Humann2Tests(PluginTestCase):
 
         self.assertEqual("", msg)
         self.assertTrue(success)
-        # there is only one artifact, thus [0]
-        ainfo = ainfo[0]
-        self.assertEqual("BIOM", ainfo.artifact_type)
-        exp = [(join(out_dir, 'genefamilies.biom'), 'biom'),
-               (join(out_dir, 'pathcoverage.biom'), 'biom'),
-               (join(out_dir, 'pathabundance.biom'), 'biom'),
-               (join(out_dir, 'genefamilies_cpm.biom'), 'biom'),
-               (join(out_dir, 'pathcoverage_relab.biom'), 'biom'),
-               (join(out_dir, 'pathabundance_relab.biom'), 'biom')]
-        self.assertEqual(exp, ainfo.files)
+        # we are expecting 6 artifacts
+        self.assertEqual(6, len(ainfo))
+
+        obs_fps = []
+        for a in ainfo:
+            self.assertEqual("BIOM", a.artifact_type)
+            obs_fps.append(a.files)
+        exp_fps = [[(join(out_dir, 'genefamilies.biom'), 'biom')],
+                   [(join(out_dir, 'pathcoverage.biom'), 'biom')],
+                   [(join(out_dir, 'pathabundance.biom'), 'biom')],
+                   [(join(out_dir, 'genefamilies_cpm.biom'), 'biom')],
+                   [(join(out_dir, 'pathcoverage_relab.biom'), 'biom')],
+                   [(join(out_dir, 'pathabundance_relab.biom'), 'biom')]]
+        self.assertItemsEqual(exp_fps, obs_fps)
 
 
 MAPPING_FILE = (

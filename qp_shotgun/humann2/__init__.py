@@ -64,7 +64,7 @@ opt_params = {
     'pathways': ['choice:["metacyc", "unipathway"]', 'metacyc'],
     'memory-use': ['choice:["minimum", "maximum"]', 'minimum'],
     'remove-column-description-output': ['boolean', 'True']}
-outputs = {'per_sample_FASTQ': 'per_sample_FASTQ'}
+outputs = {'BIOM': 'HUMAnN2 output'}
 dflt_param_set = {
     'Defaults': {
         'nucleotide-database': 'chocophlan', 'protein-database': 'uniref',

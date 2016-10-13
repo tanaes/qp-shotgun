@@ -23,7 +23,7 @@ The default pipeline is:
 2. Collate individual results into single OTU tables: gene families, path coverage and path abundance.
 3. Renormalize the tables: gene families - CPM, path coverage - relative abundance, path abundance - relative abundance.
 
-Note that HUMAnN2 depends on metaphlan2 but neither the HUMAnN2 or this plugin automatically install that dependency.
+Note that HUMAnN2 depends on `metaphlan2 <https://bitbucket.org/biobakery/metaphlan2/get/default.zip>`__ but neither the HUMAnN2 or this plugin automatically install that dependency. Remember that you need to put the `db_v20` folder in the path that the `metaphlan2.py` executable.
 
 .. |Build Status| image:: https://travis-ci.org/qiita-spots/qp-shotgun.svg?branch=master
    :target: https://travis-ci.org/qiita-spots/qp-shotgun

@@ -17,7 +17,7 @@ from qiita_client.util import system_call, get_sample_names_by_run_prefix
 
 
 def generate_humann2_analysis_commands(forward_seqs, reverse_seqs, map_file,
-                                       out_dir, parameters, assure_od=True):
+                                       out_dir, parameters):
     """Generates the HUMAnN2 commands
 
     Parameters
@@ -32,8 +32,6 @@ def generate_humann2_analysis_commands(forward_seqs, reverse_seqs, map_file,
         The job output directory
     parameters : dict
         The command's parameters, keyed by parameter name
-    assure_od : boolean, optional
-        Assure that the output dirs for HUMAnN2 exist. Useful for testing.
 
     Returns
     -------
@@ -96,7 +94,7 @@ def generate_humann2_analysis_commands(forward_seqs, reverse_seqs, map_file,
     for ffn, fn, s in samples:
         od = join(out_dir, fn)
         # just making sure the output directory exists
-        if assure_od and not exists(od):
+        if not exists(od):
             mkdir(od)
         cmds.append('humann2 --input "%s" --output "%s" --output-basename '
                     '"%s" --output-format biom %s' % (ffn, od, s,
@@ -193,14 +191,20 @@ def humann2(qclient, job_id, parameters, out_dir):
     if not success:
         return False, None, msg
 
-    # Generating artifact
+    # Generating 6 artifacts, separation is important for analysis
     pb = partial(join, out_dir)
-    filepaths = [(pb('genefamilies.biom'), 'biom'),
-                 (pb('pathcoverage.biom'), 'biom'),
-                 (pb('pathabundance.biom'), 'biom'),
-                 (pb('genefamilies_cpm.biom'), 'biom'),
-                 (pb('pathcoverage_relab.biom'), 'biom'),
-                 (pb('pathabundance_relab.biom'), 'biom')]
-    ainfo = [ArtifactInfo('OTU table', 'BIOM', filepaths)]
+    ainfo = [
+        ArtifactInfo('Gene family table', 'BIOM',
+                     [(pb('genefamilies.biom'), 'biom')]),
+        ArtifactInfo('Path coverage table', 'BIOM',
+                     [(pb('pathcoverage.biom'), 'biom')]),
+        ArtifactInfo('Path abundance table', 'BIOM',
+                     [(pb('pathabundance.biom'), 'biom')]),
+        ArtifactInfo('Gene family CMP table', 'BIOM',
+                     [(pb('genefamilies_cpm.biom'), 'biom')]),
+        ArtifactInfo('Path coverage RELAB table', 'BIOM',
+                     [(pb('pathcoverage_relab.biom'), 'biom')]),
+        ArtifactInfo('Path abundance RELAB table', 'BIOM',
+                     [(pb('pathabundance_relab.biom'), 'biom')])]
 
     return True, ainfo, ""
