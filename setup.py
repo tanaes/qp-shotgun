@@ -184,6 +184,7 @@ def download_trimmomatic():
 
     cwd = getcwd()
     scripts = join(cwd, 'scripts')
+    print("Scripts dir is located at %s" % scripts)
 
     tempdir = mkdtemp()
     URL = ('http://www.usadellab.org/cms/uploads/supplementary/Trimmomatic/'
@@ -227,8 +228,9 @@ def catch_install_errors(install_function, name):
             "building, or installing:\n  %s: %s\n" %
             (name, exception_type.__name__, exception_value))
 
-catch_install_errors(download_metaphlan2, 'metaphlan2.py')
+# catch_install_errors(download_metaphlan2, 'metaphlan2.py')
 catch_install_errors(download_fastqc, 'FastQC')
+catch_install_errors(download_trimmomatic, 'Trimmomatic')
 
 #
 # end of block

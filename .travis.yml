@@ -27,6 +27,7 @@ install:
   - travis_retry pip install . --process-dependency-links
 before_script:
   - export MOI_CONFIG_FP=$HOME/miniconda3/envs/qiita_env/lib/python2.7/site-packages/qiita_core/support_files/config_test.cfg
+  - export PATH=$PATH:`pwd`/scripts
   - qiita pet webserver start &
 script:
   - sleep 10 # give enough time to the webserver to start
