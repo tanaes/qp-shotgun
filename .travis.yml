@@ -14,12 +14,12 @@ install:
   # At this moment, this plugin depends on qiita, so install everything in the same environment
   - travis_retry conda create --yes -n qiita_env python=2.7 pip nose flake8
     pyzmq networkx pyparsing natsort mock future libgfortran
-    'pandas>=0.18' 'scipy>0.13.0' 'numpy>=1.7' 'h5py>=2.3.1'
+    'pandas>=0.18' 'scipy>0.13.0' 'numpy>=1.7' 'h5py>=2.3.1' matplotlib
   - source activate qiita_env
   - export CONDA_BIN=/home/travis/miniconda3/bin
   - pip install sphinx sphinx-bootstrap-theme coveralls ipython[all]==2.4.1
   # kneaddata dependencies
-  - conda install bowtie2
+  - conda install -c bioconda bowtie2
   - curl http://www.bioinformatics.babraham.ac.uk/projects/fastqc/fastqc_v0.11.5.zip -o ${CONDA_BIN}/fastqc_v0.11.5.zip
   - unzip ${CONDA_BIN}/fastqc_v0.11.5.zip
   - ln ${CONDA_BIN}/FastQC/fastqc ${CONDA_BIN}/fastqc
