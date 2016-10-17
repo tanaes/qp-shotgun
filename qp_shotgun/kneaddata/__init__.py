@@ -49,7 +49,7 @@ opt_params = {
 
     # Trimmomatic options
     'max-memory': ['integer', '500'],  # max memory in mb [ DEFAULT : 500 ]
-    'trimmomatic-options': ['string', 'ILLUMINACLIP:$trimmomatic/adapters/'
+    'trimmomatic-options': ['string', 'ILLUMINACLIP:$TRIMMOMATIC_DIR/adapters/'
                             'TruSeq3-PE-2.fa:2:30:10 LEADING:3 TRAILING:3 '
                             'SLIDINGWINDOW:4:15 MINLEN:36'],
     # Bowtie2 options
@@ -72,7 +72,7 @@ dflt_param_set = {
         'processes': 1, 'quality-scores': 'phred33', 'run-bmtagger': False,
         'run-trf': False, 'run-fastqc-start': True, 'run-fastqc-end': True,
         'store-temp-output': False, 'log-level': 'DEBUG', 'max-memory': 500,
-        'trimmomatic-options': '"ILLUMINACLIP:$trimmomatic/adapters/'
+        'trimmomatic-options': '"ILLUMINACLIP:$TRIMMOMATIC_DIR/adapters/'
         'TruSeq3-PE-2.fa:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 '
         'MINLEN:36"', 'bowtie2-options': '"--very-sensitive"'
         # , 'match': 2, 'mismatch': 7,

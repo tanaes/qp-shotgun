@@ -20,6 +20,8 @@ install:
   - pip install sphinx sphinx-bootstrap-theme coveralls ipython[all]==2.4.1
   # kneaddata dependencies
   - conda install --yes -c bioconda bowtie2 trimmomatic=0.36 fastqc=0.11.5
+  - export TRIMMOMATIC_BIN=$(readlink -f $(which trimmomatic))
+  - export TRIMMOMATIC_DIR=`dirname $TRIMMOMATIC_BIN`
   - pip install https://github.com/biocore/qiita/archive/master.zip --process-dependency-links
   - ipython profile create qiita-general --parallel
   - qiita-env start_cluster qiita-general
