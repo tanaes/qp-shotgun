@@ -24,6 +24,7 @@ from qp_shotgun.kneaddata.kneaddata import (make_read_pairs_per_sample,
 
 class KneaddataTests(PluginTestCase):
     maxDiff = None
+
     def setUp(self):
         plugin("https://localhost:21174", 'register', 'ignored')
         self.params = {
@@ -209,7 +210,7 @@ class KneaddataTests(PluginTestCase):
             '--trimmomatic-options "ILLUMINACLIP:$TRIMMOMATIC_DIR/adapters/'
             'TruSeq3-PE-2.fa:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 '
             'MINLEN:36"']
-        exp_pfx = ['s1','s2','s3']
+        exp_pfx = ['s1', 's2', 's3']
 
         obs_cmd, obs_pfx = generate_kneaddata_commands(
             ['fastq/s1.fastq', 'fastq/s2.fastq.gz', 'fastq/s3.fastq'], [],
@@ -253,7 +254,7 @@ class KneaddataTests(PluginTestCase):
             '--trimmomatic-options "ILLUMINACLIP:$TRIMMOMATIC_DIR/adapters/'
             'TruSeq3-PE-2.fa:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 '
             'MINLEN:36"']
-        exp_pfx = ['s1','s2','s3']
+        exp_pfx = ['s1', 's2', 's3']
 
         obs_cmd, obs_pfx = generate_kneaddata_commands(
             ['fastq/s1.fastq', 'fastq/s2.fastq.gz', 'fastq/s3.fastq'],
@@ -263,14 +264,13 @@ class KneaddataTests(PluginTestCase):
         self.assertEqual(obs_cmd, exp_cmd)
         self.assertEqual(obs_pfx, exp_pfx)
 
-
     def test_kneaddata(self):
         # generating filepaths
         in_dir = mkdtemp()
         self._clean_up_files.append(in_dir)
 
-        fp1_1 = join(in_dir,'kd_test_1_R1.fastq.gz')
-        fp1_2 = join(in_dir,'kd_test_1_R2.fastq.gz')
+        fp1_1 = join(in_dir, 'kd_test_1_R1.fastq.gz')
+        fp1_2 = join(in_dir, 'kd_test_1_R2.fastq.gz')
         copyfile('support_files/kd_test_1_R1.fastq.gz', fp1_1)
         copyfile('support_files/kd_test_1_R2.fastq.gz', fp1_2)
 
@@ -323,13 +323,13 @@ class KneaddataTests(PluginTestCase):
             self.assertEqual('per_sample_FASTQ', a.artifact_type)
             obs_fps.append(a.files)
 
-        exp_fps = [[(join(out_dir, 'kd_test_1', 'kd_test_1_paired_1.fastq'), 
+        exp_fps = [[(join(out_dir, 'kd_test_1', 'kd_test_1_paired_1.fastq'),
                     'per_sample_FASTQ')],
-                   [(join(out_dir, 'kd_test_1', 'kd_test_1_paired_2.fastq'), 
+                   [(join(out_dir, 'kd_test_1', 'kd_test_1_paired_2.fastq'),
                     'per_sample_FASTQ')],
-                   [(join(out_dir, 'kd_test_1', 'kd_test_1_unmatched_1.fastq'), 
+                   [(join(out_dir, 'kd_test_1', 'kd_test_1_unmatched_1.fastq'),
                     'per_sample_FASTQ')],
-                   [(join(out_dir, 'kd_test_1', 'kd_test_1_unmatched_2.fastq'), 
+                   [(join(out_dir, 'kd_test_1', 'kd_test_1_unmatched_2.fastq'),
                     'per_sample_FASTQ')]]
 
         self.assertItemsEqual(exp_fps, obs_fps)

@@ -194,6 +194,7 @@ def _run_commands(qclient, job_id, commands, msg):
 
     return True, ""
 
+
 def _per_sample_ainfo(out_dir, prefixes):
     ainfo = []
     for prefix in prefixes:
@@ -214,6 +215,7 @@ def _per_sample_ainfo(out_dir, prefixes):
         ainfo += sam_a
 
     return ainfo
+
 
 def kneaddata(qclient, job_id, parameters, out_dir):
     """Run kneaddata with the given parameters
@@ -251,11 +253,12 @@ def kneaddata(qclient, job_id, parameters, out_dir):
     qiime_map = prep_info['qiime-map']
 
     # Step 2 generating command kneaddata
-    qclient.update_job_step(job_id, "Step 2 of 5: Generating KneadData command")
+    qclient.update_job_step(job_id, "Step 2 of 5: Generating"
+                                    " KneadData command")
     rs = fps['raw_reverse_seqs'] if 'raw_reverse_seqs' in fps else []
     commands, prefixes = generate_kneaddata_commands(fps['raw_forward_seqs'],
-                                                  rs, qiime_map, out_dir,
-                                                  parameters)
+                                                     rs, qiime_map, out_dir,
+                                                     parameters)
 
     # Step 3 execute kneaddata
     msg = "Step 3 of 5: Executing KneadData job (%d/{0})".format(len(commands))
@@ -267,4 +270,3 @@ def kneaddata(qclient, job_id, parameters, out_dir):
     ainfo = _per_sample_ainfo(out_dir, prefixes)
 
     return True, ainfo, ""
-

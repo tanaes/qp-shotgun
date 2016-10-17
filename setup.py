@@ -14,7 +14,6 @@ from setuptools import setup
 __version__ = "0.1.0-dev"
 
 
-
 classes = """
     Development Status :: 3 - Alpha
     License :: OSI Approved :: BSD License
