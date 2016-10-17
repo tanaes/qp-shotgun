@@ -23,6 +23,7 @@ from qp_shotgun.kneaddata.kneaddata import (make_read_pairs_per_sample,
 
 
 class KneaddataTests(PluginTestCase):
+    maxDiff = None
     def setUp(self):
         plugin("https://localhost:21174", 'register', 'ignored')
         self.params = {
@@ -30,10 +31,10 @@ class KneaddataTests(PluginTestCase):
             'processes': 1, 'quality-scores': 'phred33', 'run-bmtagger': False,
             'run-trf': False, 'run-fastqc-start': True, 'run-fastqc-end': True,
             'store-temp-output': False, 'log-level': 'DEBUG',
-            'max-memory': 500, 'trimmomatic-options': '"ILLUMINACLIP:'
-            '$trimmomatic/adapters/TruSeq3-PE-2.fa:2:30:10 LEADING:3 '
-            'TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:36"',
-            'bowtie2-options': '"--very-sensitive"'
+            'trimmomatic': '"$TRIMMOMATIC_DIR"',
+            'max-memory': '500m', 'trimmomatic-options': '"ILLUMINACLIP:'
+            '$TRIMMOMATIC_DIR/adapters/TruSeq3-PE-2.fa:2:30:10 LEADING:3 '
+            'TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:36"'
         }
         self._clean_up_files = []
 
@@ -47,12 +48,12 @@ class KneaddataTests(PluginTestCase):
 
     def test_format_kneaddata_params(self):
         obs = format_kneaddata_params(self.params)
-        exp = ('--bowtie2-options "--very-sensitive" --log-level DEBUG '
-               '--max-memory 500 --processes 1 --quality-scores phred33 '
-               '--reference-db human_genome --run-fastqc-end '
-               '--run-fastqc-start --threads 1 --trimmomatic-options '
-               '"ILLUMINACLIP:$trimmomatic/adapters/TruSeq3-PE-2.fa:2:30:10 '
-               'LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:36"')
+        exp = ('--log-level DEBUG --max-memory 500m --processes 1 '
+               '--quality-scores phred33 --reference-db human_genome '
+               '--run-fastqc-end --run-fastqc-start --threads 1 '
+               '--trimmomatic "$TRIMMOMATIC_DIR" --trimmomatic-options '
+               '"ILLUMINACLIP:$TRIMMOMATIC_DIR/adapters/TruSeq3-PE-2.fa:'
+               '2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:36"')
 
         self.assertEqual(obs, exp)
 
@@ -185,27 +186,30 @@ class KneaddataTests(PluginTestCase):
 
         exp_cmd = [
             'kneaddata --input "fastq/s1.fastq" '
-            '--output "output/s1" --output-prefix "s1" --bowtie2-options '
-            '"--very-sensitive" --log-level DEBUG --max-memory 500 '
+            '--output "output/s1" --output-prefix "s1" '
+            '--log-level DEBUG --max-memory 500m '
             '--processes 1 --quality-scores phred33 --reference-db '
             'human_genome --run-fastqc-end --run-fastqc-start --threads 1 '
-            '--trimmomatic-options "ILLUMINACLIP:$trimmomatic/adapters/'
+            '--trimmomatic "$TRIMMOMATIC_DIR" '
+            '--trimmomatic-options "ILLUMINACLIP:$TRIMMOMATIC_DIR/adapters/'
             'TruSeq3-PE-2.fa:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 '
             'MINLEN:36"',
             'kneaddata --input "fastq/s2.fastq.gz" '
-            '--output "output/s2" --output-prefix "s2" --bowtie2-options '
-            '"--very-sensitive" --log-level DEBUG --max-memory 500 '
+            '--output "output/s2" --output-prefix "s2" '
+            '--log-level DEBUG --max-memory 500m '
             '--processes 1 --quality-scores phred33 --reference-db '
             'human_genome --run-fastqc-end --run-fastqc-start --threads 1 '
-            '--trimmomatic-options "ILLUMINACLIP:$trimmomatic/adapters/'
+            '--trimmomatic "$TRIMMOMATIC_DIR" '
+            '--trimmomatic-options "ILLUMINACLIP:$TRIMMOMATIC_DIR/adapters/'
             'TruSeq3-PE-2.fa:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 '
             'MINLEN:36"',
             'kneaddata --input "fastq/s3.fastq" '
-            '--output "output/s3" --output-prefix "s3" --bowtie2-options '
-            '"--very-sensitive" --log-level DEBUG --max-memory 500 '
+            '--output "output/s3" --output-prefix "s3" '
+            '--log-level DEBUG --max-memory 500m '
             '--processes 1 --quality-scores phred33 --reference-db '
             'human_genome --run-fastqc-end --run-fastqc-start --threads 1 '
-            '--trimmomatic-options "ILLUMINACLIP:$trimmomatic/adapters/'
+            '--trimmomatic "$TRIMMOMATIC_DIR" '
+            '--trimmomatic-options "ILLUMINACLIP:$TRIMMOMATIC_DIR/adapters/'
             'TruSeq3-PE-2.fa:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 '
             'MINLEN:36"']
         exp_pfx = ['s1','s2','s3']
@@ -226,27 +230,30 @@ class KneaddataTests(PluginTestCase):
 
         exp_cmd = [
             'kneaddata --input "fastq/s1.fastq" --input "fastq/s1.R2.fastq" '
-            '--output "output/s1" --output-prefix "s1" --bowtie2-options '
-            '"--very-sensitive" --log-level DEBUG --max-memory 500 '
+            '--output "output/s1" --output-prefix "s1" '
+            '--log-level DEBUG --max-memory 500m '
             '--processes 1 --quality-scores phred33 --reference-db '
             'human_genome --run-fastqc-end --run-fastqc-start --threads 1 '
-            '--trimmomatic-options "ILLUMINACLIP:$trimmomatic/adapters/'
+            '--trimmomatic "$TRIMMOMATIC_DIR" '
+            '--trimmomatic-options "ILLUMINACLIP:$TRIMMOMATIC_DIR/adapters/'
             'TruSeq3-PE-2.fa:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 '
             'MINLEN:36"',
             'kneaddata --input "fastq/s2.fastq.gz" --input '
             '"fastq/s2.R2.fastq.gz" --output "output/s2" --output-prefix "s2" '
-            '--bowtie2-options "--very-sensitive" --log-level DEBUG '
-            '--max-memory 500 --processes 1 --quality-scores phred33 '
+            '--log-level DEBUG '
+            '--max-memory 500m --processes 1 --quality-scores phred33 '
             '--reference-db human_genome --run-fastqc-end --run-fastqc-start '
-            '--threads 1 --trimmomatic-options "ILLUMINACLIP:$trimmomatic/'
+            '--threads 1 --trimmomatic "$TRIMMOMATIC_DIR" '
+            '--trimmomatic-options "ILLUMINACLIP:$TRIMMOMATIC_DIR/'
             'adapters/TruSeq3-PE-2.fa:2:30:10 LEADING:3 TRAILING:3 '
             'SLIDINGWINDOW:4:15 MINLEN:36"',
             'kneaddata --input "fastq/s3.fastq" --input "fastq/s3.R2.fastq" '
-            '--output "output/s3" --output-prefix "s3" --bowtie2-options '
-            '"--very-sensitive" --log-level DEBUG --max-memory 500 '
+            '--output "output/s3" --output-prefix "s3" '
+            '--log-level DEBUG --max-memory 500m '
             '--processes 1 --quality-scores phred33 --reference-db '
             'human_genome --run-fastqc-end --run-fastqc-start --threads 1 '
-            '--trimmomatic-options "ILLUMINACLIP:$trimmomatic/adapters/'
+            '--trimmomatic "$TRIMMOMATIC_DIR" '
+            '--trimmomatic-options "ILLUMINACLIP:$TRIMMOMATIC_DIR/adapters/'
             'TruSeq3-PE-2.fa:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 '
             'MINLEN:36"']
         exp_pfx = ['s1','s2','s3']
@@ -273,7 +280,7 @@ class KneaddataTests(PluginTestCase):
         # inserting new prep template
         prep_info_dict = {
             'SKB7.640196': {
-                'run_prefix': 'kd_test_1_'}
+                'run_prefix': 'kd_test_1'}
         }
         data = {'prep_info': dumps(prep_info_dict),
                 # magic #1 = testing study
@@ -321,12 +328,20 @@ class KneaddataTests(PluginTestCase):
         for a in ainfo:
             self.assertEqual('per_sample_FASTQ', a.artifact_type)
             obs_fps.append(a.files)
-        exp_fps = [[(join(out_dir, 'genefamilies.biom'), 'biom')],
-                   [(join(out_dir, 'pathcoverage.biom'), 'biom')],
-                   [(join(out_dir, 'pathabundance.biom'), 'biom')],
-                   [(join(out_dir, 'genefamilies_cpm.biom'), 'biom')]]
+
+        exp_fps = [[(join(out_dir, 'kd_test_1', 'kd_test_1_paired_1.fastq'), 
+                    'per_sample_FASTQ')],
+                   [(join(out_dir, 'kd_test_1', 'kd_test_1_paired_2.fastq'), 
+                    'per_sample_FASTQ')],
+                   [(join(out_dir, 'kd_test_1', 'kd_test_1_unmatched_1.fastq'), 
+                    'per_sample_FASTQ')],
+                   [(join(out_dir, 'kd_test_1', 'kd_test_1_unmatched_2.fastq'), 
+                    'per_sample_FASTQ')]]
+
         self.assertItemsEqual(exp_fps, obs_fps)
 
+        for f_a in exp_fps:
+            assert exists(f_a[0][0])
 
 
 MAPPING_FILE = (
