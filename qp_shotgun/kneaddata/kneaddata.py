@@ -8,6 +8,8 @@
 
 from os.path import basename, join
 
+from qiita_client import ArtifactInfo
+
 from qiita_client.util import system_call, get_sample_names_by_run_prefix
 
 
@@ -186,13 +188,32 @@ def _run_commands(qclient, job_id, commands, msg):
         std_out, std_err, return_value = system_call(cmd)
         if return_value != 0:
             error_msg = ("Error running KneadData:\nStd out: %s\nStd err: %s"
-                         % (std_out, std_err))
+                         "\n\nCommand run was:\n%s"
+                         % (std_out, std_err, cmd))
             return False, error_msg
 
     return True, ""
 
-def _per_sample_ainfo():
-    return
+def _per_sample_ainfo(out_dir, prefixes):
+    ainfo = []
+    for prefix in prefixes:
+        sam_out_dir = join(out_dir, prefix)
+        sam_a = [
+            ArtifactInfo('clean paired R1', 'per_sample_FASTQ',
+                         [(join(sam_out_dir, '%s_paired_1.fastq' % prefix),
+                          'per_sample_FASTQ')]),
+            ArtifactInfo('clean paired R2', 'per_sample_FASTQ',
+                         [(join(sam_out_dir, '%s_paired_2.fastq' % prefix),
+                          'per_sample_FASTQ')]),
+            ArtifactInfo('clean unpaired R1', 'per_sample_FASTQ',
+                         [(join(sam_out_dir, '%s_unmatched_1.fastq' % prefix),
+                          'per_sample_FASTQ')]),
+            ArtifactInfo('clean unpaired R2', 'per_sample_FASTQ',
+                         [(join(sam_out_dir, '%s_unmatched_2.fastq' % prefix),
+                          'per_sample_FASTQ')])]
+        ainfo += sam_a
+
+    return ainfo
 
 def kneaddata(qclient, job_id, parameters, out_dir):
     """Run kneaddata with the given parameters
@@ -206,7 +227,7 @@ def kneaddata(qclient, job_id, parameters, out_dir):
     parameters : dict
         The parameter values to run split libraries
     out_dir : str
-        Yhe path to the job's output directory
+        The path to the job's output directory
 
     Returns
     -------
@@ -243,20 +264,7 @@ def kneaddata(qclient, job_id, parameters, out_dir):
         return False, None, msg
 
     # Step 4 generating artifacts
-    pb = partial(join, out_dir)
-    ainfo = [
-        ArtifactInfo('Gene family table', 'BIOM',
-                     [(pb('genefamilies.biom'), 'biom')]),
-        ArtifactInfo('Path coverage table', 'BIOM',
-                     [(pb('pathcoverage.biom'), 'biom')]),
-        ArtifactInfo('Path abundance table', 'BIOM',
-                     [(pb('pathabundance.biom'), 'biom')]),
-        ArtifactInfo('Gene family CMP table', 'BIOM',
-                     [(pb('genefamilies_cpm.biom'), 'biom')]),
-        ArtifactInfo('Path coverage RELAB table', 'BIOM',
-                     [(pb('pathcoverage_relab.biom'), 'biom')]),
-        ArtifactInfo('Path abundance RELAB table', 'BIOM',
-                     [(pb('pathabundance_relab.biom'), 'biom')])]
+    ainfo = _per_sample_ainfo(out_dir, prefixes)
 
     return True, ainfo, ""
 

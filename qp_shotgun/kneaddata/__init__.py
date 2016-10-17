@@ -30,7 +30,6 @@ opt_params = {
     # --output # directory to write output files
     # --output-prefix # prefix for output files [ DEFAULT : $SAMPLE_kneaddata ]
     # --log # filepath for log [ DEFAULT : $OUTPUT_DIR/$SAMPLE_kneaddata.log ]
-    # --trimmomatic # path to trimmomatic executable
     # --bowtie2 # path to bowtie executable
     # --bmtagger # path to bmtagger exectuable
     # --trf # path to TRF executable
@@ -48,12 +47,13 @@ opt_params = {
                   'DEBUG'],
 
     # Trimmomatic options
-    'max-memory': ['integer', '500'],  # max memory in mb [ DEFAULT : 500 ]
+    'max-memory': ['string', '500m'],  # max memory in mb [ DEFAULT : 500m ]
+    'trimmomatic': ['string', '$TRIMMOMATIC_DIR'],
     'trimmomatic-options': ['string', 'ILLUMINACLIP:$TRIMMOMATIC_DIR/adapters/'
                             'TruSeq3-PE-2.fa:2:30:10 LEADING:3 TRAILING:3 '
                             'SLIDINGWINDOW:4:15 MINLEN:36'],
     # Bowtie2 options
-    'bowtie2-options': ['string', '--very-sensitive']
+    # 'bowtie2-options': ['string', '--very-sensitive']
     # BMTagger options
     # # TRF options
     # 'match': ['integer', '2'], # matching weight
@@ -62,7 +62,7 @@ opt_params = {
     # 'pm': ['integer', '80'], # match probability
     # 'pi': ['integer', '10'], # indel probability
     # 'minscore': ['integer', '50'], # mimimum alignment score to report
-    # 'maxperiod': ['integer', '500'] # maximum period size to report
+    # 'maxperiod': ['integer', '500m'] # maximum period size to report
     # FastQC options
     }
 outputs = {'per_sample_FASTQ': 'per_sample_FASTQ'}
@@ -71,12 +71,13 @@ dflt_param_set = {
         'reference-db': 'human_genome', 'bypass-trim': False, 'threads': 1,
         'processes': 1, 'quality-scores': 'phred33', 'run-bmtagger': False,
         'run-trf': False, 'run-fastqc-start': True, 'run-fastqc-end': True,
-        'store-temp-output': False, 'log-level': 'DEBUG', 'max-memory': 500,
+        'store-temp-output': False, 'log-level': 'DEBUG', 'max-memory': '500m',
+        'trimmomatic': '"$TRIMMOMATIC_DIR"',
         'trimmomatic-options': '"ILLUMINACLIP:$TRIMMOMATIC_DIR/adapters/'
         'TruSeq3-PE-2.fa:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 '
-        'MINLEN:36"', 'bowtie2-options': '"--very-sensitive"'
+        'MINLEN:36"'
         # , 'match': 2, 'mismatch': 7,
-        # 'delta': 7, 'pm': 80, 'pi': 10, 'minscore': 50, 'maxperiod': '500'
+        # 'delta': 7, 'pm': 80, 'pi': 10, 'minscore': 50, 'maxperiod': '500m'
         }
 }
 kneaddata_cmd = QiitaCommand(
