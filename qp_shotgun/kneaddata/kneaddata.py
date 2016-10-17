@@ -8,7 +8,7 @@
 
 from os.path import basename, join
 
-from qiita_client.util import get_sample_names_by_run_prefix
+from qiita_client.util import system_call, get_sample_names_by_run_prefix
 
 
 def make_read_pairs_per_sample(forward_seqs, reverse_seqs, map_file):
@@ -142,6 +142,9 @@ def generate_kneaddata_commands(forward_seqs, reverse_seqs, map_file,
     -------
     list of str
         The KneadData commands
+    list of str
+        The run prefixes used
+
 
     Raises
     ------
@@ -160,7 +163,9 @@ def generate_kneaddata_commands(forward_seqs, reverse_seqs, map_file,
     cmds = []
 
     param_string = format_kneaddata_params(parameters)
+    prefixes = []
     for run_prefix, sample, f_fp, r_fp in samples:
+        prefixes.append(run_prefix)
         if r_fp is None:
             cmds.append('kneaddata --input "%s" --output "%s" '
                         '--output-prefix "%s" %s' %
@@ -172,8 +177,22 @@ def generate_kneaddata_commands(forward_seqs, reverse_seqs, map_file,
                         (f_fp, r_fp, join(out_dir, run_prefix),
                          run_prefix, param_string))
 
-    return cmds
+    return cmds, prefixes
 
+
+def _run_commands(qclient, job_id, commands, msg):
+    for i, cmd in enumerate(commands):
+        qclient.update_job_step(job_id, msg % i)
+        std_out, std_err, return_value = system_call(cmd)
+        if return_value != 0:
+            error_msg = ("Error running KneadData:\nStd out: %s\nStd err: %s"
+                         % (std_out, std_err))
+            return False, error_msg
+
+    return True, ""
+
+def _per_sample_ainfo():
+    return
 
 def kneaddata(qclient, job_id, parameters, out_dir):
     """Run kneaddata with the given parameters
@@ -196,7 +215,10 @@ def kneaddata(qclient, job_id, parameters, out_dir):
     """
     # Step 1 get the rest of the information need to run kneaddata
     qclient.update_job_step(job_id, "Step 1 of 3: Collecting information")
-    artifact_id = parameters['input_data']
+    artifact_id = parameters['input']
+
+    # removing input from parameters so it's not part of the final command
+    del parameters['input']
 
     # Get the artifact filepath information
     artifact_info = qclient.get("/qiita_db/artifacts/%s/" % artifact_id)
@@ -208,17 +230,33 @@ def kneaddata(qclient, job_id, parameters, out_dir):
     qiime_map = prep_info['qiime-map']
 
     # Step 2 generating command kneaddata
-    qclient.update_job_step(job_id, "Step 2 of 3: "
-                            "Generating kneaddata command")
+    qclient.update_job_step(job_id, "Step 2 of 5: Generating KneadData command")
     rs = fps['raw_reverse_seqs'] if 'raw_reverse_seqs' in fps else []
-    commands = generate_kneaddata_commands(fps['raw_forward_seqs'], rs,
-                                           qiime_map, out_dir,
-                                           parameters)
+    commands, prefixes = generate_kneaddata_commands(fps['raw_forward_seqs'],
+                                                  rs, qiime_map, out_dir,
+                                                  parameters)
 
-    commands_len = len(commands)
+    # Step 3 execute kneaddata
+    msg = "Step 3 of 5: Executing KneadData job (%d/{0})".format(len(commands))
+    success, msg = _run_commands(qclient, job_id, commands, msg)
+    if not success:
+        return False, None, msg
 
-    # Step 3 execute kneaddata: TODO
-    qclient.update_job_step(job_id, "Step 3 of 3: Executing kneaddata %s" %
-                            commands_len)
+    # Step 4 generating artifacts
+    pb = partial(join, out_dir)
+    ainfo = [
+        ArtifactInfo('Gene family table', 'BIOM',
+                     [(pb('genefamilies.biom'), 'biom')]),
+        ArtifactInfo('Path coverage table', 'BIOM',
+                     [(pb('pathcoverage.biom'), 'biom')]),
+        ArtifactInfo('Path abundance table', 'BIOM',
+                     [(pb('pathabundance.biom'), 'biom')]),
+        ArtifactInfo('Gene family CMP table', 'BIOM',
+                     [(pb('genefamilies_cpm.biom'), 'biom')]),
+        ArtifactInfo('Path coverage RELAB table', 'BIOM',
+                     [(pb('pathcoverage_relab.biom'), 'biom')]),
+        ArtifactInfo('Path abundance RELAB table', 'BIOM',
+                     [(pb('pathabundance_relab.biom'), 'biom')])]
 
-    return True, artifact_info, ""
+    return True, ainfo, ""
+
