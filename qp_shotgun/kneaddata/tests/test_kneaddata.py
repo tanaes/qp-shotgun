@@ -57,9 +57,6 @@ class KneaddataTests(PluginTestCase):
 
         self.assertEqual(obs, exp)
 
-    def test_break(self):
-        self.assertEqual(1,3)
-
     def test_make_read_pairs_per_sample_match_fwd_rev(self):
         fd, fp = mkstemp()
         close(fd)
@@ -301,10 +298,7 @@ class KneaddataTests(PluginTestCase):
 
         self.params['input'] = aid
         # overwriting so the run uses the defaults
-        self.params['reference-db'] = ('/Users/jonsanders/Development/'
-                                       'anaconda/envs/qiita_env/lib/python2.7/'
-                                       'site-packages/kneaddata/tests/'
-                                       'data/demo_bowtie2_db/demo_db')
+        self.params['reference-db'] = ('$KD_DEMO_DB')
 
         data = {'user': 'demo@microbio.me',
                 'command': dumps(['KneadData', '0.5.1', 'KneadData']),
