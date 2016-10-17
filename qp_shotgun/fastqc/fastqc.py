@@ -6,8 +6,11 @@
 # The full license is in the file LICENSE, distributed with this software.
 # -----------------------------------------------------------------------------
 
-from os.path import basename, join
+from os.path import basename, join, splitext
 from qp_shotgun.kneaddata.kneaddata import make_read_pairs_per_sample
+
+from qiita_client import ArtifactInfo
+from qiita_client.util import system_call
 
 
 def format_fastqc_params(parameters):
@@ -31,7 +34,8 @@ def format_fastqc_params(parameters):
     return(param_string)
 
 
-def generate_fastqc_commands(seqs, map_file, out_dir, parameters):
+def generate_fastqc_commands(forward_seqs, reverse_seqs, map_file, out_dir,
+                             parameters):
     """Generates the FastQC commands
 
     Parameters
@@ -67,49 +71,65 @@ def generate_fastqc_commands(seqs, map_file, out_dir, parameters):
     for run_prefix, sample, f_fp, r_fp in samples:
         prefixes.append(run_prefix)
         if r_fp is None:
-            cmds.append('fastqc --outdir "%s" %s %s' %
-                        (join(out_dir, run_prefix), param_string, f_fp))
+            cmds.append('mkdir -p %s; fastqc --outdir "%s" %s %s' %
+                        (join(out_dir, run_prefix), join(out_dir, run_prefix), 
+                        param_string, f_fp))
             fps.append((f_fp, None))
         else:
-            cmds.append('fastqc --outdir "%s" %s %s %s' %
-                        (join(out_dir, run_prefix), param_string, f_fp, r_fp))
+            cmds.append('mkdir -p %s; fastqc --outdir "%s" %s %s %s' %
+                        (join(out_dir, run_prefix), join(out_dir, run_prefix),
+                        param_string, f_fp, r_fp))
             fps.append((f_fp, r_fp))
 
     return cmds, samples
 
+
 def _guess_fastqc_filename(fp):
-    f_d, f_p = os.path.split(fp)
+    f_p = basename(fp)
 
-    exts = ['fastq','fq','gz','gzip']
-    while os.path.splitext(f_p)[1] in exts:
-        f_p = os.path.splitext(f_p)[0]
+    exts = ['.fastq','.fq','.gz','.gzip']
+    while splitext(f_p)[1] in exts:
+        f_p = splitext(f_p)[0]
 
-    return "%s_fastqc.zip" % f_p, "%s_fastqc.html" % f_p
+    return "%s_fastqc.html" % f_p, "%s_fastqc.zip" % f_p
+
 
 def _per_sample_ainfo(out_dir, samples):
     ainfo = []
     for run_prefix, sample, f_fp, r_fp in samples:
-        sam_out_dir = join(out_dir, prefix)
-
-        f_fqfp = join(sam_out_dir, _guess_fastqc_filename(f_fp))
+        sam_out_dir = join(out_dir, run_prefix)
 
         ainfo += [
             ArtifactInfo('FastQC html summary', 'html_summary',
-                         [(join(sam_out_dir, _guess_fastqc_filename(f_fp)[1]),
+                         [(join(sam_out_dir, _guess_fastqc_filename(f_fp)[0]),
                           'html_summary')]),
             ArtifactInfo('FastQC data summary', 'zip_file',
-                         [(join(sam_out_dir, _guess_fastqc_filename(f_fp)[0]),
+                         [(join(sam_out_dir, _guess_fastqc_filename(f_fp)[1]),
                           'zip_file')])]
         if r_fp:
             ainfo += [
                 ArtifactInfo('FastQC html summary', 'html_summary',
-                             [(join(sam_out_dir, '%s_paired_1.fastq' % prefix),
+                             [(join(sam_out_dir, _guess_fastqc_filename(r_fp)[0]),
                               'html_summary')]),
                 ArtifactInfo('FastQC data summary', 'zip_file',
-                             [(join(sam_out_dir, '%s_paired_2.fastq' % prefix),
+                             [(join(sam_out_dir, _guess_fastqc_filename(r_fp)[1]),
                               'zip_file')])]
-
+    print(ainfo)
     return ainfo
+
+
+def _run_commands(qclient, job_id, commands, msg):
+    for i, cmd in enumerate(commands):
+        qclient.update_job_step(job_id, msg % i)
+        std_out, std_err, return_value = system_call(cmd)
+        if return_value != 0:
+            error_msg = ("Error running FastQC:\nStd out: %s\nStd err: %s"
+                         "\n\nCommand run was:\n%s"
+                         % (std_out, std_err, cmd))
+            return False, error_msg
+
+    return True, ""
+
 
 def fastqc(qclient, job_id, parameters, out_dir):
     """Run FastQC with the given parameters

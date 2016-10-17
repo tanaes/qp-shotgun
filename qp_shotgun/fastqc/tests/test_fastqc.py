@@ -8,11 +8,13 @@
 
 from unittest import main
 from os import close, remove
-from os.path import exists, isdir
-from shutil import rmtree
-from tempfile import mkstemp
+from os.path import exists, isdir, join
+from shutil import rmtree, copyfile
+from tempfile import mkstemp, mkdtemp
+from json import dumps
 
 from qiita_client.testing import PluginTestCase
+from qiita_client import ArtifactInfo
 
 from qp_shotgun.fastqc import plugin
 from qp_shotgun.fastqc.fastqc import (format_fastqc_params,
@@ -23,6 +25,8 @@ from qp_shotgun.fastqc.fastqc import (format_fastqc_params,
 
 
 class FastQCTests(PluginTestCase):
+    maxDiff = None
+
     def setUp(self):
         plugin("https://localhost:21174", 'register', 'ignored')
         self.params = {
@@ -44,13 +48,13 @@ class FastQCTests(PluginTestCase):
 
         self.assertEqual(obs, exp)
 
-    def test__guess_fastqc_filename(fp):
+    def test__guess_fastqc_filename(self):
         obs = _guess_fastqc_filename('./folder/file1.R1.fastq.gz')
         exp = ('file1.R1_fastqc.html', 'file1.R1_fastqc.zip')
 
         self.assertEqual(obs,exp)
 
-    def test__per_sample_ainfo(out_dir, samples):
+    def test__per_sample_ainfo(self):
         out_dir = './folder'
         samples = [('s1', 'SKB8.640193', './folder/s1_S009_L001_R1.fastq.gz',
                 './folder/s1_S009_L001_R2.fastq.gz'),
@@ -58,33 +62,36 @@ class FastQCTests(PluginTestCase):
                 './folder/s2_S011_L001_R2.fastq.gz')]
 
         exp = [ArtifactInfo('FastQC html summary', 'html_summary',
-                         [('./folder/s1_S009_L001_R1_fastqc.html',
+                         [('./folder/s1/s1_S009_L001_R1_fastqc.html',
                           'html_summary')]),
                ArtifactInfo('FastQC data summary', 'zip_file',
-                         [('./folder/s1_S009_L001_R1_fastqc.zip',
+                         [('./folder/s1/s1_S009_L001_R1_fastqc.zip',
                           'zip_file')]),
                ArtifactInfo('FastQC html summary', 'html_summary',
-                         [('./folder/s1_S009_L001_R2_fastqc.html',
+                         [('./folder/s1/s1_S009_L001_R2_fastqc.html',
                           'html_summary')]),
                ArtifactInfo('FastQC data summary', 'zip_file',
-                         [('./folder/s1_S009_L001_R2_fastqc.zip',
+                         [('./folder/s1/s1_S009_L001_R2_fastqc.zip',
                           'zip_file')]),
                ArtifactInfo('FastQC html summary', 'html_summary',
-                         [('./folder/s2_S011_L001_R1_fastqc.html',
+                         [('./folder/s2/s2_S011_L001_R1_fastqc.html',
                           'html_summary')]),
                ArtifactInfo('FastQC data summary', 'zip_file',
-                         [('./folder/s2_S011_L001_R1_fastqc.zip',
+                         [('./folder/s2/s2_S011_L001_R1_fastqc.zip',
                           'zip_file')]),
                ArtifactInfo('FastQC html summary', 'html_summary',
-                         [('./folder/s2_S011_L001_R2_fastqc.html',
+                         [('./folder/s2/s2_S011_L001_R2_fastqc.html',
                           'html_summary')]),
                ArtifactInfo('FastQC data summary', 'zip_file',
-                         [('./folder/s2_S011_L001_R2_fastqc.zip',
+                         [('./folder/s2/s2_S011_L001_R2_fastqc.zip',
                           'zip_file')])]
 
         obs = _per_sample_ainfo(out_dir, samples)
 
-        self.assertItemsEqual(obs, exp)
+        for i, a in enumerate(exp):
+            self.assertEqual(exp[i],obs[i])
+
+        #self.assertItemsEqual(obs, exp)
 
     def test_generate_fastqc_commands_fwd_rev(self):
         fd, fp = mkstemp()
@@ -93,14 +100,14 @@ class FastQCTests(PluginTestCase):
             f.write(MAPPING_FILE)
         self._clean_up_files.append(fp)
 
-        exp = ['fastqc --outdir "output" --kmers 7 --noextract --threads 1'
+        exp = ['mkdir -p output/s1; fastqc --outdir "output/s1" --kmers 7 --noextract --threads 1 '
                'fastq/s1.fastq fastq/s1.R2.fastq',
-               'fastqc --outdir "output" --kmers 7 --noextract --threads 1'
+               'mkdir -p output/s2; fastqc --outdir "output/s2" --kmers 7 --noextract --threads 1 '
                'fastq/s2.fastq.gz fastq/s2.R2.fastq.gz',
-               'fastqc --outdir "output" --kmers 7 --noextract --threads 1'
+               'mkdir -p output/s3; fastqc --outdir "output/s3" --kmers 7 --noextract --threads 1 '
                'fastq/s3.fastq fastq/s3.R2.fastq']
 
-        obs = generate_fastqc_commands(
+        obs, samp = generate_fastqc_commands(
             ['fastq/s1.fastq', 'fastq/s2.fastq.gz', 'fastq/s3.fastq'],
             ['fastq/s1.R2.fastq', 'fastq/s2.R2.fastq.gz', 'fastq/s3.R2.fastq'],
             fp, 'output', self.params)
@@ -114,14 +121,14 @@ class FastQCTests(PluginTestCase):
             f.write(MAPPING_FILE)
         self._clean_up_files.append(fp)
 
-        exp = ['fastqc --outdir "output" --kmers 7 --noextract --threads 1'
+        exp = ['mkdir -p output/s1; fastqc --outdir "output/s1" --kmers 7 --noextract --threads 1 '
                'fastq/s1.fastq',
-               'fastqc --outdir "output" --kmers 7 --noextract --threads 1'
+               'mkdir -p output/s2; fastqc --outdir "output/s2" --kmers 7 --noextract --threads 1 '
                'fastq/s2.fastq.gz',
-               'fastqc --outdir "output" --kmers 7 --noextract --threads 1'
+               'mkdir -p output/s3; fastqc --outdir "output/s3" --kmers 7 --noextract --threads 1 '
                'fastq/s3.fastq']
 
-        obs = generate_fastqc_commands(
+        obs, samp = generate_fastqc_commands(
                 ['fastq/s1.fastq', 'fastq/s2.fastq.gz', 'fastq/s3.fastq'], [],
                 fp, 'output', self.params)
 
@@ -162,7 +169,7 @@ class FastQCTests(PluginTestCase):
         self.params['input'] = aid
 
         data = {'user': 'demo@microbio.me',
-                'command': dumps(['KneadData', '0.5.1', 'KneadData']),
+                'command': dumps(['FastQC', '0.11.5', 'FastQC']),
                 'status': 'running',
                 'parameters': dumps(self.params)}
 
