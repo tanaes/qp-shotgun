@@ -52,46 +52,44 @@ class FastQCTests(PluginTestCase):
         obs = _guess_fastqc_filename('./folder/file1.R1.fastq.gz')
         exp = ('file1.R1_fastqc.html', 'file1.R1_fastqc.zip')
 
-        self.assertEqual(obs,exp)
+        self.assertEqual(obs, exp)
 
     def test__per_sample_ainfo(self):
         out_dir = './folder'
         samples = [('s1', 'SKB8.640193', './folder/s1_S009_L001_R1.fastq.gz',
-                './folder/s1_S009_L001_R2.fastq.gz'),
-               ('s2', 'SKD8.640184', './folder/s2_S011_L001_R1.fastq.gz',
-                './folder/s2_S011_L001_R2.fastq.gz')]
+                    './folder/s1_S009_L001_R2.fastq.gz'),
+                   ('s2', 'SKD8.640184', './folder/s2_S011_L001_R1.fastq.gz',
+                    './folder/s2_S011_L001_R2.fastq.gz')]
 
         exp = [ArtifactInfo('FastQC html summary', 'html_summary',
-                         [('./folder/s1/s1_S009_L001_R1_fastqc.html',
-                          'html_summary')]),
+                            [('./folder/s1/s1_S009_L001_R1_fastqc.html',
+                              'html_summary')]),
                ArtifactInfo('FastQC data summary', 'zip_file',
-                         [('./folder/s1/s1_S009_L001_R1_fastqc.zip',
-                          'zip_file')]),
+                            [('./folder/s1/s1_S009_L001_R1_fastqc.zip',
+                              'zip_file')]),
                ArtifactInfo('FastQC html summary', 'html_summary',
-                         [('./folder/s1/s1_S009_L001_R2_fastqc.html',
-                          'html_summary')]),
+                            [('./folder/s1/s1_S009_L001_R2_fastqc.html',
+                              'html_summary')]),
                ArtifactInfo('FastQC data summary', 'zip_file',
-                         [('./folder/s1/s1_S009_L001_R2_fastqc.zip',
-                          'zip_file')]),
+                            [('./folder/s1/s1_S009_L001_R2_fastqc.zip',
+                              'zip_file')]),
                ArtifactInfo('FastQC html summary', 'html_summary',
-                         [('./folder/s2/s2_S011_L001_R1_fastqc.html',
-                          'html_summary')]),
+                            [('./folder/s2/s2_S011_L001_R1_fastqc.html',
+                              'html_summary')]),
                ArtifactInfo('FastQC data summary', 'zip_file',
-                         [('./folder/s2/s2_S011_L001_R1_fastqc.zip',
-                          'zip_file')]),
+                            [('./folder/s2/s2_S011_L001_R1_fastqc.zip',
+                              'zip_file')]),
                ArtifactInfo('FastQC html summary', 'html_summary',
-                         [('./folder/s2/s2_S011_L001_R2_fastqc.html',
-                          'html_summary')]),
+                            [('./folder/s2/s2_S011_L001_R2_fastqc.html',
+                              'html_summary')]),
                ArtifactInfo('FastQC data summary', 'zip_file',
-                         [('./folder/s2/s2_S011_L001_R2_fastqc.zip',
-                          'zip_file')])]
+                            [('./folder/s2/s2_S011_L001_R2_fastqc.zip',
+                              'zip_file')])]
 
         obs = _per_sample_ainfo(out_dir, samples)
 
         for i, a in enumerate(exp):
-            self.assertEqual(exp[i],obs[i])
-
-        #self.assertItemsEqual(obs, exp)
+            self.assertEqual(exp[i], obs[i])
 
     def test_generate_fastqc_commands_fwd_rev(self):
         fd, fp = mkstemp()
@@ -100,12 +98,13 @@ class FastQCTests(PluginTestCase):
             f.write(MAPPING_FILE)
         self._clean_up_files.append(fp)
 
-        exp = ['mkdir -p output/s1; fastqc --outdir "output/s1" --kmers 7 --noextract --threads 1 '
-               'fastq/s1.fastq fastq/s1.R2.fastq',
-               'mkdir -p output/s2; fastqc --outdir "output/s2" --kmers 7 --noextract --threads 1 '
-               'fastq/s2.fastq.gz fastq/s2.R2.fastq.gz',
-               'mkdir -p output/s3; fastqc --outdir "output/s3" --kmers 7 --noextract --threads 1 '
-               'fastq/s3.fastq fastq/s3.R2.fastq']
+        exp = ['mkdir -p output/s1; fastqc --outdir "output/s1" --kmers 7 '
+               '--noextract --threads 1 fastq/s1.fastq fastq/s1.R2.fastq',
+               'mkdir -p output/s2; fastqc --outdir "output/s2" --kmers 7 '
+               '--noextract --threads 1 fastq/s2.fastq.gz '
+               'fastq/s2.R2.fastq.gz',
+               'mkdir -p output/s3; fastqc --outdir "output/s3" --kmers 7 '
+               '--noextract --threads 1 fastq/s3.fastq fastq/s3.R2.fastq']
 
         obs, samp = generate_fastqc_commands(
             ['fastq/s1.fastq', 'fastq/s2.fastq.gz', 'fastq/s3.fastq'],
@@ -121,12 +120,12 @@ class FastQCTests(PluginTestCase):
             f.write(MAPPING_FILE)
         self._clean_up_files.append(fp)
 
-        exp = ['mkdir -p output/s1; fastqc --outdir "output/s1" --kmers 7 --noextract --threads 1 '
-               'fastq/s1.fastq',
-               'mkdir -p output/s2; fastqc --outdir "output/s2" --kmers 7 --noextract --threads 1 '
-               'fastq/s2.fastq.gz',
-               'mkdir -p output/s3; fastqc --outdir "output/s3" --kmers 7 --noextract --threads 1 '
-               'fastq/s3.fastq']
+        exp = ['mkdir -p output/s1; fastqc --outdir "output/s1" --kmers 7 '
+               '--noextract --threads 1 fastq/s1.fastq',
+               'mkdir -p output/s2; fastqc --outdir "output/s2" --kmers 7 '
+               '--noextract --threads 1 fastq/s2.fastq.gz',
+               'mkdir -p output/s3; fastqc --outdir "output/s3" --kmers 7 '
+               '--noextract --threads 1 fastq/s3.fastq']
 
         obs, samp = generate_fastqc_commands(
                 ['fastq/s1.fastq', 'fastq/s2.fastq.gz', 'fastq/s3.fastq'], [],
@@ -179,7 +178,7 @@ class FastQCTests(PluginTestCase):
         self._clean_up_files.append(out_dir)
 
         success, ainfo, msg = fastqc(self.qclient, jid,
-                                        self.params, out_dir)
+                                     self.params, out_dir)
 
         self.assertEqual("", msg)
         self.assertTrue(success)
@@ -192,7 +191,7 @@ class FastQCTests(PluginTestCase):
         for a in ainfo:
             obs_arts.append(a.artifact_type)
             obs_fps.append(a.files)
-        self.assertEqual({'zip_file','html_summary'}, set(obs_arts))
+        self.assertEqual({'zip_file', 'html_summary'}, set(obs_arts))
 
         exp_fps = [[(join(out_dir, 'kd_test_1', 'kd_test_1_R1_fastqc.html'),
                     'html_summary')],

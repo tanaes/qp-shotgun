@@ -10,8 +10,6 @@ from qiita_client import QiitaPlugin, QiitaCommand
 
 from .fastqc import fastqc
 
-#from .fastqc import fastqc
-
 __all__ = ['fastqc']
 
 # Initialize the plugin

@@ -72,13 +72,13 @@ def generate_fastqc_commands(forward_seqs, reverse_seqs, map_file, out_dir,
         prefixes.append(run_prefix)
         if r_fp is None:
             cmds.append('mkdir -p %s; fastqc --outdir "%s" %s %s' %
-                        (join(out_dir, run_prefix), join(out_dir, run_prefix), 
-                        param_string, f_fp))
+                        (join(out_dir, run_prefix), join(out_dir, run_prefix),
+                         param_string, f_fp))
             fps.append((f_fp, None))
         else:
             cmds.append('mkdir -p %s; fastqc --outdir "%s" %s %s %s' %
                         (join(out_dir, run_prefix), join(out_dir, run_prefix),
-                        param_string, f_fp, r_fp))
+                         param_string, f_fp, r_fp))
             fps.append((f_fp, r_fp))
 
     return cmds, samples
@@ -87,7 +87,7 @@ def generate_fastqc_commands(forward_seqs, reverse_seqs, map_file, out_dir,
 def _guess_fastqc_filename(fp):
     f_p = basename(fp)
 
-    exts = ['.fastq','.fq','.gz','.gzip']
+    exts = ['.fastq', '.fq', '.gz', '.gzip']
     while splitext(f_p)[1] in exts:
         f_p = splitext(f_p)[0]
 
@@ -109,11 +109,13 @@ def _per_sample_ainfo(out_dir, samples):
         if r_fp:
             ainfo += [
                 ArtifactInfo('FastQC html summary', 'html_summary',
-                             [(join(sam_out_dir, _guess_fastqc_filename(r_fp)[0]),
-                              'html_summary')]),
+                             [(join(sam_out_dir,
+                               _guess_fastqc_filename(r_fp)[0]),
+                               'html_summary')]),
                 ArtifactInfo('FastQC data summary', 'zip_file',
-                             [(join(sam_out_dir, _guess_fastqc_filename(r_fp)[1]),
-                              'zip_file')])]
+                             [(join(sam_out_dir,
+                               _guess_fastqc_filename(r_fp)[1]),
+                               'zip_file')])]
     print(ainfo)
     return ainfo
 
@@ -171,8 +173,8 @@ def fastqc(qclient, job_id, parameters, out_dir):
                                     " FastQC command")
     rs = fps['raw_reverse_seqs'] if 'raw_reverse_seqs' in fps else []
     commands, samples = generate_fastqc_commands(fps['raw_forward_seqs'],
-                                                     rs, qiime_map, out_dir,
-                                                     parameters)
+                                                 rs, qiime_map, out_dir,
+                                                 parameters)
 
     # Step 3 execute FastQC
     msg = "Step 3 of 3: Executing FastQC job (%d/{0})".format(len(commands))
