@@ -179,7 +179,7 @@ def generate_kneaddata_commands(forward_seqs, reverse_seqs, map_file,
                         (f_fp, r_fp, join(out_dir, run_prefix),
                          run_prefix, param_string))
 
-    return cmds, prefixes
+    return cmds, samples
 
 
 def _run_commands(qclient, job_id, commands, msg):
@@ -203,22 +203,22 @@ def _per_sample_ainfo(out_dir, samples):
         if r_fp:
             ainfo.extend([
                 ArtifactInfo('clean paired R1', 'per_sample_FASTQ',
-                             [(join(sam_out_dir, '%s_paired_1.fastq' % prefix),
-                              'per_sample_FASTQ')]),
+                             [(join(sam_out_dir, '%s_paired_1.fastq' % 
+                               run_prefix), 'per_sample_FASTQ')]),
                 ArtifactInfo('clean paired R2', 'per_sample_FASTQ',
-                             [(join(sam_out_dir, '%s_paired_2.fastq' % prefix),
-                              'per_sample_FASTQ')]),
+                             [(join(sam_out_dir, '%s_paired_2.fastq' % 
+                               run_prefix), 'per_sample_FASTQ')]),
                 ArtifactInfo('clean unpaired R1', 'per_sample_FASTQ',
-                             [(join(sam_out_dir, '%s_unmatched_1.fastq' % prefix),
-                              'per_sample_FASTQ')]),
+                             [(join(sam_out_dir, '%s_unmatched_1.fastq' % 
+                               run_prefix), 'per_sample_FASTQ')]),
                 ArtifactInfo('clean unpaired R2', 'per_sample_FASTQ',
-                             [(join(sam_out_dir, '%s_unmatched_2.fastq' % prefix),
-                              'per_sample_FASTQ')])]
+                             [(join(sam_out_dir, '%s_unmatched_2.fastq' % 
+                               run_prefix), 'per_sample_FASTQ')])])
         else:
-            ainfo += [
+            ainfo.extend([
                 ArtifactInfo('cleaned reads', 'per_sample_FASTQ',
-                             [(join(sam_out_dir, '%s.fastq' % prefix),
-                              'per_sample_FASTQ')])])
+                             [(join(sam_out_dir, '%s.fastq' % 
+                               run_prefix), 'per_sample_FASTQ')])])
 
     return ainfo
 
@@ -262,7 +262,7 @@ def kneaddata(qclient, job_id, parameters, out_dir):
     qclient.update_job_step(job_id, "Step 2 of 5: Generating"
                                     " KneadData command")
     rs = fps['raw_reverse_seqs'] if 'raw_reverse_seqs' in fps else []
-    commands, prefixes = generate_kneaddata_commands(fps['raw_forward_seqs'],
+    commands, samples = generate_kneaddata_commands(fps['raw_forward_seqs'],
                                                      rs, qiime_map, out_dir,
                                                      parameters)
 
@@ -273,6 +273,6 @@ def kneaddata(qclient, job_id, parameters, out_dir):
         return False, None, msg
 
     # Step 4 generating artifacts
-    ainfo = _per_sample_ainfo(out_dir, prefixes)
+    ainfo = _per_sample_ainfo(out_dir, samples)
 
     return True, ainfo, ""

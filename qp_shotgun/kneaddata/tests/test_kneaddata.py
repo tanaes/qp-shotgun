@@ -210,14 +210,17 @@ class KneaddataTests(PluginTestCase):
             '--trimmomatic-options "ILLUMINACLIP:$TRIMMOMATIC_DIR/adapters/'
             'TruSeq3-PE-2.fa:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 '
             'MINLEN:36"']
-        exp_pfx = ['s1', 's2', 's3']
 
-        obs_cmd, obs_pfx = generate_kneaddata_commands(
+        exp_sample = [('s1', 'SKB8.640193', 'fastq/s1.fastq', None),
+                      ('s2', 'SKD8.640184', 'fastq/s2.fastq.gz', None),
+                      ('s3', 'SKB7.640196', 'fastq/s3.fastq', None)]
+
+        obs_cmd, obs_sample = generate_kneaddata_commands(
             ['fastq/s1.fastq', 'fastq/s2.fastq.gz', 'fastq/s3.fastq'], [],
             fp, 'output', self.params)
 
         self.assertEqual(obs_cmd, exp_cmd)
-        self.assertEqual(obs_pfx, exp_pfx)
+        self.assertEqual(obs_sample, exp_sample)
 
     def test_generate_kneaddata_analysis_commands_forward_reverse(self):
         fd, fp = mkstemp()
@@ -254,15 +257,22 @@ class KneaddataTests(PluginTestCase):
             '--trimmomatic-options "ILLUMINACLIP:$TRIMMOMATIC_DIR/adapters/'
             'TruSeq3-PE-2.fa:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 '
             'MINLEN:36"']
-        exp_pfx = ['s1', 's2', 's3']
 
-        obs_cmd, obs_pfx = generate_kneaddata_commands(
+        exp_sample = [
+               ('s1', 'SKB8.640193', 'fastq/s1.fastq', 'fastq/s1.R2.fastq'),
+               ('s2', 'SKD8.640184', 'fastq/s2.fastq.gz', 'fastq/s2.R2.fastq.gz'),
+               ('s3', 'SKB7.640196', 'fastq/s3.fastq', 'fastq/s3.R2.fastq')]
+
+        obs_cmd, obs_sample = generate_kneaddata_commands(
             ['fastq/s1.fastq', 'fastq/s2.fastq.gz', 'fastq/s3.fastq'],
             ['fastq/s1.R2.fastq', 'fastq/s2.R2.fastq.gz', 'fastq/s3.R2.fastq'],
             fp, 'output', self.params)
 
+        print(obs_sample)
+        print(exp_sample)
+
         self.assertEqual(obs_cmd, exp_cmd)
-        self.assertEqual(obs_pfx, exp_pfx)
+        self.assertEqual(obs_sample, exp_sample)
 
     def test_kneaddata(self):
         # generating filepaths
