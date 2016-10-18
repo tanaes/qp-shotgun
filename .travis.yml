@@ -5,8 +5,8 @@ env:
 before_install:
   - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
   - chmod +x miniconda.sh
-  - ./miniconda.sh -b -p ${JENKINS_HOME}/workspace/${ITEM_FULLNAME}
-  - export PATH=${JENKINS_HOME}/workspace/${ITEM_FULLNAME}/miniconda3/bin:$PATH
+  - ./miniconda.sh -b -p ${JENKINS_HOME}/workspace/${ITEM_FULL_NAME}
+  - export PATH=${JENKINS_HOME}/workspace/${ITEM_FULL_NAME}/miniconda3/bin:$PATH
 #  - export PATH=/home/travis/miniconda3/bin:$PATH
   # Update conda itself
   - conda update --yes conda
