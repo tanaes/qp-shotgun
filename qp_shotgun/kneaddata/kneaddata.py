@@ -195,24 +195,30 @@ def _run_commands(qclient, job_id, commands, msg):
     return True, ""
 
 
-def _per_sample_ainfo(out_dir, prefixes):
+def _per_sample_ainfo(out_dir, samples):
     ainfo = []
-    for prefix in prefixes:
-        sam_out_dir = join(out_dir, prefix)
-        sam_a = [
-            ArtifactInfo('clean paired R1', 'per_sample_FASTQ',
-                         [(join(sam_out_dir, '%s_paired_1.fastq' % prefix),
-                          'per_sample_FASTQ')]),
-            ArtifactInfo('clean paired R2', 'per_sample_FASTQ',
-                         [(join(sam_out_dir, '%s_paired_2.fastq' % prefix),
-                          'per_sample_FASTQ')]),
-            ArtifactInfo('clean unpaired R1', 'per_sample_FASTQ',
-                         [(join(sam_out_dir, '%s_unmatched_1.fastq' % prefix),
-                          'per_sample_FASTQ')]),
-            ArtifactInfo('clean unpaired R2', 'per_sample_FASTQ',
-                         [(join(sam_out_dir, '%s_unmatched_2.fastq' % prefix),
-                          'per_sample_FASTQ')])]
-        ainfo += sam_a
+    for run_prefix, sample, f_fp, r_fp in samples:
+        sam_out_dir = join(out_dir, run_prefix)
+
+        if r_fp:
+            ainfo.extend([
+                ArtifactInfo('clean paired R1', 'per_sample_FASTQ',
+                             [(join(sam_out_dir, '%s_paired_1.fastq' % prefix),
+                              'per_sample_FASTQ')]),
+                ArtifactInfo('clean paired R2', 'per_sample_FASTQ',
+                             [(join(sam_out_dir, '%s_paired_2.fastq' % prefix),
+                              'per_sample_FASTQ')]),
+                ArtifactInfo('clean unpaired R1', 'per_sample_FASTQ',
+                             [(join(sam_out_dir, '%s_unmatched_1.fastq' % prefix),
+                              'per_sample_FASTQ')]),
+                ArtifactInfo('clean unpaired R2', 'per_sample_FASTQ',
+                             [(join(sam_out_dir, '%s_unmatched_2.fastq' % prefix),
+                              'per_sample_FASTQ')])]
+        else:
+            ainfo += [
+                ArtifactInfo('cleaned reads', 'per_sample_FASTQ',
+                             [(join(sam_out_dir, '%s.fastq' % prefix),
+                              'per_sample_FASTQ')])])
 
     return ainfo
 
