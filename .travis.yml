@@ -40,5 +40,7 @@ services:
 after_script:
   - kill $QIITA_PID
   - qiita-env stop_cluster qiita-general
+  - qiita-env drop
+  - rm $PWD/miniconda3
 after_success:
   - coveralls
