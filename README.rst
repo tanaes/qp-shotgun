@@ -25,7 +25,7 @@ The default pipeline is:
 
 Note that HUMAnN2 depends on `metaphlan2 <https://bitbucket.org/biobakery/metaphlan2/get/default.zip>`__ but neither the HUMAnN2 or this plugin automatically install that dependency. Remember that you need to put the `db_v20` folder in the path that the `metaphlan2.py` executable.
 
-.. |Build Status| image:: https://travis-ci.org/qiita-spots/qp-shotgun.svg?branch=master
-   :target: https://travis-ci.org/qiita-spots/qp-shotgun
+.. |Build Status| image:: http://kl-ci.ucsd.edu:8080/job/qp-shotgun-job/badge/icon
+   :target: http://kl-ci.ucsd.edu:8080/job/qp-shotgun-job/
 .. |Coverage Status| image:: https://coveralls.io/repos/github/qiita-spots/qp-shotgun/badge.svg?branch=master
    :target: https://coveralls.io/github/qiita-spots/qp-shotgun?branch=master
