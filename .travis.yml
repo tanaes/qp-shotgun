@@ -39,10 +39,10 @@ services:
   - postgresql
 after_success:
   - coveralls
-  - if [ -n "$QIITA_PID" ]; then kill $QIITA_PID; fi
+  - kill $QIITA_PID
   - qiita-env stop_cluster qiita-general
   - qiita-env drop
 after_failure:
-  - if [ -n "$QIITA_PID" ]; then kill $QIITA_PID; fi
+  - kill $QIITA_PID
   - qiita-env stop_cluster qiita-general
   - qiita-env drop
