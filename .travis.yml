@@ -26,6 +26,7 @@ install:
 before_script:
   - export MOI_CONFIG_FP=$HOME/miniconda3/envs/qiita_env/lib/python2.7/site-packages/qiita_core/support_files/config_test.cfg
   - qiita pet webserver start &
+  - export QIITA_PID=$!
 script:
   - sleep 5 # give enough time to the webserver to start
   - configure_shotgun --env-script "source activate qp-shotgun" --server-cert $QIITA_SERVER_CERT
@@ -36,5 +37,8 @@ addons:
 services:
   - redis-server
   - postgresql
+after_script:
+  - kill $QIITA_PID
+  - qiita-env stop_cluster qiita-general
 after_success:
   - coveralls
