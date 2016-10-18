@@ -6,6 +6,7 @@
 # The full license is in the file LICENSE, distributed with this software.
 # -----------------------------------------------------------------------------
 
+from itertools import zip_longest
 from os.path import basename, join
 
 from qiita_client import ArtifactInfo
@@ -59,46 +60,47 @@ def make_read_pairs_per_sample(forward_seqs, reverse_seqs, map_file):
 
     # make pairings
     samples = []
-    used_prefixes = []
-    for i, f_fp in enumerate(forward_seqs):
-        # f_fp is the fwd read filepath
-        f_fn = basename(f_fp)
+    used_prefixes = set()
+    for i, (fwd_fp, rev_fp) in enumerate(zip_longest(forward_seqs,
+                                                     reverse_seqs)):
+        # fwd_fp is the fwd read filepath
+        fwd_fn = basename(fwd_fp)
 
         # iterate over run prefixes and make sure only one matches
         run_prefix = None
         for rp in sn_by_rp:
-            if f_fn.startswith(rp) and run_prefix is None:
+            if fwd_fn.startswith(rp) and run_prefix is None:
                 run_prefix = rp
-            elif f_fn.startswith(rp) and run_prefix is not None:
+            elif fwd_fn.startswith(rp) and run_prefix is not None:
                 raise ValueError('Multiple run prefixes match this fwd read: '
-                                 '%s' % f_fn)
+                                 '%s' % fwd_fn)
 
         # make sure that we got one matching run prefix:
         if run_prefix is None:
             raise ValueError('No run prefix matching this fwd read: %s'
-                             % f_fn)
+                             % fwd_fn)
 
         if run_prefix in used_prefixes:
             raise ValueError('This run prefix matches multiple fwd reads: '
                              '%s' % run_prefix)
 
-        # if we have reverse reads, make sure the matching pair also
-        # matches the run prefix:
-        if (reverse_seqs and not
-                basename(reverse_seqs[i]).startswith(run_prefix)):
-            raise ValueError('Reverse read does not match this run prefix. '
-                             'Run prefix: %s\nForward read: %s\n'
-                             'Reverse read: %s\n' %
-                             (run_prefix, f_fn, basename(reverse_seqs[i])))
-
-        used_prefixes.append(run_prefix)
-        # create the tuple for this read set
-        if reverse_seqs:
-            samples.append((run_prefix, sn_by_rp[run_prefix], f_fp,
-                            reverse_seqs[i]))
+        if rev_fp is None:
+            samples.append((run_prefix, sn_by_rp[run_prefix], fwd_fp, None))
         else:
-            samples.append((run_prefix, sn_by_rp[run_prefix], f_fp, None))
-
+            rev_fn = basename(rev_fp)
+            # if we have reverse reads, make sure the matching pair also
+            # matches the run prefix:
+            if not rev_fn.startswith(run_prefix):
+                raise ValueError('Reverse read does not match this run prefix.'
+                                 '\nRun prefix: %s\nForward read: %s\n'
+                                 'Reverse read: %s\n' %
+                                 (run_prefix, fwd_fn, rev_fn))
+                
+            samples.append((run_prefix, sn_by_rp[run_prefix], fwd_fp,
+                                rev_fp))
+        
+        used_prefixes.add(run_prefix)
+        
     return(samples)
 
 
@@ -109,10 +111,10 @@ def format_kneaddata_params(parameters):
     for param in sorted(parameters):
         value = parameters[param]
 
-        if str(value) == 'True':
+        if value is True:
             params.append('--%s' % param)
             continue
-        elif str(value) == 'False':
+        elif value is False:
             continue
         elif value:
             params.append('--%s %s' % (param, value))
@@ -142,11 +144,10 @@ def generate_kneaddata_commands(forward_seqs, reverse_seqs, map_file,
 
     Returns
     -------
-    list of str
+    cmds: list of str
         The KneadData commands
-    list of str
-        The run prefixes used
-
+    samples: list of tup
+        list of 3-tuples with run prefix, sample name, fwd read fp, rev read fp
 
     Raises
     ------
