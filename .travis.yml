@@ -20,11 +20,11 @@ install:
   - ipython profile create qiita-general --parallel
   - qiita-env start_cluster qiita-general
   - qiita-env make --no-load-ontologies
-  - export QIITA_SERVER_CERT=$HOME/miniconda3/envs/qiita_env/lib/python2.7/site-packages/qiita_core/support_files/server.crt
+  - export QIITA_SERVER_CERT=$PWD/miniconda3/envs/qiita_env/lib/python2.7/site-packages/qiita_core/support_files/server.crt
   - pip install https://github.com/qiita-spots/qiita_client/archive/master.zip
   - pip install .
 before_script:
-  - export MOI_CONFIG_FP=$HOME/miniconda3/envs/qiita_env/lib/python2.7/site-packages/qiita_core/support_files/config_test.cfg
+  - export MOI_CONFIG_FP=$PWD/miniconda3/envs/qiita_env/lib/python2.7/site-packages/qiita_core/support_files/config_test.cfg
   - qiita pet webserver start &
   - export QIITA_PID=$!
 script:
@@ -37,9 +37,12 @@ addons:
 services:
   - redis-server
   - postgresql
-after_script:
+after_success:
+  - coveralls
   - kill $QIITA_PID
   - qiita-env stop_cluster qiita-general
   - qiita-env drop
-after_success:
-  - coveralls
+after_failure:
+  - kill $QIITA_PID
+  - qiita-env stop_cluster qiita-general
+  - qiita-env drop
