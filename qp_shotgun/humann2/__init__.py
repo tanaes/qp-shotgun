@@ -62,8 +62,9 @@ opt_params = {
     'input-format': ['choice:["", "fastq", "fastq.gz", "fasta", "fasta.gz", '
                      '"sam", "bam", "blastm8", "genetable", "biom"]', ''],
     'pathways': ['choice:["metacyc", "unipathway"]', 'metacyc'],
-    'memory-use': ['choice:["minimum", "maximum"]', 'minimum']}
-outputs = {'per_sample_FASTQ': 'per_sample_FASTQ'}
+    'memory-use': ['choice:["minimum", "maximum"]', 'minimum'],
+    'remove-column-description-output': ['boolean', 'True']}
+outputs = {'BIOM': 'HUMAnN2 output'}
 dflt_param_set = {
     'Defaults': {
         'nucleotide-database': 'chocophlan', 'protein-database': 'uniref',

@@ -7,10 +7,11 @@
 #
 # The full license is in the file LICENSE, distributed with this software.
 # -----------------------------------------------------------------------------
+
 from setuptools import setup
-from glob import glob
 
 __version__ = "0.1.0-dev"
+
 
 classes = """
     Development Status :: 3 - Alpha
@@ -24,6 +25,7 @@ classes = """
     Operating System :: POSIX :: Linux
     Operating System :: MacOS :: MacOS X
 """
+
 
 with open('README.rst') as f:
     long_description = f.read()
@@ -41,7 +43,7 @@ setup(name='qp-shotgun',
       test_suite='nose.collector',
       packages=['qp_shotgun', 'qp_shotgun/humann2'],
       package_data={'qp_shotgun': ['support_files/config_file.cfg']},
-      scripts=glob('scripts/*'),
+      scripts=['scripts/configure_shotgun', 'scripts/start_shotgun'],
       extras_require={'test': ["nose >= 0.10.1", "pep8"]},
       install_requires=['click >= 3.3', 'future', 'pandas >= 0.15', 'humann2',
                         'h5py >= 2.3.1', 'biom-format'],
