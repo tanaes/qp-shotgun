@@ -10,7 +10,7 @@ before_install:
   # Update conda itself
   - conda update --yes conda
 install:
-  # At this moment, this plugin depends on qiita, so install everything in the same environment
+  # At this moment this plugin has overlapping dependencies than qiita so installing everything in the same environment
   - conda create --yes -n qiita_env python=2.7 pip nose flake8
     pyzmq networkx pyparsing natsort mock future libgfortran
     'pandas>=0.18' 'scipy>0.13.0' 'numpy>=1.7' 'h5py>=2.3.1' matplotlib
@@ -23,12 +23,21 @@ install:
   - export TRIMMOMATIC_DIR=`dirname $TRIMMOMATIC_BIN`
   - export KD_DEMO_DB=$PWD/miniconda3/envs/qiita_env/lib/python2.7/site-packages/kneaddata/tests/data/demo_bowtie2_db/demo_db
   - pip install https://github.com/biocore/qiita/archive/master.zip --process-dependency-links
+  # installing other deps
+  - conda install --yes -c jjhelmus glpk
+  - conda install --yes -c bioconda diamond bowtie2 trimmomatic=0.36 fastqc=0.11.5
+  #
   - ipython profile create qiita-general --parallel
   - qiita-env start_cluster qiita-general
   - qiita-env make --no-load-ontologies
   - export QIITA_SERVER_CERT=$PWD/miniconda3/envs/qiita_env/lib/python2.7/site-packages/qiita_core/support_files/server.crt
   - pip install https://github.com/qiita-spots/qiita_client/archive/master.zip
   - pip install .
+  - wget https://bitbucket.org/biobakery/metaphlan2/get/default.zip
+  - unzip default.zip 'biobakery-metaphlan2*/db_v20/*' 'biobakery-metaphlan2*/metaphlan2.py'
+  - export HUMANN2_BIN=`which humann2`
+  - export HUMANN2_DIR=`dirname $HUMANN2_BIN`
+  - mv biobakery-metaphlan2*/metaphlan2.py biobakery-metaphlan2*/db_v20 $HUMANN2_DIR
 before_script:
   - export MOI_CONFIG_FP=$PWD/miniconda3/envs/qiita_env/lib/python2.7/site-packages/qiita_core/support_files/config_test.cfg
   - qiita pet webserver start &
