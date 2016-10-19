@@ -259,9 +259,9 @@ class KneaddataTests(PluginTestCase):
             'MINLEN:36"']
 
         exp_sample = [
-               ('s1', 'SKB8.640193', 'fastq/s1.fastq', 'fastq/s1.R2.fastq'),
-               ('s2', 'SKD8.640184', 'fastq/s2.fastq.gz', 'fastq/s2.R2.fastq.gz'),
-               ('s3', 'SKB7.640196', 'fastq/s3.fastq', 'fastq/s3.R2.fastq')]
+            ('s1', 'SKB8.640193', 'fastq/s1.fastq', 'fastq/s1.R2.fastq'),
+            ('s2', 'SKD8.640184', 'fastq/s2.fastq.gz', 'fastq/s2.R2.fastq.gz'),
+            ('s3', 'SKB7.640196', 'fastq/s3.fastq', 'fastq/s3.R2.fastq')]
 
         obs_cmd, obs_sample = generate_kneaddata_commands(
             ['fastq/s1.fastq', 'fastq/s2.fastq.gz', 'fastq/s3.fastq'],
