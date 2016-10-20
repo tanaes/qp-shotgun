@@ -39,6 +39,10 @@ def make_read_pairs_per_sample(forward_seqs, reverse_seqs, map_file):
 
     Notes
     -----
+    At this stage it is required that if reverse sequences are present that all
+    samples have both a forward and a reverse sequence. However, the read
+    trimming step can sometimes eliminate all reverse reads, especially in low
+    coverage samples with poor overall reverse read quality. 
     """
 
     # sort forward seqs
@@ -157,6 +161,10 @@ def generate_kneaddata_commands(forward_seqs, reverse_seqs, map_file,
 
     Notes
     -----
+    Currently this is requiring matched pairs in the make_read_pairs_per_sample
+    step but implicitly allowing empty reverse reads in the actual command
+    generation. This behavior may allow support of situations with empty
+    reverse reads in some samples, for example after trimming and QC.
     """
     # making sure the forward and reverse reads are in the same order
 
