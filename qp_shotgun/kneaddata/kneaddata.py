@@ -42,7 +42,7 @@ def make_read_pairs_per_sample(forward_seqs, reverse_seqs, map_file):
     At this stage it is required that if reverse sequences are present that all
     samples have both a forward and a reverse sequence. However, the read
     trimming step can sometimes eliminate all reverse reads, especially in low
-    coverage samples with poor overall reverse read quality. 
+    coverage samples with poor overall reverse read quality.
     """
 
     # sort forward seqs
