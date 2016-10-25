@@ -135,7 +135,7 @@ def humann2(qclient, job_id, parameters, out_dir):
         The results of the job
     """
     # Step 1 get the rest of the information need to run humann2
-    qclient.update_job_step(job_id, "Step 1 of 5: Collecting information")
+    qclient.update_job_step(job_id, "Step 1 of 6: Collecting information")
     artifact_id = parameters['input']
     # removing input from parameters so it's not part of the final command
     del parameters['input']
@@ -150,14 +150,14 @@ def humann2(qclient, job_id, parameters, out_dir):
     qiime_map = prep_info['qiime-map']
 
     # Step 2 generating command humann2
-    qclient.update_job_step(job_id, "Step 2 of 5: Generating HUMANn2 command")
+    qclient.update_job_step(job_id, "Step 2 of 6: Generating HUMANn2 command")
     rs = fps['raw_reverse_seqs'] if 'raw_reverse_seqs' in fps else []
     commands = generate_humann2_analysis_commands(fps['raw_forward_seqs'], rs,
                                                   qiime_map, out_dir,
                                                   parameters)
 
     # Step 3 execute humann2
-    msg = "Step 3 of 5: Executing HUMANn2 job (%d/{0})".format(len(commands))
+    msg = "Step 3 of 6: Executing HUMANn2 job (%d/{0})".format(len(commands))
     success, msg = _run_commands(qclient, job_id, commands, msg)
     if not success:
         return False, None, msg
@@ -173,7 +173,7 @@ def humann2(qclient, job_id, parameters, out_dir):
     commands.append(('humann2_join_tables -i {0} -o {0}/pathabundance.biom '
                      '--file_name pathabundance --search-subdirectories '
                      '--verbose').format(out_dir))
-    msg = "Step 4 of 5: Merging resulting tables job (%d/3)"
+    msg = "Step 4 of 6: Merging resulting tables job (%d/3)"
     success, msg = _run_commands(qclient, job_id, commands, msg)
     if not success:
         return False, None, msg
@@ -186,13 +186,24 @@ def humann2(qclient, job_id, parameters, out_dir):
                      '-o {0}/pathcoverage_relab.biom').format(out_dir))
     commands.append(('humann2_renorm_table -i {0}/pathabundance.biom -u relab '
                      '-o {0}/pathabundance_relab.biom').format(out_dir))
-    msg = "Step 5 of 5: Re-normalizing tables (%d/3)"
+    msg = "Step 5 of 6: Re-normalizing tables (%d/3)"
+    success, msg = _run_commands(qclient, job_id, commands, msg)
+    if not success:
+        return False, None, msg
+
+    # Step 6 stratifiying re-normalized tables
+    commands = []
+    pb = partial(join, out_dir)
+    cmd = "humann2_split_stratified_table --input %s --output %s"
+    commands.append(cmd % (pb(out_dir, 'genefamilies_cpm.biom'), out_dir))
+    commands.append(cmd % (pb(out_dir, 'pathcoverage_relab.biom'), out_dir))
+    commands.append(cmd % (pb(out_dir, 'pathabundance_relab.biom'), out_dir))
+    msg = "Step 6 of 6: Stratifiying re-normalizing tables (%d/3)"
     success, msg = _run_commands(qclient, job_id, commands, msg)
     if not success:
         return False, None, msg
 
     # Generating 6 artifacts, separation is important for analysis
-    pb = partial(join, out_dir)
     ainfo = [
         ArtifactInfo('Gene family table', 'BIOM',
                      [(pb('genefamilies.biom'), 'biom')]),
@@ -205,6 +216,18 @@ def humann2(qclient, job_id, parameters, out_dir):
         ArtifactInfo('Path coverage RELAB table', 'BIOM',
                      [(pb('pathcoverage_relab.biom'), 'biom')]),
         ArtifactInfo('Path abundance RELAB table', 'BIOM',
-                     [(pb('pathabundance_relab.biom'), 'biom')])]
+                     [(pb('pathabundance_relab.biom'), 'biom')]),
+        ArtifactInfo('Gene family CMP table - stratified', 'BIOM',
+                     [(pb('genefamilies_cpm_stratified.biom'), 'biom')]),
+        ArtifactInfo('Path coverage RELAB table - stratified', 'BIOM',
+                     [(pb('pathcoverage_relab_stratified.biom'), 'biom')]),
+        ArtifactInfo('Path abundance RELAB table - stratified', 'BIOM',
+                     [(pb('pathabundance_relab_stratified.biom'), 'biom')]),
+        ArtifactInfo('Gene family CMP table - unstratified', 'BIOM',
+                     [(pb('genefamilies_cpm_unstratified.biom'), 'biom')]),
+        ArtifactInfo('Path coverage RELAB table - unstratified', 'BIOM',
+                     [(pb('pathcoverage_relab_unstratified.biom'), 'biom')]),
+        ArtifactInfo('Path abundance RELAB table - unstratified', 'BIOM',
+                     [(pb('pathabundance_relab_unstratified.biom'), 'biom')])]
 
     return True, ainfo, ""

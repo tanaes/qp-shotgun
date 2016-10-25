@@ -283,18 +283,25 @@ class Humann2Tests(PluginTestCase):
         self.assertEqual("", msg)
         self.assertTrue(success)
         # we are expecting 6 artifacts
-        self.assertEqual(6, len(ainfo))
+        self.assertEqual(12, len(ainfo))
 
         obs_fps = []
         for a in ainfo:
             self.assertEqual("BIOM", a.artifact_type)
             obs_fps.append(a.files)
-        exp_fps = [[(join(out_dir, 'genefamilies.biom'), 'biom')],
-                   [(join(out_dir, 'pathcoverage.biom'), 'biom')],
-                   [(join(out_dir, 'pathabundance.biom'), 'biom')],
-                   [(join(out_dir, 'genefamilies_cpm.biom'), 'biom')],
-                   [(join(out_dir, 'pathcoverage_relab.biom'), 'biom')],
-                   [(join(out_dir, 'pathabundance_relab.biom'), 'biom')]]
+        exp_fps = [
+            [(join(out_dir, 'genefamilies.biom'), 'biom')],
+            [(join(out_dir, 'pathcoverage.biom'), 'biom')],
+            [(join(out_dir, 'pathabundance.biom'), 'biom')],
+            [(join(out_dir, 'genefamilies_cpm.biom'), 'biom')],
+            [(join(out_dir, 'pathcoverage_relab.biom'), 'biom')],
+            [(join(out_dir, 'pathabundance_relab.biom'), 'biom')],
+            [(join(out_dir, 'genefamilies_cpm_stratified.biom'), 'biom')],
+            [(join(out_dir, 'pathcoverage_relab_stratified.biom'), 'biom')],
+            [(join(out_dir, 'pathabundance_relab_stratified.biom'), 'biom')],
+            [(join(out_dir, 'genefamilies_cpm_unstratified.biom'), 'biom')],
+            [(join(out_dir, 'pathcoverage_relab_unstratified.biom'), 'biom')],
+            [(join(out_dir, 'pathabundance_relab_unstratified.biom'), 'biom')]]
         self.assertItemsEqual(exp_fps, obs_fps)
 
 
