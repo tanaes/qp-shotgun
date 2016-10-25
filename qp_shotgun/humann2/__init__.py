@@ -64,7 +64,19 @@ opt_params = {
     'pathways': ['choice:["metacyc", "unipathway"]', 'metacyc'],
     'memory-use': ['choice:["minimum", "maximum"]', 'minimum'],
     'remove-column-description-output': ['boolean', 'True']}
-outputs = {'BIOM': 'HUMAnN2 output'}
+outputs = {
+    'Gene family table': 'BIOM',
+    'Path coverage table': 'BIOM',
+    'Path abundance table': 'BIOM',
+    'Gene family CMP table': 'BIOM',
+    'Path coverage RELAB table': 'BIOM',
+    'Path abundance RELAB table': 'BIOM',
+    'Gene family CMP table - stratified': 'BIOM',
+    'Path coverage RELAB table - stratified': 'BIOM',
+    'Path abundance RELAB table - stratified': 'BIOM',
+    'Gene family CMP table - unstratified': 'BIOM',
+    'Path coverage RELAB table - unstratified': 'BIOM',
+    'Path abundance RELAB table - unstratified': 'BIOM'}
 dflt_param_set = {
     'Defaults': {
         'nucleotide-database': 'chocophlan', 'protein-database': 'uniref',
