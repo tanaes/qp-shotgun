@@ -75,7 +75,7 @@ dflt_param_set = {
         'nucleotide-database': 'default', 'protein-database': 'default',
         'bypass-prescreen': False, 'bypass-nucleotide-index': False,
         'bypass-translated-search': False, 'bypass-nucleotide-search': False,
-        'annotation-gene-index': 8, 'evalue': 1.0, 
+        'annotation-gene-index': 8, 'evalue': 1.0,
         'metaphlan-options': '-t rel_ab', 'log-level': 'DEBUG',
         'remove-temp-output': False, 'threads': 1,
         'prescreen-threshold': 0.01, 'identity-threshold': 50.0,
