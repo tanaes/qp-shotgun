@@ -16,7 +16,7 @@ from os.path import exists, isdir, basename, join
 from qiita_client.testing import PluginTestCase
 
 
-from qp_shotgun.humann2 import plugin
+from qp_shotgun import plugin
 from qp_shotgun.humann2.humann2 import (
     humann2, generate_humann2_analysis_commands)
 
@@ -270,7 +270,7 @@ class Humann2Tests(PluginTestCase):
         self.params['nucleotide-database'] = ''
         self.params['protein-database'] = ''
         data = {'user': 'demo@microbio.me',
-                'command': dumps(['HUMAnN2', '0.9.1', 'HUMAnN2']),
+                'command': dumps(['qp-shotgun', '0.0.1', 'HUMAnN2 0.9.1']),
                 'status': 'running',
                 'parameters': dumps(self.params)}
         jid = self.qclient.post('/apitest/processing_job/', data=data)['job']

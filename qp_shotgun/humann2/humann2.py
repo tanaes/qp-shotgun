@@ -91,7 +91,7 @@ def generate_humann2_analysis_commands(forward_seqs, reverse_seqs, map_file,
     cmds = []
     params = []
     for k, v in viewitems(parameters):
-        if not v:
+        if v is False or v in ['False', 'default']:
             continue
         if v is True or v == 'True':
             params.append('--%s' % k)

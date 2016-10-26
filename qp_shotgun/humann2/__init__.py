@@ -26,8 +26,8 @@ opt_params = {
     # id-mapping
     # pathways-database
     # o-log
-    'nucleotide-database': ['choice:["chocophlan"]', 'chocophlan'],
-    'protein-database': ['choice:["uniref"]', 'uniref'],
+    'nucleotide-database': ['choice:["default"]', 'default'],
+    'protein-database': ['choice:["default"]', 'default'],
     'bypass-prescreen': ['boolean', 'False'],
     'bypass-nucleotide-index': ['boolean', 'False'],
     'bypass-translated-search': ['boolean', 'False'],
@@ -73,7 +73,7 @@ outputs = {
     'Path abundance RELAB table - unstratified': 'BIOM'}
 dflt_param_set = {
     'Defaults': {
-        'nucleotide-database': 'chocophlan', 'protein-database': 'uniref',
+        'nucleotide-database': 'default', 'protein-database': 'default',
         'bypass-prescreen': False, 'bypass-nucleotide-index': False,
         'bypass-translated-search': False, 'bypass-nucleotide-search': False,
         'annotation-gene-index': 8, 'evalue': 1.0, 'search-mode': '',
