@@ -89,5 +89,5 @@ dflt_param_set = {
         'input-format': '', 'pathways': 'metacyc', 'memory-use': 'minimum'}
 }
 humann2_cmd = QiitaCommand(
-    "HUMAnN2", "Community profiling", humann2, req_params, opt_params,
+    "HUMAnN2 0.9.1", "Community profiling", humann2, req_params, opt_params,
     outputs, dflt_param_set)
