@@ -6,17 +6,11 @@
 # The full license is in the file LICENSE, distributed with this software.
 # -----------------------------------------------------------------------------
 
-from qiita_client import QiitaPlugin, QiitaCommand
+from qiita_client import QiitaCommand
 
 from .humann2 import humann2
 
 __all__ = ['humann2']
-
-
-# Initialize the plugin
-plugin = QiitaPlugin(
-    'HUMAnN2', '0.9.1', 'HUMAnN2 is the next generation of HUMAnN (HMP '
-    'Unified Metabolic Analysis Network)')
 
 # Define the HUMAnN2 command
 req_params = {'input': ('artifact', ['per_sample_FASTQ'])}
@@ -95,6 +89,5 @@ dflt_param_set = {
         'input-format': '', 'pathways': 'metacyc', 'memory-use': 'minimum'}
 }
 humann2_cmd = QiitaCommand(
-    "HUMAnN2", "Community profiling", humann2, req_params, opt_params,
+    "HUMAnN2 0.9.1", "Community profiling", humann2, req_params, opt_params,
     outputs, dflt_param_set)
-plugin.register_command(humann2_cmd)
