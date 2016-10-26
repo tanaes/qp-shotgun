@@ -89,8 +89,14 @@ def generate_humann2_analysis_commands(forward_seqs, reverse_seqs, map_file,
             % ', '.join(sn_by_rp.keys()))
 
     cmds = []
-    params = ['--%s "%s"' % (k, v) if v is not True else '--%s' % k
-              for k, v in viewitems(parameters) if v]
+    params = []
+    for k, v in viewitems(parameters):
+        if not v:
+            continue
+        if v is True or v == 'True':
+            params.append('--%s' % k)
+        else:
+            params.append('--%s "%s"' % (k, v))
     for ffn, fn, s in samples:
         od = join(out_dir, fn)
         # just making sure the output directory exists
