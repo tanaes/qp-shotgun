@@ -12,7 +12,6 @@ from .humann2 import humann2_cmd
 
 # Initialize the plugin
 plugin = QiitaPlugin(
-    'HUMAnN2', '0.9.1', 'HUMAnN2 is the next generation of HUMAnN (HMP '
-    'Unified Metabolic Analysis Network)')
+    'qp-shotgun', '0.0.1', 'Analysis tools for shotgun data')
 
 plugin.register_command(humann2_cmd)
