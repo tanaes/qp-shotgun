@@ -16,7 +16,7 @@ from os.path import exists, isdir, basename, join
 from qiita_client.testing import PluginTestCase
 
 
-from qp_shotgun.humann2 import plugin
+from qp_shotgun import plugin
 from qp_shotgun.humann2.humann2 import (
     humann2, generate_humann2_analysis_commands)
 
@@ -25,11 +25,11 @@ class Humann2Tests(PluginTestCase):
     def setUp(self):
         plugin("https://localhost:21174", 'register', 'ignored')
         self.params = {
-            'nucleotide-database': 'chocophlan', 'protein-database': 'uniref',
+            'nucleotide-database': 'default', 'protein-database': 'default',
             'bypass-prescreen': False, 'bypass-nucleotide-index': False,
             'bypass-translated-search': False,
             'bypass-nucleotide-search': False,
-            'annotation-gene-index': 8, 'evalue': 1.0, 'search-mode': '',
+            'annotation-gene-index': 8, 'evalue': 1.0,
             'metaphlan-options': '-t rel_ab', 'log-level': 'DEBUG',
             'remove-temp-output': False, 'threads': 1,
             'prescreen-threshold': 0.01, 'identity-threshold': 50.0,
@@ -39,7 +39,7 @@ class Humann2Tests(PluginTestCase):
             'xipe': 'off', 'minpath': 'on', 'pick-frames': 'off',
             'gap-fill': 'off', 'output-format': 'biom',
             'output-max-decimals': 10, 'remove-stratified-output': False,
-            'input-format': '', 'pathways': 'metacyc',
+            'pathways': 'metacyc',
             'memory-use': 'minimum', 'remove-column-description-output': True}
         self._clean_up_files = []
 
@@ -91,9 +91,9 @@ class Humann2Tests(PluginTestCase):
             '--prescreen-threshold "0.01" '
             '--translated-subject-coverage-threshold "50.0" --evalue "1.0" '
             '--minpath "on" --output-max-decimals "10" '
-            '--nucleotide-database "chocophlan" --memory-use "minimum" '
+            '--memory-use "minimum" '
             '--xipe "off" --annotation-gene-index "8" '
-            '--protein-database "uniref" --threads "1" --pathways "metacyc" '
+            '--threads "1" --pathways "metacyc" '
             '--pick-frames "off" --translated-alignment "diamond" '
             '--remove-column-description-output --log-level "DEBUG"' % out_dir,
             'humann2 --input "fastq/s2.fastq.gz" --output "%s/s2" '
@@ -105,9 +105,9 @@ class Humann2Tests(PluginTestCase):
             '--prescreen-threshold "0.01" '
             '--translated-subject-coverage-threshold "50.0" --evalue "1.0" '
             '--minpath "on" --output-max-decimals "10" '
-            '--nucleotide-database "chocophlan" --memory-use "minimum" '
+            '--memory-use "minimum" '
             '--xipe "off" --annotation-gene-index "8" '
-            '--protein-database "uniref" --threads "1" --pathways "metacyc" '
+            '--threads "1" --pathways "metacyc" '
             '--pick-frames "off" --translated-alignment "diamond" '
             '--remove-column-description-output --log-level "DEBUG"' % out_dir,
             'humann2 --input "fastq/s3.fastq" --output "%s/s3" '
@@ -119,9 +119,9 @@ class Humann2Tests(PluginTestCase):
             '--prescreen-threshold "0.01" '
             '--translated-subject-coverage-threshold "50.0" --evalue "1.0" '
             '--minpath "on" --output-max-decimals "10" '
-            '--nucleotide-database "chocophlan" --memory-use "minimum" '
+            '--memory-use "minimum" '
             '--xipe "off" --annotation-gene-index "8" '
-            '--protein-database "uniref" --threads "1" --pathways "metacyc" '
+            '--threads "1" --pathways "metacyc" '
             '--pick-frames "off" --translated-alignment "diamond" '
             '--remove-column-description-output --log-level "DEBUG"' % out_dir]
         obs = generate_humann2_analysis_commands(
@@ -149,9 +149,9 @@ class Humann2Tests(PluginTestCase):
             '--prescreen-threshold "0.01" '
             '--translated-subject-coverage-threshold "50.0" --evalue "1.0" '
             '--minpath "on" --output-max-decimals "10" '
-            '--nucleotide-database "chocophlan" --memory-use "minimum" '
+            '--memory-use "minimum" '
             '--xipe "off" --annotation-gene-index "8" '
-            '--protein-database "uniref" --threads "1" --pathways "metacyc" '
+            '--threads "1" --pathways "metacyc" '
             '--pick-frames "off" --translated-alignment "diamond" '
             '--remove-column-description-output --log-level "DEBUG"' % out_dir,
             'humann2 --input "fastq/s1.R2.fastq" --output "%s/s1.R2" '
@@ -163,9 +163,9 @@ class Humann2Tests(PluginTestCase):
             '--prescreen-threshold "0.01" '
             '--translated-subject-coverage-threshold "50.0" --evalue "1.0" '
             '--minpath "on" --output-max-decimals "10" '
-            '--nucleotide-database "chocophlan" --memory-use "minimum" '
+            '--memory-use "minimum" '
             '--xipe "off" --annotation-gene-index "8" '
-            '--protein-database "uniref" --threads "1" '
+            '--threads "1" '
             '--pathways "metacyc" --pick-frames "off" '
             '--translated-alignment "diamond" '
             '--remove-column-description-output --log-level "DEBUG"' % out_dir,
@@ -178,9 +178,9 @@ class Humann2Tests(PluginTestCase):
             '--prescreen-threshold "0.01" '
             '--translated-subject-coverage-threshold "50.0" --evalue "1.0" '
             '--minpath "on" --output-max-decimals "10" '
-            '--nucleotide-database "chocophlan" --memory-use "minimum" '
-            '--xipe "off" --annotation-gene-index "8" --protein-database '
-            '"uniref" --threads "1" --pathways "metacyc" --pick-frames "off" '
+            '--memory-use "minimum" '
+            '--xipe "off" --annotation-gene-index "8" '
+            '--threads "1" --pathways "metacyc" --pick-frames "off" '
             '--translated-alignment "diamond" '
             '--remove-column-description-output --log-level "DEBUG"' % out_dir,
             'humann2 --input "fastq/s2.R2.fastq.gz" --output "%s/s2.R2" '
@@ -192,9 +192,9 @@ class Humann2Tests(PluginTestCase):
             '--prescreen-threshold "0.01" '
             '--translated-subject-coverage-threshold "50.0" '
             '--evalue "1.0" --minpath "on" --output-max-decimals "10" '
-            '--nucleotide-database "chocophlan" --memory-use "minimum" '
+            '--memory-use "minimum" '
             '--xipe "off" --annotation-gene-index "8" '
-            '--protein-database "uniref" --threads "1" --pathways "metacyc" '
+            '--threads "1" --pathways "metacyc" '
             '--pick-frames "off" --translated-alignment "diamond" '
             '--remove-column-description-output --log-level "DEBUG"' % out_dir,
             'humann2 --input "fastq/s3.fastq" --output "%s/s3" '
@@ -206,9 +206,9 @@ class Humann2Tests(PluginTestCase):
             '--prescreen-threshold "0.01" '
             '--translated-subject-coverage-threshold "50.0" '
             '--evalue "1.0" --minpath "on" --output-max-decimals "10" '
-            '--nucleotide-database "chocophlan" --memory-use "minimum" '
+            '--memory-use "minimum" '
             '--xipe "off" --annotation-gene-index "8" '
-            '--protein-database "uniref" --threads "1" --pathways "metacyc" '
+            '--threads "1" --pathways "metacyc" '
             '--pick-frames "off" --translated-alignment "diamond" '
             '--remove-column-description-output --log-level "DEBUG"' % out_dir,
             'humann2 --input "fastq/s3.R2.fastq" --output "%s/s3.R2" '
@@ -220,9 +220,9 @@ class Humann2Tests(PluginTestCase):
             '--prescreen-threshold "0.01" '
             '--translated-subject-coverage-threshold "50.0" --evalue "1.0" '
             '--minpath "on" --output-max-decimals "10" '
-            '--nucleotide-database "chocophlan" --memory-use "minimum" '
+            '--memory-use "minimum" '
             '--xipe "off" --annotation-gene-index "8" '
-            '--protein-database "uniref" --threads "1" --pathways "metacyc" '
+            '--threads "1" --pathways "metacyc" '
             '--pick-frames "off" --translated-alignment "diamond" '
             '--remove-column-description-output --log-level "DEBUG"' % out_dir]
         obs = generate_humann2_analysis_commands(
@@ -270,7 +270,7 @@ class Humann2Tests(PluginTestCase):
         self.params['nucleotide-database'] = ''
         self.params['protein-database'] = ''
         data = {'user': 'demo@microbio.me',
-                'command': dumps(['HUMAnN2', '0.9.1', 'HUMAnN2']),
+                'command': dumps(['qp-shotgun', '0.0.1', 'HUMAnN2 0.9.1']),
                 'status': 'running',
                 'parameters': dumps(self.params)}
         jid = self.qclient.post('/apitest/processing_job/', data=data)['job']
