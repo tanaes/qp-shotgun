@@ -223,23 +223,20 @@ class KneaddataTests(PluginTestCase):
 
         exp_cmd = [
             'kneaddata --input "fastq/s1.fastq" --input "fastq/s1.R2.fastq" '
-            '--output "output/s1" --output-prefix "s1" '
-            '--log-level DEBUG --max-memory 500m '
-            '--processes 1 --quality-scores phred33 '
+            '--output "output/s1" --output-prefix "s1" --log-level DEBUG '
+            '--max-memory 500m --processes 1 --quality-scores phred33 '
             '--run-fastqc-end --run-fastqc-start --threads 1 '
             '--trimmomatic-options "LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 '
             'MINLEN:36"',
-            'kneaddata --input "fastq/s2.fastq.gz" --input '
-            '"fastq/s2.R2.fastq.gz" --output "output/s2" --output-prefix "s2" '
-            '--log-level DEBUG '
-            '--max-memory 500m --processes 1 --quality-scores phred33 '
-            '--run-fastqc-end --run-fastqc-start '
-            '--trimmomatic-options "LEADING:3 TRAILING:3 '
-            'SLIDINGWINDOW:4:15 MINLEN:36"',
+            'kneaddata --input "fastq/s2.fastq.gz" '
+            '--input "fastq/s2.R2.fastq.gz" --output "output/s2" '
+            '--output-prefix "s2" --log-level DEBUG --max-memory 500m '
+            '--processes 1 --quality-scores phred33 --run-fastqc-end '
+            '--run-fastqc-start --threads 1 --trimmomatic-options '
+            '"LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:36"',
             'kneaddata --input "fastq/s3.fastq" --input "fastq/s3.R2.fastq" '
-            '--output "output/s3" --output-prefix "s3" '
-            '--log-level DEBUG --max-memory 500m '
-            '--processes 1 --quality-scores phred33 '
+            '--output "output/s3" --output-prefix "s3" --log-level DEBUG '
+            '--max-memory 500m --processes 1 --quality-scores phred33 '
             '--run-fastqc-end --run-fastqc-start --threads 1 '
             '--trimmomatic-options "LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 '
             'MINLEN:36"']
@@ -253,9 +250,6 @@ class KneaddataTests(PluginTestCase):
             ['fastq/s1.fastq', 'fastq/s2.fastq.gz', 'fastq/s3.fastq'],
             ['fastq/s1.R2.fastq', 'fastq/s2.R2.fastq.gz', 'fastq/s3.R2.fastq'],
             fp, 'output', self.params)
-
-        print(obs_sample)
-        print(exp_sample)
 
         self.assertEqual(obs_cmd, exp_cmd)
         self.assertEqual(obs_sample, exp_sample)
