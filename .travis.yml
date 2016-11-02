@@ -13,7 +13,7 @@ install:
   # At this moment this plugin has overlapping dependencies than qiita so installing everything in the same environment
   - conda create --yes -n qiita_env python=2.7 pip nose flake8
     pyzmq networkx pyparsing natsort mock future libgfortran
-    'pandas>=0.18' 'scipy>0.13.0' 'numpy>=1.7' 'h5py>=2.3.1'
+    'pandas>=0.18' 'scipy>0.13.0' 'numpy>=1.7' 'h5py>=2.3.1' matplotlib
   - source activate qiita_env
   - pip install sphinx sphinx-bootstrap-theme coveralls ipython[all]==2.4.1
   - pip install https://github.com/biocore/qiita/archive/master.zip --process-dependency-links
