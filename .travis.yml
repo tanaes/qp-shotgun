@@ -26,7 +26,8 @@ install:
   - qiita-env make --no-load-ontologies
   - export QIITA_SERVER_CERT=$PWD/miniconda3/envs/qiita_env/lib/python2.7/site-packages/qiita_core/support_files/server.crt
   - pip install https://github.com/qiita-spots/qiita_client/archive/master.zip
-  - pip install . --user
+  - pip install kneaddata
+  - pip install .
   - wget https://bitbucket.org/biobakery/metaphlan2/get/default.zip
   - unzip default.zip 'biobakery-metaphlan2*/db_v20/*' 'biobakery-metaphlan2*/metaphlan2.py'
   - export HUMANN2_BIN=`which humann2`
