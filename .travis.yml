@@ -15,8 +15,8 @@ install:
     pyzmq networkx pyparsing natsort mock future libgfortran
     'pandas>=0.18' 'scipy>0.13.0' 'numpy>=1.7' 'h5py>=2.3.1' matplotlib
   - source activate qiita_env
-  - pip -U install sphinx sphinx-bootstrap-theme coveralls ipython[all]==2.4.1
-  - pip -U install https://github.com/biocore/qiita/archive/master.zip --process-dependency-links
+  - pip install -U sphinx sphinx-bootstrap-theme coveralls ipython[all]==2.4.1
+  - pip install -U https://github.com/biocore/qiita/archive/master.zip --process-dependency-links
   # installing other deps
   - conda install --yes -c jjhelmus glpk
   - conda install --yes -c bioconda diamond bowtie2 fastqc=0.11.5
@@ -25,8 +25,8 @@ install:
   - qiita-env start_cluster qiita-general
   - qiita-env make --no-load-ontologies
   - export QIITA_SERVER_CERT=$PWD/miniconda3/envs/qiita_env/lib/python2.7/site-packages/qiita_core/support_files/server.crt
-  - pip -U install https://github.com/qiita-spots/qiita_client/archive/master.zip
-  - pip -U install .
+  - pip install -U https://github.com/qiita-spots/qiita_client/archive/master.zip
+  - pip install -U .
   - wget --quiet https://bitbucket.org/biobakery/metaphlan2/get/default.zip
   - unzip -qq default.zip 'biobakery-metaphlan2*/db_v20/*' 'biobakery-metaphlan2*/metaphlan2.py'
   - export HUMANN2_BIN=`which humann2`
