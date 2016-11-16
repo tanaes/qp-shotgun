@@ -28,7 +28,7 @@ install:
   - pip install https://github.com/qiita-spots/qiita_client/archive/master.zip
   - pip install kneaddata
   - pip install .
-  - wget -quiet https://bitbucket.org/biobakery/metaphlan2/get/default.zip
+  - wget --quiet https://bitbucket.org/biobakery/metaphlan2/get/default.zip
   - unzip -qq default.zip 'biobakery-metaphlan2*/db_v20/*' 'biobakery-metaphlan2*/metaphlan2.py'
   - export HUMANN2_BIN=`which humann2`
   - export HUMANN2_DIR=`dirname $HUMANN2_BIN`
