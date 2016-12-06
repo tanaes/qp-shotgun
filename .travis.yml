@@ -29,6 +29,7 @@ install:
   - pip install .
   - wget --quiet https://bitbucket.org/biobakery/metaphlan2/get/default.zip
   - unzip -qq default.zip 'biobakery-metaphlan2*/db_v20/*' 'biobakery-metaphlan2*/metaphlan2.py'
+  - ln -s $PWD/miniconda3/envs/qiita_env/share/trimmomatic-0.36-3/trimmomatic.jar $PWD/miniconda3/envs/qiita_env/bin/trimmomatic.jar
   - export HUMANN2_BIN=`which humann2`
   - export HUMANN2_DIR=`dirname $HUMANN2_BIN`
   - mv biobakery-metaphlan2*/metaphlan2.py biobakery-metaphlan2*/db_v20 $HUMANN2_DIR
