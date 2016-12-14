@@ -31,8 +31,9 @@ class KneaddataTests(PluginTestCase):
         self.params = {
             'reference-db': 'default', 'bypass-trim': False, 'threads': 1,
             'processes': 1, 'quality-scores': 'phred33', 'run-bmtagger': False,
-            'run-trf': False, 'run-fastqc-start': True, 'run-fastqc-end': True,
-            'max-memory': '500m', 'trimmomatic-options': (
+            'run-trf': False, 'run-fastqc-start': True,
+            'run-fastqc-end': False, 'max-memory': '500m',
+            'trimmomatic-options': (
                 '"LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:36"')
         }
         self._clean_up_files = []
@@ -48,7 +49,7 @@ class KneaddataTests(PluginTestCase):
     def test_format_kneaddata_params(self):
         obs = _format_kneaddata_params(self.params)
         exp = ('--max-memory 500m --processes 1 --quality-scores phred33 '
-               '--run-fastqc-end --run-fastqc-start --threads 1 '
+               '--run-fastqc-start --threads 1 '
                '--trimmomatic-options "LEADING:3 '
                'TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:36"')
 
@@ -182,19 +183,19 @@ class KneaddataTests(PluginTestCase):
             'kneaddata --input "fastq/s1.fastq" '
             '--output "output/s1" --output-prefix "s1" '
             '--max-memory 500m --processes 1 --quality-scores phred33 '
-            '--run-fastqc-end --run-fastqc-start --threads 1 '
+            '--run-fastqc-start --threads 1 '
             '--trimmomatic-options "LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 '
             'MINLEN:36"',
             'kneaddata --input "fastq/s2.fastq.gz" '
             '--output "output/s2" --output-prefix "s2" '
             '--max-memory 500m --processes 1 --quality-scores phred33 '
-            '--run-fastqc-end --run-fastqc-start --threads 1 '
+            '--run-fastqc-start --threads 1 '
             '--trimmomatic-options "LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 '
             'MINLEN:36"',
             'kneaddata --input "fastq/s3.fastq" '
             '--output "output/s3" --output-prefix "s3" '
             '--max-memory 500m --processes 1 --quality-scores phred33 '
-            '--run-fastqc-end --run-fastqc-start --threads 1 '
+            '--run-fastqc-start --threads 1 '
             '--trimmomatic-options "LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 '
             'MINLEN:36"']
 
@@ -220,19 +221,19 @@ class KneaddataTests(PluginTestCase):
             'kneaddata --input "fastq/s1.fastq" --input "fastq/s1.R2.fastq" '
             '--output "output/s1" --output-prefix "s1" '
             '--max-memory 500m --processes 1 --quality-scores phred33 '
-            '--run-fastqc-end --run-fastqc-start --threads 1 '
+            '--run-fastqc-start --threads 1 '
             '--trimmomatic-options "LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 '
             'MINLEN:36"',
             'kneaddata --input "fastq/s2.fastq.gz" '
             '--input "fastq/s2.R2.fastq.gz" --output "output/s2" '
             '--output-prefix "s2" --max-memory 500m '
-            '--processes 1 --quality-scores phred33 --run-fastqc-end '
+            '--processes 1 --quality-scores phred33 '
             '--run-fastqc-start --threads 1 --trimmomatic-options '
             '"LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:36"',
             'kneaddata --input "fastq/s3.fastq" --input "fastq/s3.R2.fastq" '
             '--output "output/s3" --output-prefix "s3" '
             '--max-memory 500m --processes 1 --quality-scores phred33 '
-            '--run-fastqc-end --run-fastqc-start --threads 1 '
+            '--run-fastqc-start --threads 1 '
             '--trimmomatic-options "LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 '
             'MINLEN:36"']
 
@@ -290,7 +291,6 @@ class KneaddataTests(PluginTestCase):
         out_dir = mkdtemp()
         self._clean_up_files.append(out_dir)
 
-        print out_dir
         success, ainfo, msg = kneaddata(self.qclient, jid,
                                         self.params, out_dir)
 

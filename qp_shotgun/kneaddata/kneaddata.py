@@ -189,35 +189,35 @@ def _run_commands(qclient, job_id, commands, msg):
 
 def _per_sample_ainfo(out_dir, samples):
     pf = []
-    r1f = []
-    r2f = []
+    ainfo = []
     for rp, _, _, _ in samples:
         smd = partial(join, out_dir, rp)
 
+        # matching forward/reverse
         fname = smd('%s.trimmed.1.fastq' % rp)
-        if not exists(fname):
-            raise ValueError("%s doesn't exist" % fname)
-        pf.append((fname, 'preprocessed_fastq'))
-
+        if exists(fname):
+            pf.append((fname, 'preprocessed_fastq'))
         fname = smd('%s.trimmed.2.fastq' % rp)
-        if not exists(fname):
-            raise ValueError("%s doesn't exist" % fname)
-        pf.append((fname, 'preprocessed_fastq'))
+        if exists(fname):
+            pf.append((fname, 'preprocessed_fastq'))
+        ainfo.append(
+            ArtifactInfo('KneadData clean paired', 'per_sample_FASTQ', pf))
 
+        # unmatching forward
         fname = smd('%s.trimmed.single.1.fastq' % rp)
-        if not exists(fname):
-            raise ValueError("%s doesn't exist" % fname)
-        r1f.append((fname, 'preprocessed_fastq'))
+        if exists(fname):
+            ainfo.append(
+                ArtifactInfo('KneadData clean unmatched R1',
+                             'per_sample_FASTQ',
+                             [(fname, 'preprocessed_fastq')]))
 
+        # unmatching reverse
         fname = smd('%s.trimmed.single.2.fastq' % rp)
-        if not exists(fname):
-            raise ValueError("%s doesn't exist" % fname)
-        r2f.append((fname, 'preprocessed_fastq'))
-
-    ainfo = [
-        ArtifactInfo('KneadData clean paired', 'per_sample_FASTQ', pf),
-        ArtifactInfo('KneadData clean unmatched R1', 'per_sample_FASTQ', r1f),
-        ArtifactInfo('KneadData clean unmatched R2', 'per_sample_FASTQ', r2f)]
+        if exists(fname):
+            ainfo.append(
+                ArtifactInfo('KneadData clean unmatched R2',
+                             'per_sample_FASTQ',
+                             [(fname, 'preprocessed_fastq')]))
 
     return ainfo
 

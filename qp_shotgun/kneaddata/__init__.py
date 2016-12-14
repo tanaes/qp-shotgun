@@ -39,7 +39,7 @@ opt_params = {
     'run-bmtagger': ['boolean', 'False'],  # run BMTagger instead of Bowtie2
     'run-trf': ['boolean', 'False'],  # run TRF repeat finder tool
     'run-fastqc-start': ['boolean', 'True'],  # run FastQC on original data
-    'run-fastqc-end': ['boolean', 'True'],  # run FastQC on filtered data
+    'run-fastqc-end': ['boolean', 'False'],  # run FastQC on filtered data
     # Trimmomatic options
     'max-memory': ['string', '500m'],  # max memory in mb [ DEFAULT : 500m ]
     # leaving as empty string to simply. note that in tests is not empty.
@@ -67,7 +67,7 @@ dflt_param_set = {
     'Defaults': {
         'reference-db': 'default', 'bypass-trim': False, 'threads': 1,
         'processes': 1, 'quality-scores': 'phred33', 'run-bmtagger': False,
-        'run-trf': False, 'run-fastqc-start': True, 'run-fastqc-end': True,
+        'run-trf': False, 'run-fastqc-start': True, 'run-fastqc-end': False,
         'max-memory': '500m', 'trimmomatic-options': ''
         }
 }
