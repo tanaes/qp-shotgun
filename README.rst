@@ -28,8 +28,7 @@ The default pipeline is:
 
 Note that:
 - HUMAnN2 depends on `metaphlan2 <https://bitbucket.org/biobakery/metaphlan2/get/default.zip>`__ but neither the HUMAnN2 or this plugin automatically install that dependency. Remember that you need to put the `db_v20` folder in the path that the `metaphlan2.py` executable.
-- KneadData depends on `fastqc <http://www.bioinformatics.babraham.ac.uk/projects/download.html>`__ but neither the KneadData or this plugin automatically install that dependency.
-http://www.bioinformatics.babraham.ac.uk/projects/download.html
+- KneadData depends on `fastqc <http://www.bioinformatics.babraham.ac.uk/projects/download.html>`__ and `trimmomatic <http://www.usadellab.org/cms/?page=trimmomatic>`__ but neither the KneadData or this plugin automatically install that dependency.
 
 .. |Build Status| image:: http://kl-ci.ucsd.edu:8080/job/qp-shotgun-job/badge/icon
    :target: http://kl-ci.ucsd.edu:8080/job/qp-shotgun-job/

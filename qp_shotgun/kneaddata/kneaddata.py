@@ -6,8 +6,8 @@
 # The full license is in the file LICENSE, distributed with this software.
 # -----------------------------------------------------------------------------
 
-from itertools import zip_longest
-from os.path import basename, join
+from itertools import izip_longest
+from os.path import basename, join, exists
 from functools import partial
 
 from qiita_client import ArtifactInfo
@@ -30,7 +30,7 @@ def make_read_pairs_per_sample(forward_seqs, reverse_seqs, map_file):
     Returns
     -------
     samples: list of tup
-        list of 3-tuples with run prefix, sample name, fwd read fp, rev read fp
+        list of 4-tuples with run prefix, sample name, fwd read fp, rev read fp
 
     Raises
     ------
@@ -66,8 +66,8 @@ def make_read_pairs_per_sample(forward_seqs, reverse_seqs, map_file):
     # make pairings
     samples = []
     used_prefixes = set()
-    for i, (fwd_fp, rev_fp) in enumerate(zip_longest(forward_seqs,
-                                                     reverse_seqs)):
+    for i, (fwd_fp, rev_fp) in enumerate(izip_longest(forward_seqs,
+                                                      reverse_seqs)):
         # fwd_fp is the fwd read filepath
         fwd_fn = basename(fwd_fp)
 
@@ -109,7 +109,7 @@ def make_read_pairs_per_sample(forward_seqs, reverse_seqs, map_file):
     return(samples)
 
 
-def format_kneaddata_params(parameters):
+def _format_kneaddata_params(parameters):
     params = []
 
     for param in sorted(parameters):
@@ -119,7 +119,7 @@ def format_kneaddata_params(parameters):
             params.append('--%s' % param)
         elif value is False:
             continue
-        elif value:
+        elif value and value != 'default':
             params.append('--%s %s' % (param, value))
 
     param_string = ' '.join(params)
@@ -149,13 +149,7 @@ def generate_kneaddata_commands(forward_seqs, reverse_seqs, map_file,
     cmds: list of str
         The KneadData commands
     samples: list of tup
-        list of 3-tuples with run prefix, sample name, fwd read fp, rev read fp
-
-    Raises
-    ------
-    ValueError
-        If the rev is not an empty list and the same length than fwd seqs
-        The prefixes of the run_prefix don't match the file names
+        list of 4-tuples with run prefix, sample name, fwd read fp, rev read fp
 
     Notes
     -----
@@ -164,18 +158,13 @@ def generate_kneaddata_commands(forward_seqs, reverse_seqs, map_file,
     generation. This behavior may allow support of situations with empty
     reverse reads in some samples, for example after trimming and QC.
     """
-    # making sure the forward and reverse reads are in the same order
-
     # we match filenames, samples, and run prefixes
     samples = make_read_pairs_per_sample(forward_seqs, reverse_seqs, map_file)
 
     cmds = []
 
-    param_string = format_kneaddata_params(parameters)
-    prefixes = []
+    param_string = _format_kneaddata_params(parameters)
     for run_prefix, sample, f_fp, r_fp in samples:
-        prefixes.append(run_prefix)
-
         r_fp_str = ' --input "%s"' % r_fp if r_fp is not None else ""
         cmds.append('kneaddata --input "%s"%s --output "%s" '
                     '--output-prefix "%s" %s' % (
@@ -202,12 +191,28 @@ def _per_sample_ainfo(out_dir, samples):
     pf = []
     r1f = []
     r2f = []
-    for rp, sample, _, _ in samples:
+    for rp, _, _, _ in samples:
         smd = partial(join, out_dir, rp)
-        pf.append((smd('%s_paired_1.fastq' % rp), 'preprocessed_fastq'))
-        pf.append((smd('%s_paired_2.fastq' % rp), 'preprocessed_fastq'))
-        r1f.append((smd('%s_unmatched_1.fastq' % rp), 'preprocessed_fastq'))
-        r2f.append((smd('%s_unmatched_2.fastq' % rp), 'preprocessed_fastq'))
+
+        fname = smd('%s.trimmed.1.fastq' % rp)
+        if not exists(fname):
+            raise ValueError("%s doesn't exist" % fname)
+        pf.append((fname, 'preprocessed_fastq'))
+
+        fname = smd('%s.trimmed.2.fastq' % rp)
+        if not exists(fname):
+            raise ValueError("%s doesn't exist" % fname)
+        pf.append((fname, 'preprocessed_fastq'))
+
+        fname = smd('%s.trimmed.single.1.fastq' % rp)
+        if not exists(fname):
+            raise ValueError("%s doesn't exist" % fname)
+        r1f.append((fname, 'preprocessed_fastq'))
+
+        fname = smd('%s.trimmed.single.2.fastq' % rp)
+        if not exists(fname):
+            raise ValueError("%s doesn't exist" % fname)
+        r2f.append((fname, 'preprocessed_fastq'))
 
     ainfo = [
         ArtifactInfo('KneadData clean paired', 'per_sample_FASTQ', pf),

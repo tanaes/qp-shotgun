@@ -30,7 +30,8 @@ opt_params = {
     # --store-temp-output # store temp output files
     # --trimmomatic # the location of the trimmomatic (automatically
     #               # installed by pip install kneaddata)
-    'reference-db': ['choice:[""]', ''],  # ref db
+    # --log-level
+    'reference-db': ['choice:["default"]', 'default'],  # ref db
     'bypass-trim': ['boolean', 'False'],  # bypass the trim step
     'threads': ['integer', '1'],  # threads to run
     'processes': ['integer', '1'],  # processes to run
@@ -39,9 +40,6 @@ opt_params = {
     'run-trf': ['boolean', 'False'],  # run TRF repeat finder tool
     'run-fastqc-start': ['boolean', 'True'],  # run FastQC on original data
     'run-fastqc-end': ['boolean', 'True'],  # run FastQC on filtered data
-    'log-level': ['choice:["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]',
-                  'DEBUG'],
-
     # Trimmomatic options
     'max-memory': ['string', '500m'],  # max memory in mb [ DEFAULT : 500m ]
     # leaving as empty string to simply. note that in tests is not empty.
@@ -67,10 +65,10 @@ outputs = {
     }
 dflt_param_set = {
     'Defaults': {
-        'reference-db': '', 'bypass-trim': False, 'threads': 1,
+        'reference-db': 'default', 'bypass-trim': False, 'threads': 1,
         'processes': 1, 'quality-scores': 'phred33', 'run-bmtagger': False,
         'run-trf': False, 'run-fastqc-start': True, 'run-fastqc-end': True,
-        'log-level': 'DEBUG', 'max-memory': '500m', 'trimmomatic-options': ''
+        'max-memory': '500m', 'trimmomatic-options': ''
         }
 }
 
