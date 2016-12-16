@@ -13,7 +13,7 @@ install:
   # At this moment this plugin has overlapping dependencies than qiita so installing everything in the same environment
   - conda create --yes -n qiita_env python=2.7 pip nose flake8
     pyzmq networkx pyparsing natsort mock future libgfortran
-    'pandas>=0.18' 'scipy>0.13.0' 'numpy>=1.7' 'h5py>=2.3.1'
+    'pandas>=0.18' 'scipy>0.13.0' 'numpy>=1.7' 'h5py>=2.3.1' matplotlib
   - source activate qiita_env
   - pip install sphinx sphinx-bootstrap-theme coveralls ipython[all]==2.4.1
   - pip install https://github.com/biocore/qiita/archive/master.zip --process-dependency-links
@@ -27,8 +27,9 @@ install:
   - export QIITA_SERVER_CERT=$PWD/miniconda3/envs/qiita_env/lib/python2.7/site-packages/qiita_core/support_files/server.crt
   - pip install https://github.com/qiita-spots/qiita_client/archive/master.zip
   - pip install .
-  - wget https://bitbucket.org/biobakery/metaphlan2/get/default.zip
-  - unzip default.zip 'biobakery-metaphlan2*/db_v20/*' 'biobakery-metaphlan2*/metaphlan2.py'
+  - wget --quiet https://bitbucket.org/biobakery/metaphlan2/get/default.zip
+  - unzip -qq default.zip 'biobakery-metaphlan2*/db_v20/*' 'biobakery-metaphlan2*/metaphlan2.py'
+  - ln -s $PWD/miniconda3/envs/qiita_env/share/trimmomatic-0.36-3/trimmomatic.jar $PWD/miniconda3/envs/qiita_env/bin/trimmomatic.jar
   - export HUMANN2_BIN=`which humann2`
   - export HUMANN2_DIR=`dirname $HUMANN2_BIN`
   - mv biobakery-metaphlan2*/metaphlan2.py biobakery-metaphlan2*/db_v20 $HUMANN2_DIR

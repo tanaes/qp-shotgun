@@ -12,7 +12,6 @@ import click
 
 from qp_shotgun import plugin
 
-
 @click.command()
 @click.option('--env-script', prompt='Environment script',
               default='source activate qp-shotgun')
