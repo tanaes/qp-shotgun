@@ -60,8 +60,8 @@ opt_params = {
     }
 outputs = {
     'KneadData clean paired': 'per_sample_FASTQ',
-    'KneadData unmatched R1': 'per_sample_FASTQ',
-    'KneadData unmatched R2': 'per_sample_FASTQ',
+    'KneadData clean unmatched R1': 'per_sample_FASTQ',
+    'KneadData clean unmatched R2': 'per_sample_FASTQ',
     }
 dflt_param_set = {
     'Defaults': {
