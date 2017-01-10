@@ -194,17 +194,17 @@ def _per_sample_ainfo(out_dir, samples):
         smd = partial(join, out_dir, rp)
 
         # matching forward/reverse
-        fname = smd('%s.trimmed.1.fastq' % rp)
+        fname = smd('%s_paired_1.fastq' % rp)
         if exists(fname):
             pf.append((fname, 'preprocessed_fastq'))
-        fname = smd('%s.trimmed.2.fastq' % rp)
+        fname = smd('%s_paired_2.fastq' % rp)
         if exists(fname):
             pf.append((fname, 'preprocessed_fastq'))
         ainfo.append(
             ArtifactInfo('KneadData clean paired', 'per_sample_FASTQ', pf))
 
         # unmatching forward
-        fname = smd('%s.trimmed.single.1.fastq' % rp)
+        fname = smd('%s_unmatched_1.fastq' % rp)
         if exists(fname):
             ainfo.append(
                 ArtifactInfo('KneadData clean unmatched R1',
@@ -212,7 +212,7 @@ def _per_sample_ainfo(out_dir, samples):
                              [(fname, 'preprocessed_fastq')]))
 
         # unmatching reverse
-        fname = smd('%s.trimmed.single.2.fastq' % rp)
+        fname = smd('%s_unmatched_2.fastq' % rp)
         if exists(fname):
             ainfo.append(
                 ArtifactInfo('KneadData clean unmatched R2',

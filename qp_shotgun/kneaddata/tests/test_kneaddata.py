@@ -305,10 +305,10 @@ class KneaddataTests(PluginTestCase):
             obs_fps.append(a.files)
         od = partial(join, out_dir, 'kd_test_1')
         exp_fps = [
-            [(od('kd_test_1.trimmed.1.fastq'), 'preprocessed_fastq'),
-             (od('kd_test_1.trimmed.2.fastq'), 'preprocessed_fastq')],
-            [(od('kd_test_1.trimmed.single.1.fastq'), 'preprocessed_fastq')],
-            [(od('kd_test_1.trimmed.single.2.fastq'), 'preprocessed_fastq')]]
+            [(od('kd_test_1_paired_1.fastq'), 'preprocessed_fastq'),
+             (od('kd_test_1_paired_2.fastq'), 'preprocessed_fastq')],
+            [(od('kd_test_1_unmatched_1.fastq'), 'preprocessed_fastq')],
+            [(od('kd_test_1_unmatched_2.fastq'), 'preprocessed_fastq')]]
         self.assertItemsEqual(exp_fps, obs_fps)
 
 
