@@ -187,37 +187,48 @@ def _run_commands(qclient, job_id, commands, msg):
     return True, ""
 
 
-def _per_sample_ainfo(out_dir, samples):
-    pf = []
+def _per_sample_ainfo(out_dir, samples, fwd_and_rev=False):
     ainfo = []
-    for rp, _, _, _ in samples:
-        smd = partial(join, out_dir, rp)
 
-        # matching forward/reverse
-        fname = smd('%s_paired_1.fastq' % rp)
-        if exists(fname):
-            pf.append((fname, 'preprocessed_fastq'))
-        fname = smd('%s_paired_2.fastq' % rp)
-        if exists(fname):
-            pf.append((fname, 'preprocessed_fastq'))
+    if fwd_and_rev:
+        paired, ur1, ur2 = [], [], []
+        for rp, _, _, _ in samples:
+            smd = partial(join, out_dir, rp)
+
+            # matching forward/reverse
+            fname = smd('%s_paired_1.fastq' % rp)
+            if exists(fname):
+                paired.append((fname, 'preprocessed_fastq'))
+            fname = smd('%s_paired_2.fastq' % rp)
+            if exists(fname):
+                paired.append((fname, 'preprocessed_fastq'))
+
+            # unmatching forward
+            fname = smd('%s_unmatched_1.fastq' % rp)
+            if exists(fname):
+                ur1.append((fname, 'preprocessed_fastq'))
+
+            # unmatching reverse
+            fname = smd('%s_unmatched_2.fastq' % rp)
+            if exists(fname):
+                ur2.append((fname, 'preprocessed_fastq'))
+
         ainfo.append(
-            ArtifactInfo('KneadData clean paired', 'per_sample_FASTQ', pf))
-
-        # unmatching forward
-        fname = smd('%s_unmatched_1.fastq' % rp)
-        if exists(fname):
-            ainfo.append(
-                ArtifactInfo('KneadData clean unmatched R1',
-                             'per_sample_FASTQ',
-                             [(fname, 'preprocessed_fastq')]))
-
-        # unmatching reverse
-        fname = smd('%s_unmatched_2.fastq' % rp)
-        if exists(fname):
-            ainfo.append(
-                ArtifactInfo('KneadData clean unmatched R2',
-                             'per_sample_FASTQ',
-                             [(fname, 'preprocessed_fastq')]))
+            ArtifactInfo('KneadData clean paired', 'per_sample_FASTQ', paired))
+        ainfo.append(
+            ArtifactInfo('KneadData clean unmatched R1', 'per_sample_FASTQ',
+                         ur1))
+        ainfo.append(
+            ArtifactInfo('KneadData clean unmatched R2', 'per_sample_FASTQ',
+                         ur2))
+    else:
+        pf = []
+        for rp, _, _, _ in samples:
+            fname = join(out_dir, rp, '%s.fastq' % rp)
+            if exists(fname):
+                pf.append((fname, 'preprocessed_fastq'))
+        ainfo.append(
+                ArtifactInfo('KneadData clean R1', 'per_sample_FASTQ', pf))
 
     return ainfo
 
@@ -273,6 +284,6 @@ def kneaddata(qclient, job_id, parameters, out_dir):
     # Step 4 generating artifacts
     msg = "Step 4 of 4: Generating new artifacts (%d/{0})".format(len_cmd)
     success, msg = _run_commands(qclient, job_id, commands, msg)
-    ainfo = _per_sample_ainfo(out_dir, samples)
+    ainfo = _per_sample_ainfo(out_dir, samples, bool(rs))
 
     return True, ainfo, ""

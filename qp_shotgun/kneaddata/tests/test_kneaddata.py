@@ -8,7 +8,7 @@
 
 from unittest import main
 from os import close, remove
-from os.path import exists, isdir, join
+from os.path import exists, isdir, join, dirname
 from shutil import rmtree, copyfile
 from tempfile import mkstemp, mkdtemp
 from json import dumps
@@ -21,6 +21,7 @@ from qp_shotgun.kneaddata.kneaddata import (make_read_pairs_per_sample,
                                             generate_kneaddata_commands,
                                             _format_kneaddata_params,
                                             kneaddata)
+import kneaddata as kd
 
 
 class KneaddataTests(PluginTestCase):
@@ -28,10 +29,15 @@ class KneaddataTests(PluginTestCase):
 
     def setUp(self):
         plugin("https://localhost:21174", 'register', 'ignored')
+
+        # to fully test the plugin we need to use the demo reference-db,
+        # which is part of the regular kneaddata install
+        self.refdb_path = join(dirname(kd.__file__),
+                               "tests/data/demo_bowtie2_db/demo_db.1.bt2")
         self.params = {
-            'reference-db': 'default', 'bypass-trim': False, 'threads': 1,
-            'processes': 1, 'quality-scores': 'phred33', 'run-bmtagger': False,
-            'run-trf': False, 'run-fastqc-start': True,
+            'reference-db': self.refdb_path, 'bypass-trim': False,
+            'threads': 1, 'processes': 1, 'quality-scores': 'phred33',
+            'run-bmtagger': False, 'run-trf': False, 'run-fastqc-start': True,
             'run-fastqc-end': False, 'max-memory': '500m',
             'trimmomatic-options': (
                 '"LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:36"')
@@ -49,9 +55,10 @@ class KneaddataTests(PluginTestCase):
     def test_format_kneaddata_params(self):
         obs = _format_kneaddata_params(self.params)
         exp = ('--max-memory 500m --processes 1 --quality-scores phred33 '
+               '--reference-db %s '
                '--run-fastqc-start --threads 1 '
                '--trimmomatic-options "LEADING:3 '
-               'TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:36"')
+               'TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:36"' % self.refdb_path)
 
         self.assertEqual(obs, exp)
 
@@ -183,21 +190,21 @@ class KneaddataTests(PluginTestCase):
             'kneaddata --input "fastq/s1.fastq" '
             '--output "output/s1" --output-prefix "s1" '
             '--max-memory 500m --processes 1 --quality-scores phred33 '
-            '--run-fastqc-start --threads 1 '
+            '--reference-db %s --run-fastqc-start --threads 1 '
             '--trimmomatic-options "LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 '
-            'MINLEN:36"',
+            'MINLEN:36"' % self.refdb_path,
             'kneaddata --input "fastq/s2.fastq.gz" '
             '--output "output/s2" --output-prefix "s2" '
             '--max-memory 500m --processes 1 --quality-scores phred33 '
-            '--run-fastqc-start --threads 1 '
+            '--reference-db %s --run-fastqc-start --threads 1 '
             '--trimmomatic-options "LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 '
-            'MINLEN:36"',
+            'MINLEN:36"' % self.refdb_path,
             'kneaddata --input "fastq/s3.fastq" '
             '--output "output/s3" --output-prefix "s3" '
             '--max-memory 500m --processes 1 --quality-scores phred33 '
-            '--run-fastqc-start --threads 1 '
+            '--reference-db %s --run-fastqc-start --threads 1 '
             '--trimmomatic-options "LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 '
-            'MINLEN:36"']
+            'MINLEN:36"' % self.refdb_path]
 
         exp_sample = [('s1', 'SKB8.640193', 'fastq/s1.fastq', None),
                       ('s2', 'SKD8.640184', 'fastq/s2.fastq.gz', None),
@@ -221,21 +228,22 @@ class KneaddataTests(PluginTestCase):
             'kneaddata --input "fastq/s1.fastq" --input "fastq/s1.R2.fastq" '
             '--output "output/s1" --output-prefix "s1" '
             '--max-memory 500m --processes 1 --quality-scores phred33 '
-            '--run-fastqc-start --threads 1 '
+            '--reference-db %s --run-fastqc-start --threads 1 '
             '--trimmomatic-options "LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 '
-            'MINLEN:36"',
+            'MINLEN:36"' % self.refdb_path,
             'kneaddata --input "fastq/s2.fastq.gz" '
             '--input "fastq/s2.R2.fastq.gz" --output "output/s2" '
             '--output-prefix "s2" --max-memory 500m '
-            '--processes 1 --quality-scores phred33 '
+            '--processes 1 --quality-scores phred33 --reference-db %s '
             '--run-fastqc-start --threads 1 --trimmomatic-options '
-            '"LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:36"',
+            '"LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 '
+            'MINLEN:36"' % self.refdb_path,
             'kneaddata --input "fastq/s3.fastq" --input "fastq/s3.R2.fastq" '
             '--output "output/s3" --output-prefix "s3" '
             '--max-memory 500m --processes 1 --quality-scores phred33 '
-            '--run-fastqc-start --threads 1 '
+            '--reference-db %s --run-fastqc-start --threads 1 '
             '--trimmomatic-options "LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 '
-            'MINLEN:36"']
+            'MINLEN:36"' % self.refdb_path]
 
         exp_sample = [
             ('s1', 'SKB8.640193', 'fastq/s1.fastq', 'fastq/s1.R2.fastq'),
@@ -257,13 +265,17 @@ class KneaddataTests(PluginTestCase):
 
         fp1_1 = join(in_dir, 'kd_test_1_R1.fastq.gz')
         fp1_2 = join(in_dir, 'kd_test_1_R2.fastq.gz')
+        fp2_1 = join(in_dir, 'kd_test_2_R1.fastq.gz')
+        fp2_2 = join(in_dir, 'kd_test_2_R2.fastq.gz')
         copyfile('support_files/kd_test_1_R1.fastq.gz', fp1_1)
         copyfile('support_files/kd_test_1_R2.fastq.gz', fp1_2)
+        copyfile('support_files/kd_test_1_R1.fastq.gz', fp2_1)
+        copyfile('support_files/kd_test_1_R2.fastq.gz', fp2_2)
 
         # inserting new prep template
         prep_info_dict = {
-            'SKB7.640196': {
-                'run_prefix': 'kd_test_1'}
+            'SKB7.640196': {'run_prefix': 'kd_test_1'},
+            'SKB8.640193': {'run_prefix': 'kd_test_2'}
         }
         data = {'prep_info': dumps(prep_info_dict),
                 # magic #1 = testing study
@@ -275,7 +287,9 @@ class KneaddataTests(PluginTestCase):
         data = {
             'filepaths': dumps([
                 (fp1_1, 'raw_forward_seqs'),
-                (fp1_2, 'raw_reverse_seqs')]),
+                (fp1_2, 'raw_reverse_seqs'),
+                (fp2_1, 'raw_forward_seqs'),
+                (fp2_2, 'raw_reverse_seqs')]),
             'type': "per_sample_FASTQ",
             'name': "Test KneadData artifact",
             'prep': pid}
@@ -303,12 +317,76 @@ class KneaddataTests(PluginTestCase):
         for a in ainfo:
             self.assertEqual("per_sample_FASTQ", a.artifact_type)
             obs_fps.append(a.files)
-        od = partial(join, out_dir, 'kd_test_1')
+        od = partial(join, out_dir)
+
+        ftype = 'preprocessed_fastq'
         exp_fps = [
-            [(od('kd_test_1_paired_1.fastq'), 'preprocessed_fastq'),
-             (od('kd_test_1_paired_2.fastq'), 'preprocessed_fastq')],
-            [(od('kd_test_1_unmatched_1.fastq'), 'preprocessed_fastq')],
-            [(od('kd_test_1_unmatched_2.fastq'), 'preprocessed_fastq')]]
+            [(od('kd_test_1/kd_test_1_paired_1.fastq'), ftype),
+             (od('kd_test_1/kd_test_1_paired_2.fastq'), ftype),
+             (od('kd_test_2/kd_test_2_paired_1.fastq'), ftype),
+             (od('kd_test_2/kd_test_2_paired_2.fastq'), ftype)],
+            [(od('kd_test_1/kd_test_1_unmatched_1.fastq'), ftype),
+             (od('kd_test_2/kd_test_2_unmatched_1.fastq'), ftype)],
+            [(od('kd_test_1/kd_test_1_unmatched_2.fastq'), ftype),
+             (od('kd_test_2/kd_test_2_unmatched_2.fastq'), ftype)]]
+        self.assertItemsEqual(exp_fps, obs_fps)
+
+    def test_kneaddata_just_fwd(self):
+        # generating filepaths
+        in_dir = mkdtemp()
+        self._clean_up_files.append(in_dir)
+
+        fp1_1 = join(in_dir, 'kd_test_1_R1.fastq.gz')
+        fp2_1 = join(in_dir, 'kd_test_2_R1.fastq.gz')
+        copyfile('support_files/kd_test_1_R1.fastq.gz', fp1_1)
+        copyfile('support_files/kd_test_1_R1.fastq.gz', fp2_1)
+
+        # inserting new prep template
+        prep_info_dict = {
+            'SKB7.640196': {'run_prefix': 'kd_test_1'},
+            'SKB8.640193': {'run_prefix': 'kd_test_2'}
+        }
+        data = {'prep_info': dumps(prep_info_dict),
+                # magic #1 = testing study
+                'study': 1,
+                'data_type': 'Metagenomic'}
+        pid = self.qclient.post('/apitest/prep_template/', data=data)['prep']
+
+        # inserting artifacts
+        data = {
+            'filepaths': dumps([
+                (fp1_1, 'raw_forward_seqs'), (fp2_1, 'raw_forward_seqs')]),
+            'type': "per_sample_FASTQ",
+            'name': "Test KneadData artifact",
+            'prep': pid}
+        aid = self.qclient.post('/apitest/artifact/', data=data)['artifact']
+
+        self.params['input'] = aid
+        data = {'user': 'demo@microbio.me',
+                'command': dumps(['qp-shotgun', '0.0.1', 'KneadData 0.5.1']),
+                'status': 'running',
+                'parameters': dumps(self.params)}
+        jid = self.qclient.post('/apitest/processing_job/', data=data)['job']
+
+        out_dir = mkdtemp()
+        self._clean_up_files.append(out_dir)
+
+        success, ainfo, msg = kneaddata(self.qclient, jid,
+                                        self.params, out_dir)
+        self.assertEqual("", msg)
+        self.assertTrue(success)
+        # we are expecting 1 artifacts in total
+        self.assertEqual(1, len(ainfo))
+
+        obs_fps = []
+        for a in ainfo:
+            self.assertEqual("per_sample_FASTQ", a.artifact_type)
+            obs_fps.append(a.files)
+        od = partial(join, out_dir)
+
+        exp_fps = [
+            [(od('kd_test_1/kd_test_1.fastq'), 'preprocessed_fastq'),
+             (od('kd_test_2/kd_test_2.fastq'), 'preprocessed_fastq')]]
         self.assertItemsEqual(exp_fps, obs_fps)
 
 
