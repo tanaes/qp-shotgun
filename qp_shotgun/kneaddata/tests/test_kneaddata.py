@@ -321,14 +321,14 @@ class KneaddataTests(PluginTestCase):
 
         ftype = 'preprocessed_fastq'
         exp_fps = [
-            [(od('kd_test_1/kd_test_1_paired_1.fastq'), ftype),
-             (od('kd_test_1/kd_test_1_paired_2.fastq'), ftype),
-             (od('kd_test_2/kd_test_2_paired_1.fastq'), ftype),
-             (od('kd_test_2/kd_test_2_paired_2.fastq'), ftype)],
-            [(od('kd_test_1/kd_test_1_unmatched_1.fastq'), ftype),
-             (od('kd_test_2/kd_test_2_unmatched_1.fastq'), ftype)],
-            [(od('kd_test_1/kd_test_1_unmatched_2.fastq'), ftype),
-             (od('kd_test_2/kd_test_2_unmatched_2.fastq'), ftype)]]
+            [(od('kd_test_1/kd_test_1_paired_1.fastq.gz'), ftype),
+             (od('kd_test_1/kd_test_1_paired_2.fastq.gz'), ftype),
+             (od('kd_test_2/kd_test_2_paired_1.fastq.gz'), ftype),
+             (od('kd_test_2/kd_test_2_paired_2.fastq.gz'), ftype)],
+            [(od('kd_test_1/kd_test_1_unmatched_1.fastq.gz'), ftype),
+             (od('kd_test_2/kd_test_2_unmatched_1.fastq.gz'), ftype)],
+            [(od('kd_test_1/kd_test_1_unmatched_2.fastq.gz'), ftype),
+             (od('kd_test_2/kd_test_2_unmatched_2.fastq.gz'), ftype)]]
         self.assertItemsEqual(exp_fps, obs_fps)
 
     def test_kneaddata_just_fwd(self):
@@ -385,8 +385,8 @@ class KneaddataTests(PluginTestCase):
         od = partial(join, out_dir)
 
         exp_fps = [
-            [(od('kd_test_1/kd_test_1.fastq'), 'preprocessed_fastq'),
-             (od('kd_test_2/kd_test_2.fastq'), 'preprocessed_fastq')]]
+            [(od('kd_test_1/kd_test_1.fastq.gz'), 'preprocessed_fastq'),
+             (od('kd_test_2/kd_test_2.fastq.gz'), 'preprocessed_fastq')]]
         self.assertItemsEqual(exp_fps, obs_fps)
 
 

@@ -7,8 +7,10 @@
 # -----------------------------------------------------------------------------
 
 from itertools import izip_longest
+from os import utime
 from os.path import basename, join, exists
 from functools import partial
+from gzip import open as gopen
 
 from qiita_client import ArtifactInfo
 
@@ -187,6 +189,15 @@ def _run_commands(qclient, job_id, commands, msg):
     return True, ""
 
 
+def _gzip_file(path):
+    with open(path) as in_file:
+        gz_path = '%s.gz' % path
+        with gopen(gz_path, "wb") as out_file:
+            out_file.writelines(in_file)
+
+    return gz_path
+
+
 def _per_sample_ainfo(out_dir, samples, fwd_and_rev=False):
     ainfo = []
 
@@ -197,21 +208,25 @@ def _per_sample_ainfo(out_dir, samples, fwd_and_rev=False):
 
             # matching forward/reverse
             fname = smd('%s_paired_1.fastq' % rp)
-            if exists(fname):
-                paired.append((fname, 'preprocessed_fastq'))
+            if not exists(fname):
+                utime(fname)
+            paired.append((_gzip_file(fname), 'preprocessed_fastq'))
             fname = smd('%s_paired_2.fastq' % rp)
-            if exists(fname):
-                paired.append((fname, 'preprocessed_fastq'))
+            if not exists(fname):
+                utime(fname)
+            paired.append((_gzip_file(fname), 'preprocessed_fastq'))
 
             # unmatching forward
             fname = smd('%s_unmatched_1.fastq' % rp)
-            if exists(fname):
-                ur1.append((fname, 'preprocessed_fastq'))
+            if not exists(fname):
+                utime(fname)
+            ur1.append((_gzip_file(fname), 'preprocessed_fastq'))
 
             # unmatching reverse
             fname = smd('%s_unmatched_2.fastq' % rp)
-            if exists(fname):
-                ur2.append((fname, 'preprocessed_fastq'))
+            if not exists(fname):
+                utime(fname)
+            ur2.append((_gzip_file(fname), 'preprocessed_fastq'))
 
         ainfo.append(
             ArtifactInfo('KneadData clean paired', 'per_sample_FASTQ', paired))
@@ -226,7 +241,7 @@ def _per_sample_ainfo(out_dir, samples, fwd_and_rev=False):
         for rp, _, _, _ in samples:
             fname = join(out_dir, rp, '%s.fastq' % rp)
             if exists(fname):
-                pf.append((fname, 'preprocessed_fastq'))
+                pf.append((_gzip_file(fname), 'preprocessed_fastq'))
         ainfo.append(
                 ArtifactInfo('KneadData clean R1', 'per_sample_FASTQ', pf))
 
