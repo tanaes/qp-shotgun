@@ -28,6 +28,7 @@ opt_params = {
     # o-log
     # input-format
     # search-mode
+    'read-set': ['choice:["fwd", "fwd_rev"]', 'fwd'],
     'nucleotide-database': ['choice:["default"]', 'default'],
     'protein-database': ['choice:["default"]', 'default'],
     'bypass-prescreen': ['boolean', 'False'],
@@ -72,6 +73,7 @@ outputs = {
     'Path abundance RELAB table - unstratified': 'BIOM'}
 dflt_param_set = {
     'Defaults': {
+        'read-set': 'fwd',
         'nucleotide-database': 'default', 'protein-database': 'default',
         'bypass-prescreen': False, 'bypass-nucleotide-index': False,
         'bypass-translated-search': False, 'bypass-nucleotide-search': False,
