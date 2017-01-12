@@ -311,7 +311,7 @@ class KneaddataTests(PluginTestCase):
         self.assertEqual("", msg)
         self.assertTrue(success)
         # we are expecting 3 artifacts in total
-        self.assertEqual(3, len(ainfo))
+        self.assertEqual(1, len(ainfo))
 
         obs_fps = []
         for a in ainfo:
@@ -323,11 +323,11 @@ class KneaddataTests(PluginTestCase):
         exp_fps = [
             [(od('kd_test_1/kd_test_1_paired_1.fastq.gz'), ftype),
              (od('kd_test_1/kd_test_1_paired_2.fastq.gz'), ftype),
+             (od('kd_test_1/kd_test_1_unmatched_1.fastq.gz'), ftype),
+             (od('kd_test_1/kd_test_1_unmatched_2.fastq.gz'), ftype),
              (od('kd_test_2/kd_test_2_paired_1.fastq.gz'), ftype),
-             (od('kd_test_2/kd_test_2_paired_2.fastq.gz'), ftype)],
-            [(od('kd_test_1/kd_test_1_unmatched_1.fastq.gz'), ftype),
-             (od('kd_test_2/kd_test_2_unmatched_1.fastq.gz'), ftype)],
-            [(od('kd_test_1/kd_test_1_unmatched_2.fastq.gz'), ftype),
+             (od('kd_test_2/kd_test_2_paired_2.fastq.gz'), ftype),
+             (od('kd_test_2/kd_test_2_unmatched_1.fastq.gz'), ftype),
              (od('kd_test_2/kd_test_2_unmatched_2.fastq.gz'), ftype)]]
         self.assertItemsEqual(exp_fps, obs_fps)
 

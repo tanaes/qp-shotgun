@@ -199,10 +199,9 @@ def _gzip_file(path):
 
 
 def _per_sample_ainfo(out_dir, samples, fwd_and_rev=False):
-    ainfo = []
+    files = []
 
     if fwd_and_rev:
-        paired, ur1, ur2 = [], [], []
         for rp, _, _, _ in samples:
             smd = partial(join, out_dir, rp)
 
@@ -210,42 +209,30 @@ def _per_sample_ainfo(out_dir, samples, fwd_and_rev=False):
             fname = smd('%s_paired_1.fastq' % rp)
             if not exists(fname):
                 utime(fname)
-            paired.append((_gzip_file(fname), 'preprocessed_fastq'))
+            files.append((_gzip_file(fname), 'preprocessed_fastq'))
             fname = smd('%s_paired_2.fastq' % rp)
             if not exists(fname):
                 utime(fname)
-            paired.append((_gzip_file(fname), 'preprocessed_fastq'))
+            files.append((_gzip_file(fname), 'preprocessed_fastq'))
 
             # unmatching forward
             fname = smd('%s_unmatched_1.fastq' % rp)
             if not exists(fname):
                 utime(fname)
-            ur1.append((_gzip_file(fname), 'preprocessed_fastq'))
+            files.append((_gzip_file(fname), 'preprocessed_fastq'))
 
             # unmatching reverse
             fname = smd('%s_unmatched_2.fastq' % rp)
             if not exists(fname):
                 utime(fname)
-            ur2.append((_gzip_file(fname), 'preprocessed_fastq'))
-
-        ainfo.append(
-            ArtifactInfo('KneadData clean paired', 'per_sample_FASTQ', paired))
-        ainfo.append(
-            ArtifactInfo('KneadData clean unmatched R1', 'per_sample_FASTQ',
-                         ur1))
-        ainfo.append(
-            ArtifactInfo('KneadData clean unmatched R2', 'per_sample_FASTQ',
-                         ur2))
+            files.append((_gzip_file(fname), 'preprocessed_fastq'))
     else:
-        pf = []
         for rp, _, _, _ in samples:
             fname = join(out_dir, rp, '%s.fastq' % rp)
             if exists(fname):
-                pf.append((_gzip_file(fname), 'preprocessed_fastq'))
-        ainfo.append(
-                ArtifactInfo('KneadData clean R1', 'per_sample_FASTQ', pf))
+                files.append((_gzip_file(fname), 'preprocessed_fastq'))
 
-    return ainfo
+    return [ArtifactInfo('KneadData files', 'per_sample_FASTQ', files)]
 
 
 def kneaddata(qclient, job_id, parameters, out_dir):
