@@ -25,6 +25,7 @@ class Humann2Tests(PluginTestCase):
     def setUp(self):
         plugin("https://localhost:21174", 'register', 'ignored')
         self.params = {
+            'read-set': 'fwd',
             'nucleotide-database': 'default', 'protein-database': 'default',
             'bypass-prescreen': False, 'bypass-nucleotide-index': False,
             'bypass-translated-search': False,
@@ -50,6 +51,228 @@ class Humann2Tests(PluginTestCase):
                     rmtree(fp)
                 else:
                     remove(fp)
+
+    def test_make_read_sets_per_sample_match_fwd_rev(self):
+        fd, fp = mkstemp()
+        close(fd)
+        with open(fp, 'w') as f:
+            f.write(MAPPING_FILE)
+        self._clean_up_files.append(fp)
+
+        fwd_p_fp = ['./folder/s3_paired_1.fastq.gz',
+                    './folder/s2_paired_1.fastq.gz',
+                    './folder/s1_paired_1.fastq.gz']
+
+        rev_p_fp = ['./folder/s3_paired_2.fastq.gz',
+                    './folder/s2_paired_2.fastq.gz',
+                    './folder/s1_paired_2.fastq.gz']
+
+        fwd_u_fp = ['./folder/s3_unmatched_1.fastq.gz',
+                    './folder/s2_unmatched_1.fastq.gz',
+                    './folder/s1_unmatched_1.fastq.gz']
+
+        rev_u_fp = ['./folder/s3_unmatched_2.fastq.gz',
+                    './folder/s2_unmatched_2.fastq.gz',
+                    './folder/s1_unmatched_2.fastq.gz']
+
+        files = fwd_p_fp + rev_p_fp + fwd_u_fp + rev_u_fp
+
+        exp = [('s1', 'SKB8.640193',
+                './folder/s1_paired_1.fastq.gz',
+                './folder/s1_paired_2.fastq.gz',
+                './folder/s1_unpaired_1.fastq.gz',
+                './folder/s1_unpaired_2.fastq.gz',
+                None),
+               ('s2', 'SKD8.640184',
+                './folder/s2_paired_1.fastq.gz',
+                './folder/s2_paired_2.fastq.gz',
+                './folder/s2_unpaired_1.fastq.gz',
+                './folder/s2_unpaired_2.fastq.gz',
+                None),
+               ('s3', 'SKB7.640196',
+                './folder/s3_paired_1.fastq.gz',
+                './folder/s3_paired_2.fastq.gz',
+                './folder/s3_unpaired_1.fastq.gz',
+                './folder/s3_unpaired_2.fastq.gz',
+                None)]
+
+    def test_make_read_sets_per_sample_match_fwd_rev_extra_f(self):
+        fd, fp = mkstemp()
+        close(fd)
+        with open(fp, 'w') as f:
+            f.write(MAPPING_FILE)
+        self._clean_up_files.append(fp)
+
+        fwd_p_fp = ['./folder/s3_paired_1.fastq.gz',
+                    './folder/s2_paired_1.fastq.gz',
+                    './folder/s1_paired_1.fastq.gz']
+
+        rev_p_fp = ['./folder/s3_paired_2.fastq.gz',
+                    './folder/s2_paired_2.fastq.gz',
+                    './folder/s1_paired_2.fastq.gz']
+
+        fwd_u_fp = ['./folder/s3_unmatched_1.fastq.gz',
+                    './folder/s2_unmatched_1.fastq.gz',
+                    './folder/s1_unmatched_1.fastq.gz']
+
+        rev_u_fp = ['./folder/s3_unmatched_2.fastq.gz',
+                    './folder/s2_unmatched_2.fastq.gz',
+                    './folder/s1_unmatched_2.fastq.gz']
+
+        files = fwd_p_fp + rev_p_fp + fwd_u_fp + rev_u_fp + \
+                ['./random/file.txt']
+
+        exp = [('s1', 'SKB8.640193',
+                './folder/s1_paired_1.fastq.gz',
+                './folder/s1_paired_2.fastq.gz',
+                './folder/s1_unpaired_1.fastq.gz',
+                './folder/s1_unpaired_2.fastq.gz',
+                None),
+               ('s2', 'SKD8.640184',
+                './folder/s2_paired_1.fastq.gz',
+                './folder/s2_paired_2.fastq.gz',
+                './folder/s2_unpaired_1.fastq.gz',
+                './folder/s2_unpaired_2.fastq.gz',
+                None),
+               ('s3', 'SKB7.640196',
+                './folder/s3_paired_1.fastq.gz',
+                './folder/s3_paired_2.fastq.gz',
+                './folder/s3_unpaired_1.fastq.gz',
+                './folder/s3_unpaired_2.fastq.gz',
+                None)]
+
+        obs = make_read_sets_per_sample(files, fp)
+
+        self.assertEqual(obs, exp)
+
+    def test_make_read_sets_per_sample_match_fwd_only(self):
+        fd, fp = mkstemp()
+        close(fd)
+        with open(fp, 'w') as f:
+            f.write(MAPPING_FILE)
+        self._clean_up_files.append(fp)
+
+        fwd_fp = ['./folder/s3_S013_L001.fastq.gz',
+                  './folder/s2_S011_L001.fastq.gz',
+                  './folder/s1_S009_L001.fastq.gz']
+
+        files = fwd_fp
+
+        exp = [('s1', 'SKB8.640193',
+                None,
+                None,
+                None,
+                None,
+                './folder/s1_S009_L001.fastq.gz'),
+               ('s2', 'SKD8.640184',
+                None,
+                None,
+                None,
+                None,
+                './folder/s2_S011_L001.fastq.gz'),
+               ('s3', 'SKB7.640196',
+                None,
+                None,
+                None,
+                None,
+                './folder/s3_S013_L001.fastq.gz')]
+
+        obs = make_read_sets_per_sample(files, fp)
+
+        self.assertEqual(obs, exp)
+
+    def test_make_single_fastq_gz_fwd_rev(self):
+        self.params['read-set'] = 'fwd_rev'
+
+        read_sets = [('s1', 'SKB8.640193',
+                      './support_files/s1_paired_1.fastq.gz',
+                      './support_files/s1_paired_2.fastq.gz',
+                      './support_files/s1_unpaired_1.fastq.gz',
+                      './support_files/s1_unpaired_2.fastq.gz',
+                      None),
+                     ('s2', 'SKD8.640184',
+                      './support_files/s2_paired_1.fastq.gz',
+                      './support_files/s2_paired_2.fastq.gz',
+                      './support_files/s2_unpaired_1.fastq.gz',
+                      './support_files/s2_unpaired_2.fastq.gz',
+                      None)]
+
+        out_dir = mkdtemp()
+        self._clean_up_files.append(out_dir)
+
+        exp_out = [('s1', 'SKB8.640193',
+                    join(out_dir,'s1.fastq.gz')),
+                   ('s2', 'SKD8.640184',
+                     join(out_dir,'s2.fastq.gz'))]
+
+        obs_out = make_single_fastq_gz(read_sets, out_dir, self.params)
+
+        self.assertEqual(exp_out, obs_out)
+
+        self.assertEqual(obs_out[0][2], './support_files/s1.all.fastq.gz')
+        self.assertEqual(obs_out[1][2], './support_files/s2.all.fastq.gz')
+
+    def test_make_single_fastq_gz_paired_fwd(self):
+        self.params['read-set'] = 'fwd'
+
+        read_sets = [('s1', 'SKB8.640193',
+                      './support_files/s1_paired_1.fastq.gz',
+                      './support_files/s1_paired_2.fastq.gz',
+                      './support_files/s1_unpaired_1.fastq.gz',
+                      './support_files/s1_unpaired_2.fastq.gz',
+                      None),
+                     ('s2', 'SKD8.640184',
+                      './support_files/s2_paired_1.fastq.gz',
+                      './support_files/s2_paired_2.fastq.gz',
+                      './support_files/s2_unpaired_1.fastq.gz',
+                      './support_files/s2_unpaired_2.fastq.gz',
+                      None)]
+
+        out_dir = mkdtemp()
+        self._clean_up_files.append(out_dir)
+
+        exp_out = [('s1', 'SKB8.640193',
+                    join(out_dir,'s1.fastq.gz')),
+                   ('s2', 'SKD8.640184',
+                     join(out_dir,'s2.fastq.gz'))]
+
+        obs_out = make_single_fastq_gz(read_sets, out_dir, self.params)
+
+        self.assertEqual(exp_out, obs_out)
+
+        self.assertEqual(obs_out[0][2], './support_files/s1.fwd.fastq.gz')
+        self.assertEqual(obs_out[1][2], './support_files/s2.fwd.fastq.gz')
+
+    def test_make_single_fastq_gz_single_fwd(self):
+        self.params['read-set'] = 'fwd'
+
+        read_sets = [('s1', 'SKB8.640193',
+                      None,
+                      None,
+                      None,
+                      None,
+                      './support_files/s1_single.fastq.gz'),
+                     ('s2', 'SKD8.640184',
+                      None,
+                      None,
+                      None,
+                      None,
+                      './support_files/s2_single.fastq.gz')]
+
+        out_dir = mkdtemp()
+        self._clean_up_files.append(out_dir)
+
+        exp_out = [('s1', 'SKB8.640193',
+                    join(out_dir,'s1.fastq.gz')),
+                   ('s2', 'SKD8.640184',
+                     join(out_dir,'s2.fastq.gz'))]
+
+        obs_out = make_single_fastq_gz(read_sets, out_dir, self.params)
+
+        self.assertEqual(exp_out, obs_out)
+
+        self.assertEqual(obs_out[0][2], './support_files/s1_single.fastq.gz')
+        self.assertEqual(obs_out[1][2], './support_files/s2_single.fastq.gz')
 
     def test_generate_humann2_analysis_commands_names_no_match(self):
         fd, fp = mkstemp()
@@ -80,6 +303,8 @@ class Humann2Tests(PluginTestCase):
 
         out_dir = mkdtemp()
         self._clean_up_files.append(out_dir)
+
+        self.params['read-set'] = 'fwd'
 
         exp = [
             'humann2 --input "fastq/s1.fastq" --output "%s/s1" '
@@ -138,6 +363,8 @@ class Humann2Tests(PluginTestCase):
 
         out_dir = mkdtemp()
         self._clean_up_files.append(out_dir)
+
+        self.params['read-set'] = 'fwd_rev'
 
         exp = [
             'humann2 --input "fastq/s1.fastq" --output "%s/s1" '
@@ -258,8 +485,8 @@ class Humann2Tests(PluginTestCase):
         # inserting artifacts
         data = {
             'filepaths': dumps([
-                (fp1, 'raw_forward_seqs'),
-                (fp2, 'raw_forward_seqs')]),
+                (fp1, 'preprocessed_fastq'),
+                (fp2, 'preprocessed_fastq')]),
             'type': "per_sample_FASTQ",
             'name': "New test artifact",
             'prep': pid}
