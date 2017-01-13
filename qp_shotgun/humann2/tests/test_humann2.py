@@ -382,8 +382,7 @@ class Humann2Tests(PluginTestCase):
             'SKB7.640196': {
                 'run_prefix': basename(fp1).replace('.fastq.gz', '')},
             'SKB8.640193': {
-                'run_prefix': basename(fp2).replace('.fastq.gz', '')}
-        }
+                'run_prefix': basename(fp2).replace('.fastq.gz', '')}}
         data = {'prep_info': dumps(prep_info_dict),
                 # magic #1 = testing study
                 'study': 1,
