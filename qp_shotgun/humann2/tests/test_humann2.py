@@ -284,7 +284,8 @@ class Humann2Tests(PluginTestCase):
 
     def test_generate_humann2_analysis_commands(self):
 
-        out_dir = './output'
+        out_dir = mkdtemp()
+        self._clean_up_files.append(out_dir)
 
         self.params['read-set'] = 'fwd'
 
