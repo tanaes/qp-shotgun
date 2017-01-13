@@ -283,7 +283,6 @@ class Humann2Tests(PluginTestCase):
                         './support_files/s2_single.fastq.gz'))
 
     def test_generate_humann2_analysis_commands(self):
-
         out_dir = mkdtemp()
         self._clean_up_files.append(out_dir)
 
