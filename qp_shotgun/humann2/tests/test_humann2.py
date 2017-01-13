@@ -16,7 +16,6 @@ from os.path import exists, isdir, basename, join
 
 from qiita_client.testing import PluginTestCase
 
-
 from qp_shotgun import plugin
 from qp_shotgun.humann2.humann2 import (
     make_read_sets_per_sample, make_single_fastq_gz,
