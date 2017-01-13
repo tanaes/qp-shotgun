@@ -113,7 +113,7 @@ def make_read_sets_per_sample(files, map_file):
     single.sort()
 
     seq_files = zip(fwd_paired, rev_paired, fwd_unpaired, rev_unpaired, single)
-    print(seq_files)
+
     # get run prefixes
     # These are prefixes that should match uniquely to forward reads
     # sn_by_rp is dict of samples keyed by run prefixes
@@ -123,7 +123,9 @@ def make_read_sets_per_sample(files, map_file):
     read_sets = []
     used_prefixes = set()
 
-    for i, (f_p, r_p, f_u, r_u, s) in enumerate(seq_files):
+    raised_ValueError = ''
+
+    for f_p, r_p, f_u, r_u, s in seq_files:
         # pick file basename
         if f_p is None:
             fn = basename(s)
@@ -136,28 +138,31 @@ def make_read_sets_per_sample(files, map_file):
             if fn.startswith(rp) and run_prefix is None:
                 run_prefix = rp
             elif fn.startswith(rp) and run_prefix is not None:
-                raise ValueError('Multiple run prefixes match this read file: '
-                                 '%s' % fn)
+                raised_ValueError.append('Multiple run prefixes match this '
+                                         'file: %s\n\n' % fn)
 
         # make sure that we got one matching run prefix:
         if run_prefix is None:
-            raise ValueError('No run prefix matching this read file: %s'
-                             % fn)
+            raised_ValueError.append('No run prefix matching this read file: '
+                                     '%s\n\n' % fn)
 
         if run_prefix in used_prefixes:
-            raise ValueError('This run prefix matches multiple read files: '
-                             '%s' % run_prefix)
+            raised_ValueError.append('This run prefix matches multiple read '
+                                     ' files: %s\n\n' % run_prefix)
 
         # if paired, check that all files match run prefix
         if s is None:
             if not (basename(r_p).startswith(run_prefix) and
                     basename(f_u).startswith(run_prefix) and
                     basename(r_u).startswith(run_prefix)):
-                raise ValueError('Not all read files match run prefix.'
-                                 '\nRun prefix: %s\nForward paired: %s\n'
-                                 'Reverse paired: %s\nForward unpaired: %s\n'
-                                 'Reverse unpaired: %s\n' %
-                                 (run_prefix, f_p, r_p, f_u, r_u))
+                raised_ValueError.append('Not all read files match run prefix.'
+                                         '\nRun prefix: %s\nForward paired: '
+                                         '%s\nReverse paired: %s\nForward '
+                                         'unpaired: %s\nReverse unpaired: %s\n'
+                                         % (run_prefix, f_p, r_p, f_u, r_u))
+
+        if raised_ValueError:
+            raise ValueError(raised_ValueError)
 
         read_sets.append((run_prefix, sn_by_rp[run_prefix], f_p, r_p,
                           f_u, r_u, s))
