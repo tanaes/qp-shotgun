@@ -15,6 +15,141 @@ from functools import partial
 from qiita_client import ArtifactInfo
 from qiita_client.util import system_call, get_sample_names_by_run_prefix
 
+def make_read_sets_per_sample(files, map_file):
+    """Recovers read set information from kneaddata output
+
+    Parameters
+    ----------
+    files : list of str
+        The list of sequence filepaths from the kneaddata artifact
+    map_file : str
+        The path to the mapping file
+
+    Returns
+    -------
+    read_sets: list of tup
+        list of 7-tuples with run prefix, sample name, fwd paired read fp,
+        rev paired read fp, fwd unpaired read fp, rev unpaired read fp, and
+        single fwd read fp.
+
+    Raises
+    ------
+    ValueError
+        If there are files matching the kneaddata paired file naming convention
+        (_paired_1.fastq.gz, _unmatched_1.fastq.gz) but which don't have all 4
+        outputs.
+    ValueError
+        If there are files matching the kneaddata paired file naming convention
+        (_paired_1.fastq.gz, _unmatched_1.fastq.gz) in addition to fastq.gz
+        files that do not match naming convention (the latter are interpreted
+        as single read files).
+    ValueError
+        If there are no *.fastq.gz files in the artifact
+
+    Notes
+    -----
+    """
+
+    # sort through the filenames and bin into sequence type lists
+    fwd_paired = []
+    fwd_unpaired = []
+    rev_paired = []
+    rev_unpaired = []
+    single = []
+
+    for fp in files:
+        if str.endswith('_paired_1.fastq.gz'):
+            fwd_paired.append(fp)
+        elif str.endswith('_paired_2.fastq.gz'):
+            rev_paired.append(fp)
+        elif str.endswith('_unmatched_1.fastq.gz'):
+            fwd_unpaired.append(fp)
+        elif str.endswith('_unmatched_2.fastq.gz'):
+            rev_unpaired.append(fp)
+        elif str.endswith('.fastq.gz'):
+            single.append(fp)
+
+    # check that seq lists are same len
+    if not (len(fwd_paired) == len(fwd_unpaired) == 
+            len(rev_paired) == len(rev_unpaired)):
+        raise ValueError('There are not equal numbers of forward paired, '
+                         'forward unpaired, reverse paired, and reverse '
+                         'unpaired sequences.')
+
+    # check that there aren't both paired and single sequences
+    if len(single) > 0 and len(fwd_paired) > 0:
+        raise ValueError('There are both paired-end and single-end sequences.')
+
+    # fill out unused seq file types with None and check that there exist files
+    if len(fwd_paired) > 0:
+        single = [None] * len(fwd_paired)
+    elif len(single) > 0:
+        fwd_paired = [None] * len(single)
+        fwd_unpaired = [None] * len(single)
+        rev_paired = [None] * len(single)
+        rev_unpaired = [None] * len(single)
+    else:
+        raise ValueError('There are no *.fastq.gz files in the artifact')
+    
+    # make the 5-tuple of sequence filepaths
+    seq_files = izip_longest(fwd_paired.sort(), rev_paired.sort(),
+                             fwd_unpaired.sort(), rev_unpaired.sort(),
+                             single.sort())
+
+    # get run prefixes
+    # These are prefixes that should match uniquely to forward reads
+    # sn_by_rp is dict of samples keyed by run prefixes
+    sn_by_rp = get_sample_names_by_run_prefix(map_file)
+
+    # make sets
+    read_sets = []
+    used_prefixes = set()
+
+    for i, f_p, r_p, f_u, r_u, s in enumerate(seq_files):
+        # pick file basename
+        if f_p is None:
+            fn = basename(s)
+        else:
+            fn = basename(f_p)
+
+        # iterate over run prefixes and make sure only one matches
+        run_prefix = None
+        for rp in sn_by_rp:
+            if fn.startswith(rp) and run_prefix is None:
+                run_prefix = rp
+            elif fn.startswith(rp) and run_prefix is not None:
+                raise ValueError('Multiple run prefixes match this read file: '
+                                 '%s' % fn)
+
+        # make sure that we got one matching run prefix:
+        if run_prefix is None:
+            raise ValueError('No run prefix matching this read file: %s'
+                             % fn)
+
+        if run_prefix in used_prefixes:
+            raise ValueError('This run prefix matches multiple read files: '
+                             '%s' % run_prefix)
+
+        # if paired, check that all files match run prefix
+        if s is None:
+            if not (r_p.startsiwth(run_prefix) and
+                    f_u.startswith(run_prefix) and
+                    r_u.startswith(run_prefix)):
+                raise ValueError('Not all read files match run prefix.'
+                                 '\nRun prefix: %s\nForward paired: %s\n'
+                                 'Reverse paired: %s\nForward unpaired: %s\n'
+                                 'Reverse unpaired: %s\n' %
+                                 (run_prefix, f_p, r_p, f_u, r_u))
+
+        read_sets.append((run_prefix, sn_by_rp[run_prefix], f_p, r_p,
+                          f_u, r_u, s ))
+
+        used_prefixes.add(run_prefix)
+
+    return(read_sets)
+
+def make_single_fastq_gz(read_sets, out_dir, params):
+
 
 def generate_humann2_analysis_commands(forward_seqs, reverse_seqs, map_file,
                                        out_dir, parameters):
