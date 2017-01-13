@@ -11,9 +11,21 @@ from os.path import basename, join, exists
 
 from future.utils import viewitems
 from functools import partial
+from subprocess import Popen
+from contextlib import contextmanager
+from tempfile import mkdtemp
+from shutil import rmtree
 
 from qiita_client import ArtifactInfo
 from qiita_client.util import system_call, get_sample_names_by_run_prefix
+
+@contextmanager
+def make_temp_directory():
+    temp_dir = mkdtemp()
+    try:
+        yield temp_dir
+    finally:
+        rmtree(temp_dir)
 
 def make_read_sets_per_sample(files, map_file):
     """Recovers read set information from kneaddata output
@@ -58,15 +70,15 @@ def make_read_sets_per_sample(files, map_file):
     single = []
 
     for fp in files:
-        if str.endswith('_paired_1.fastq.gz'):
+        if fp.endswith('_paired_1.fastq.gz'):
             fwd_paired.append(fp)
-        elif str.endswith('_paired_2.fastq.gz'):
+        elif fp.endswith('_paired_2.fastq.gz'):
             rev_paired.append(fp)
-        elif str.endswith('_unmatched_1.fastq.gz'):
+        elif fp.endswith('_unmatched_1.fastq.gz'):
             fwd_unpaired.append(fp)
-        elif str.endswith('_unmatched_2.fastq.gz'):
+        elif fp.endswith('_unmatched_2.fastq.gz'):
             rev_unpaired.append(fp)
-        elif str.endswith('.fastq.gz'):
+        elif fp.endswith('.fastq.gz'):
             single.append(fp)
 
     # check that seq lists are same len
@@ -90,12 +102,16 @@ def make_read_sets_per_sample(files, map_file):
         rev_unpaired = [None] * len(single)
     else:
         raise ValueError('There are no *.fastq.gz files in the artifact')
-    
-    # make the 5-tuple of sequence filepaths
-    seq_files = izip_longest(fwd_paired.sort(), rev_paired.sort(),
-                             fwd_unpaired.sort(), rev_unpaired.sort(),
-                             single.sort())
 
+    # make the 5-tuple of sorted sequence filepaths
+    fwd_paired.sort()
+    rev_paired.sort()
+    fwd_unpaired.sort()
+    rev_unpaired.sort()
+    single.sort()
+
+    seq_files = zip(fwd_paired, rev_paired, fwd_unpaired, rev_unpaired, single)
+    print(seq_files)
     # get run prefixes
     # These are prefixes that should match uniquely to forward reads
     # sn_by_rp is dict of samples keyed by run prefixes
@@ -105,7 +121,7 @@ def make_read_sets_per_sample(files, map_file):
     read_sets = []
     used_prefixes = set()
 
-    for i, f_p, r_p, f_u, r_u, s in enumerate(seq_files):
+    for i, (f_p, r_p, f_u, r_u, s) in enumerate(seq_files):
         # pick file basename
         if f_p is None:
             fn = basename(s)
@@ -132,9 +148,9 @@ def make_read_sets_per_sample(files, map_file):
 
         # if paired, check that all files match run prefix
         if s is None:
-            if not (r_p.startsiwth(run_prefix) and
-                    f_u.startswith(run_prefix) and
-                    r_u.startswith(run_prefix)):
+            if not (basename(r_p).startswith(run_prefix) and
+                    basename(f_u).startswith(run_prefix) and
+                    basename(r_u).startswith(run_prefix)):
                 raise ValueError('Not all read files match run prefix.'
                                  '\nRun prefix: %s\nForward paired: %s\n'
                                  'Reverse paired: %s\nForward unpaired: %s\n'
@@ -148,21 +164,63 @@ def make_read_sets_per_sample(files, map_file):
 
     return(read_sets)
 
-def make_single_fastq_gz(read_sets, out_dir, params):
+def make_single_fastq_gz(read_sets, out_dir, include_reverse):
+    """Recovers read set information from kneaddata output
 
+    Parameters
+    ----------
+    read_sets: list of tup
+        list of 7-tuples with run prefix, sample name, fwd paired read fp,
+        rev paired read fp, fwd unpaired read fp, rev unpaired read fp, and
+        single fwd read fp.
+    out_dir : str
+        The path to a directory in which to write files
+    include_reverse : bool
+        Whether to include reverse sequences in combined file
 
-def generate_humann2_analysis_commands(forward_seqs, reverse_seqs, map_file,
-                                       out_dir, parameters):
+    Returns
+    -------
+    combined_reads: list of tup
+        list of 3-tuples with run prefix, sample name, combined gzip fastq
+
+    Raises
+    ------
+    OSError
+        If the Popen process call to cat returns with value other than 0
+
+    Notes
+    -----
+    """
+    combined_reads = []
+    for run_prefix, sample, f_p, r_p, f_u, r_u, s in read_sets:
+        out_fp = join(out_dir, '%s.fastq.gz' % run_prefix)
+
+        if s is None:
+            if include_reverse:
+                cmd = 'cat %s %s %s %s > %s' % (f_p, r_p, f_u, r_u, out_fp)
+            else:
+                cmd = 'cat %s %s > %s' % (f_p, f_u, out_fp)
+        else:
+            cmd = 'cat %s > %s' % (s, out_fp)
+
+        proc = Popen(cmd, shell=True)
+
+        failure = proc.wait()
+
+        if failure != 0:
+            raise OSError('Problem with cat of files: %s' % cmd)
+
+        combined_reads.append((run_prefix, sample, out_fp))
+
+    return(combined_reads)
+
+def generate_humann2_analysis_commands(combined_reads, out_dir, parameters):
     """Generates the HUMAnN2 commands
 
     Parameters
     ----------
-    forward_seqs : list of str
-        The list of forward seqs filepaths
-    reverse_seqs : list of str
-        The list of reverse seqs filepaths
-    map_file : str
-        The path to the mapping file
+    combined_reads: list of tup
+        list of 3-tuples with run prefix, sample name, combined gzip fastq
     out_dir : str
         The job output directory
     parameters : dict
@@ -175,54 +233,10 @@ def generate_humann2_analysis_commands(forward_seqs, reverse_seqs, map_file,
 
     Raises
     ------
-    ValueError
-        If the rev is not an empty list and the same length than fwd seqs
-        The prefixes of the run_prefix don't match the file names
 
     Notes
     -----
-    The forward reads filename has to be a perfect match with the value stored
-    in run_prefix. This is not a requirement for the reverse reads. However,
-    note that we assume that the filenames of the forward and reverse reads
-    are pretty similar so if sorted they will have matching orders.
     """
-    # making sure the forward and reverse reads are in the same order
-    forward_seqs.sort()
-    if reverse_seqs:
-        if len(forward_seqs) != len(reverse_seqs):
-            raise ValueError('Your reverse and forward files are of different '
-                             'length. Forward: %s. Reverse: %s.' %
-                             (', '.join(forward_seqs),
-                              ', '.join(reverse_seqs)))
-        reverse_seqs.sort()
-
-    sn_by_rp = get_sample_names_by_run_prefix(map_file)
-
-    # we match sample name and forward filename
-    samples = []
-    for i, fname in enumerate(forward_seqs):
-        f = basename(fname)
-        # removing extentions: fastq or fastq.gz
-        if 'fastq' in f.lower().rsplit('.', 2):
-            f = f[:f.lower().rindex('.fastq')]
-        # this try/except block is simply to retrieve all possible errors
-        # and display them in the next if block
-        try:
-            samples.append((fname, f, sn_by_rp[f]))
-            if reverse_seqs:
-                fr = basename(reverse_seqs[i])
-                if 'fastq' in fr.lower().rsplit('.', 2):
-                    fr = fr[:fr.lower().rindex('.fastq')]
-                samples.append((reverse_seqs[i], fr, sn_by_rp[f]))
-            del sn_by_rp[f]
-        except KeyError:
-            pass
-
-    if sn_by_rp:
-        raise ValueError(
-            'Some run_prefix values do not match your sample names: %s'
-            % ', '.join(sn_by_rp.keys()))
-
     cmds = []
     params = []
     for k, v in viewitems(parameters):
@@ -232,13 +246,17 @@ def generate_humann2_analysis_commands(forward_seqs, reverse_seqs, map_file,
             params.append('--%s' % k)
         else:
             params.append('--%s "%s"' % (k, v))
-    for ffn, fn, s in samples:
-        od = join(out_dir, fn)
+
+    # sort params to enable unit testing
+    params.sort()
+
+    for run_prefix, sample, fp in combined_reads:
+        od = join(out_dir, run_prefix)
         # just making sure the output directory exists
         if not exists(od):
             mkdir(od)
         cmds.append('humann2 --input "%s" --output "%s" --output-basename '
-                    '"%s" --output-format biom %s' % (ffn, od, s,
+                    '"%s" --output-format biom %s' % (fp, od, sample,
                                                       ' '.join(params)))
 
     return cmds
@@ -290,18 +308,34 @@ def humann2(qclient, job_id, parameters, out_dir):
                             % artifact_info['prep_information'][0])
     qiime_map = prep_info['qiime-map']
 
-    # Step 2 generating command humann2
-    qclient.update_job_step(job_id, "Step 2 of 6: Generating HUMANn2 command")
-    rs = fps['raw_reverse_seqs'] if 'raw_reverse_seqs' in fps else []
-    commands = generate_humann2_analysis_commands(fps['raw_forward_seqs'], rs,
-                                                  qiime_map, out_dir,
-                                                  parameters)
+    # Get the read set information
+    read_sets = make_read_sets_per_sample(fps['preprocessed_fastq'], qiime_map)
 
-    # Step 3 execute humann2
-    msg = "Step 3 of 6: Executing HUMANn2 job (%d/{0})".format(len(commands))
-    success, msg = _run_commands(qclient, job_id, commands, msg)
-    if not success:
-        return False, None, msg
+    # Generate the per-sample combined gzip
+    with make_temp_directory() as temp_dir:
+        read_set = parameters.pop('read-set')
+
+        if read_set == 'fwd_rev':
+            include_reverse = True
+        elif read_set == 'fwd':
+            include_reverse = False
+
+        combined_reads = make_single_fastq_gz(read_sets, temp_dir, 
+                                              include_reverse)
+
+        # Step 2 generating command humann2
+        qclient.update_job_step(job_id,
+                                "Step 2 of 6: Generating HUMANn2 command")
+        rs = fps['raw_reverse_seqs'] if 'raw_reverse_seqs' in fps else []
+        commands = generate_humann2_analysis_commands(combined_reads, out_dir,
+                                                      parameters)
+
+        # Step 3 execute humann2
+        msg = ("Step 3 of 6: Executing HUMANn2 job "
+               "(%d/{0})".format(len(commands)))
+        success, msg = _run_commands(qclient, job_id, commands, msg)
+        if not success:
+            return False, None, msg
 
     # Step 4 merge tables
     commands = []
