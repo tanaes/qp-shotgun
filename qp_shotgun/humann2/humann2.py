@@ -19,6 +19,7 @@ from shutil import rmtree
 from qiita_client import ArtifactInfo
 from qiita_client.util import system_call, get_sample_names_by_run_prefix
 
+
 @contextmanager
 def make_temp_directory():
     temp_dir = mkdtemp()
@@ -26,6 +27,7 @@ def make_temp_directory():
         yield temp_dir
     finally:
         rmtree(temp_dir)
+
 
 def make_read_sets_per_sample(files, map_file):
     """Recovers read set information from kneaddata output
@@ -82,7 +84,7 @@ def make_read_sets_per_sample(files, map_file):
             single.append(fp)
 
     # check that seq lists are same len
-    if not (len(fwd_paired) == len(fwd_unpaired) == 
+    if not (len(fwd_paired) == len(fwd_unpaired) ==
             len(rev_paired) == len(rev_unpaired)):
         raise ValueError('There are not equal numbers of forward paired, '
                          'forward unpaired, reverse paired, and reverse '
@@ -158,11 +160,12 @@ def make_read_sets_per_sample(files, map_file):
                                  (run_prefix, f_p, r_p, f_u, r_u))
 
         read_sets.append((run_prefix, sn_by_rp[run_prefix], f_p, r_p,
-                          f_u, r_u, s ))
+                          f_u, r_u, s))
 
         used_prefixes.add(run_prefix)
 
     return(read_sets)
+
 
 def make_single_fastq_gz(read_sets, out_dir, include_reverse):
     """Recovers read set information from kneaddata output
@@ -213,6 +216,7 @@ def make_single_fastq_gz(read_sets, out_dir, include_reverse):
         combined_reads.append((run_prefix, sample, out_fp))
 
     return(combined_reads)
+
 
 def generate_humann2_analysis_commands(combined_reads, out_dir, parameters):
     """Generates the HUMAnN2 commands
@@ -320,13 +324,13 @@ def humann2(qclient, job_id, parameters, out_dir):
         elif read_set == 'fwd':
             include_reverse = False
 
-        combined_reads = make_single_fastq_gz(read_sets, temp_dir, 
+        combined_reads = make_single_fastq_gz(read_sets, temp_dir,
                                               include_reverse)
 
         # Step 2 generating command humann2
         qclient.update_job_step(job_id,
                                 "Step 2 of 6: Generating HUMANn2 command")
-        rs = fps['raw_reverse_seqs'] if 'raw_reverse_seqs' in fps else []
+
         commands = generate_humann2_analysis_commands(combined_reads, out_dir,
                                                       parameters)
 

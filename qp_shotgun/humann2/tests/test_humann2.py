@@ -125,8 +125,8 @@ class Humann2Tests(PluginTestCase):
                     './folder/s2_unmatched_2.fastq.gz',
                     './folder/s1_unmatched_2.fastq.gz']
 
-        files = fwd_p_fp + rev_p_fp + fwd_u_fp + rev_u_fp + \
-                ['./random/file.txt']
+        files = (fwd_p_fp + rev_p_fp + fwd_u_fp + rev_u_fp +
+                 ['./random/file.txt'])
 
         exp = [('s1', 'SKB8.640193',
                 './folder/s1_paired_1.fastq.gz',
@@ -207,9 +207,9 @@ class Humann2Tests(PluginTestCase):
         self._clean_up_files.append(out_dir)
 
         exp_out = [('s1', 'SKB8.640193',
-                    join(out_dir,'s1.fastq.gz')),
+                    join(out_dir, 's1.fastq.gz')),
                    ('s2', 'SKD8.640184',
-                     join(out_dir,'s2.fastq.gz'))]
+                    join(out_dir, 's2.fastq.gz'))]
 
         obs_out = make_single_fastq_gz(read_sets, out_dir, True)
 
@@ -238,9 +238,9 @@ class Humann2Tests(PluginTestCase):
         self._clean_up_files.append(out_dir)
 
         exp_out = [('s1', 'SKB8.640193',
-                    join(out_dir,'s1.fastq.gz')),
+                    join(out_dir, 's1.fastq.gz')),
                    ('s2', 'SKD8.640184',
-                     join(out_dir,'s2.fastq.gz'))]
+                    join(out_dir, 's2.fastq.gz'))]
 
         obs_out = make_single_fastq_gz(read_sets, out_dir, False)
 
@@ -269,16 +269,18 @@ class Humann2Tests(PluginTestCase):
         self._clean_up_files.append(out_dir)
 
         exp_out = [('s1', 'SKB8.640193',
-                    join(out_dir,'s1.fastq.gz')),
+                    join(out_dir, 's1.fastq.gz')),
                    ('s2', 'SKD8.640184',
-                     join(out_dir,'s2.fastq.gz'))]
+                    join(out_dir, 's2.fastq.gz'))]
 
         obs_out = make_single_fastq_gz(read_sets, out_dir, False)
 
         self.assertEqual(exp_out, obs_out)
 
-        self.assertTrue(fcmp(obs_out[0][2], './support_files/s1_single.fastq.gz'))
-        self.assertTrue(fcmp(obs_out[1][2], './support_files/s2_single.fastq.gz'))
+        self.assertTrue(fcmp(obs_out[0][2],
+                        './support_files/s1_single.fastq.gz'))
+        self.assertTrue(fcmp(obs_out[1][2],
+                        './support_files/s2_single.fastq.gz'))
 
     def test_generate_humann2_analysis_commands(self):
 
@@ -352,13 +354,12 @@ class Humann2Tests(PluginTestCase):
             '--xipe "off"' % out_dir]
 
         params_fwd = dict(self.params)
-        
-        read_set = params_fwd.pop('read-set')
+
+        params_fwd.pop('read-set')
 
         combined_reads = [('s1', 'SKB8.640193', './folder/s1.fastq.gz'),
                           ('s2', 'SKD8.640184', './folder/s2.fastq.gz'),
                           ('s3', 'SKB7.640196', './folder/s3.fastq.gz')]
-
 
         obs = generate_humann2_analysis_commands(combined_reads, out_dir,
                                                  params_fwd)
