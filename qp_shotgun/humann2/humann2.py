@@ -130,8 +130,6 @@ def make_read_sets_per_sample(files, map_file):
         else:
             fn = basename(f_p)
 
-        print(f_p)
-
         # iterate over run prefixes and make sure only one matches
         run_prefix = None
         for rp in sn_by_rp:
@@ -152,10 +150,6 @@ def make_read_sets_per_sample(files, map_file):
 
         # if paired, check that all files match run prefix
         if s is None:
-            print(run_prefix)
-            print(r_p)
-            print(f_u)
-            print(r_u)
             if not (basename(r_p).startswith(run_prefix) and
                     basename(f_u).startswith(run_prefix) and
                     basename(r_u).startswith(run_prefix)):
