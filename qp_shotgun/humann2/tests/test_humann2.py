@@ -186,6 +186,106 @@ class Humann2Tests(PluginTestCase):
 
         self.assertEqual(obs, exp)
 
+    def test_make_read_sets_per_sample_extra_fwd(self):
+        fd, fp = mkstemp()
+        close(fd)
+        with open(fp, 'w') as f:
+            f.write(MAPPING_FILE)
+        self._clean_up_files.append(fp)
+
+        fwd_p_fp = ['./folder/s3_paired_1.fastq.gz',
+                    './folder/s2_paired_1.fastq.gz',
+                    './folder/s1_paired_1.fastq.gz',
+                    './folder/s0_paired_1.fastq.gz']
+
+        rev_p_fp = ['./folder/s3_paired_2.fastq.gz',
+                    './folder/s2_paired_2.fastq.gz',
+                    './folder/s1_paired_2.fastq.gz']
+
+        fwd_u_fp = ['./folder/s3_unmatched_1.fastq.gz',
+                    './folder/s2_unmatched_1.fastq.gz',
+                    './folder/s1_unmatched_1.fastq.gz']
+
+        rev_u_fp = ['./folder/s3_unmatched_2.fastq.gz',
+                    './folder/s2_unmatched_2.fastq.gz',
+                    './folder/s1_unmatched_2.fastq.gz']
+
+        files = fwd_p_fp + rev_p_fp + fwd_u_fp + rev_u_fp
+
+        with self.assertRaises(ValueError):
+            make_read_sets_per_sample(files, fp)
+
+    def test_make_read_sets_per_sample_fwd_single(self):
+        fd, fp = mkstemp()
+        close(fd)
+        with open(fp, 'w') as f:
+            f.write(MAPPING_FILE)
+        self._clean_up_files.append(fp)
+
+        fwd_p_fp = ['./folder/s3_paired_1.fastq.gz',
+                    './folder/s2_paired_1.fastq.gz',
+                    './folder/s1_paired_1.fastq.gz',
+                    './folder/s0_paired_1.fastq.gz']
+
+        rev_p_fp = ['./folder/s3_paired_2.fastq.gz',
+                    './folder/s2_paired_2.fastq.gz',
+                    './folder/s1_paired_2.fastq.gz']
+
+        fwd_u_fp = ['./folder/s3_unmatched_1.fastq.gz',
+                    './folder/s2_unmatched_1.fastq.gz',
+                    './folder/s1_unmatched_1.fastq.gz']
+
+        rev_u_fp = ['./folder/s3_unmatched_2.fastq.gz',
+                    './folder/s2_unmatched_2.fastq.gz',
+                    './folder/s1_unmatched_2.fastq.gz']
+
+        single = ['./folder/s3_single.fasta.gz']
+
+        files = fwd_p_fp + rev_p_fp + fwd_u_fp + rev_u_fp + single
+
+        with self.assertRaises(ValueError):
+            make_read_sets_per_sample(files, fp)
+
+    def test_make_read_sets_per_sample_no_fastq(self):
+        fd, fp = mkstemp()
+        close(fd)
+        with open(fp, 'w') as f:
+            f.write(MAPPING_FILE)
+        self._clean_up_files.append(fp)
+
+        files = ['not_a_seqfile.txt']
+
+        with self.assertRaises(ValueError):
+            make_read_sets_per_sample(files, fp)
+
+    def test_make_read_sets_per_sample_unmatch_fwd_rev(self):
+        fd, fp = mkstemp()
+        close(fd)
+        with open(fp, 'w') as f:
+            f.write(MAPPING_FILE)
+        self._clean_up_files.append(fp)
+
+        fwd_p_fp = ['./folder/wrong_paired_1.fastq.gz',
+                    './folder/s2_paired_1.fastq.gz',
+                    './folder/s1_paired_1.fastq.gz']
+
+        rev_p_fp = ['./folder/s3_paired_2.fastq.gz',
+                    './folder/s2_paired_2.fastq.gz',
+                    './folder/s1_paired_2.fastq.gz']
+
+        fwd_u_fp = ['./folder/s3_unmatched_1.fastq.gz',
+                    './folder/s2_unmatched_1.fastq.gz',
+                    './folder/s1_unmatched_1.fastq.gz']
+
+        rev_u_fp = ['./folder/s3_unmatched_2.fastq.gz',
+                    './folder/s2_unmatched_2.fastq.gz',
+                    './folder/s1_unmatched_2.fastq.gz']
+
+        files = fwd_p_fp + rev_p_fp + fwd_u_fp + rev_u_fp
+
+        with self.assertRaises(ValueError):
+            make_read_sets_per_sample(files, fp)
+
     def test_make_single_fastq_gz_fwd_rev(self):
         self.params['read-set'] = 'fwd_rev'
 
