@@ -399,6 +399,8 @@ class KneaddataTests(PluginTestCase):
                                    ('sampleB', None, None, None)), True)
 
         obs = [files for _, _, files in walk(in_dir) if files]
+        obs_flat = [item for sublist in obs for item in sublist]
+
         exp = [['sampleA_paired_1.fastq', 'sampleA_paired_1.fastq.gz',
                 'sampleA_unmatched_1.fastq', 'sampleA_unmatched_1.fastq.gz',
                 'sampleA_paired_2.fastq', 'sampleA_paired_2.fastq.gz',
@@ -407,7 +409,9 @@ class KneaddataTests(PluginTestCase):
                 'sampleB_paired_2.fastq', 'sampleB_paired_2.fastq.gz',
                 'sampleB_unmatched_1.fastq', 'sampleB_unmatched_1.fastq.gz',
                 'sampleB_unmatched_2.fastq', 'sampleB_unmatched_2.fastq.gz']]
-        self.assertItemsEqual(exp, obs)
+        exp_flat = [item for sublist in exp for item in sublist]
+
+        self.assertItemsEqual(exp_flat, obs_flat)
 
 
 MAPPING_FILE = (
