@@ -400,14 +400,14 @@ class KneaddataTests(PluginTestCase):
 
         obs = [files for _, _, files in walk(in_dir) if files]
         exp = [['sampleA_paired_1.fastq', 'sampleA_paired_1.fastq.gz',
-                'sampleA_paired_2.fastq', 'sampleA_paired_2.fastq.gz',
                 'sampleA_unmatched_1.fastq', 'sampleA_unmatched_1.fastq.gz',
+                'sampleA_paired_2.fastq', 'sampleA_paired_2.fastq.gz',
                 'sampleA_unmatched_2.fastq', 'sampleA_unmatched_2.fastq.gz'],
                ['sampleB_paired_1.fastq', 'sampleB_paired_1.fastq.gz',
                 'sampleB_paired_2.fastq', 'sampleB_paired_2.fastq.gz',
                 'sampleB_unmatched_1.fastq', 'sampleB_unmatched_1.fastq.gz',
                 'sampleB_unmatched_2.fastq', 'sampleB_unmatched_2.fastq.gz']]
-        self.assertEqual(exp, obs)
+        self.assertItemsEqual(exp, obs)
 
 
 MAPPING_FILE = (
