@@ -208,23 +208,23 @@ def _per_sample_ainfo(out_dir, samples, fwd_and_rev=False):
             # matching forward/reverse
             fname = smd('%s_paired_1.fastq' % rp)
             if not exists(fname):
-                utime(fname)
+                utime(fname, times=None)
             files.append((_gzip_file(fname), 'preprocessed_fastq'))
             fname = smd('%s_paired_2.fastq' % rp)
             if not exists(fname):
-                utime(fname)
+                utime(fname, times=None)
             files.append((_gzip_file(fname), 'preprocessed_fastq'))
 
             # unmatching forward
             fname = smd('%s_unmatched_1.fastq' % rp)
             if not exists(fname):
-                utime(fname)
+                utime(fname, times=None)
             files.append((_gzip_file(fname), 'preprocessed_fastq'))
 
             # unmatching reverse
             fname = smd('%s_unmatched_2.fastq' % rp)
             if not exists(fname):
-                utime(fname)
+                utime(fname, times=None)
             files.append((_gzip_file(fname), 'preprocessed_fastq'))
     else:
         for rp, _, _, _ in samples:
