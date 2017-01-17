@@ -7,7 +7,7 @@
 # -----------------------------------------------------------------------------
 
 from unittest import main
-from os import close, remove
+from os import close, remove, walk, makedirs
 from os.path import exists, isdir, join, dirname
 from shutil import rmtree, copyfile
 from tempfile import mkstemp, mkdtemp
@@ -20,7 +20,7 @@ from qp_shotgun import plugin
 from qp_shotgun.kneaddata.kneaddata import (make_read_pairs_per_sample,
                                             generate_kneaddata_commands,
                                             _format_kneaddata_params,
-                                            kneaddata)
+                                            kneaddata, _per_sample_ainfo)
 import kneaddata as kd
 
 
@@ -388,6 +388,26 @@ class KneaddataTests(PluginTestCase):
             [(od('kd_test_1/kd_test_1.fastq.gz'), 'preprocessed_fastq'),
              (od('kd_test_2/kd_test_2.fastq.gz'), 'preprocessed_fastq')]]
         self.assertItemsEqual(exp_fps, obs_fps)
+
+    def test_per_sample_ainfo_create_files(self):
+        in_dir = mkdtemp()
+        self._clean_up_files.append(in_dir)
+        makedirs(join(in_dir, 'sampleA'))
+        makedirs(join(in_dir, 'sampleB'))
+
+        _per_sample_ainfo(in_dir, (('sampleA', None, None, None),
+                                   ('sampleB', None, None, None)), True)
+
+        obs = [files for _, _, files in walk(in_dir) if files]
+        exp = [['sampleA_paired_1.fastq', 'sampleA_paired_1.fastq.gz',
+                'sampleA_paired_2.fastq', 'sampleA_paired_2.fastq.gz',
+                'sampleA_unmatched_1.fastq', 'sampleA_unmatched_1.fastq.gz',
+                'sampleA_unmatched_2.fastq', 'sampleA_unmatched_2.fastq.gz'],
+               ['sampleB_paired_1.fastq', 'sampleB_paired_1.fastq.gz',
+                'sampleB_paired_2.fastq', 'sampleB_paired_2.fastq.gz',
+                'sampleB_unmatched_1.fastq', 'sampleB_unmatched_1.fastq.gz',
+                'sampleB_unmatched_2.fastq', 'sampleB_unmatched_2.fastq.gz']]
+        self.assertEqual(exp, obs)
 
 
 MAPPING_FILE = (
