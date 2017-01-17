@@ -22,7 +22,7 @@ from qiita_client.util import system_call, get_sample_names_by_run_prefix
 
 @contextmanager
 def make_temp_directory(out_dir):
-    temp_dir = mkdtemp(out_dir)
+    temp_dir = mkdtemp(dir=out_dir)
     try:
         yield temp_dir
     finally:
