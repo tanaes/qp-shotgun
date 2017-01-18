@@ -15,6 +15,7 @@ from subprocess import Popen
 from contextlib import contextmanager
 from tempfile import mkdtemp
 from shutil import rmtree
+from gzip import open as gzopen
 
 from qiita_client import ArtifactInfo
 from qiita_client.util import system_call, get_sample_names_by_run_prefix
@@ -193,6 +194,8 @@ def make_single_fastq_gz(read_sets, out_dir, include_reverse):
 
     Notes
     -----
+    If all input files are empty for a sample, will not output that sample in
+    the `sample` list.
     """
     combined_reads = []
     for run_prefix, sample, f_p, r_p, f_u, r_u, s in read_sets:
@@ -213,7 +216,12 @@ def make_single_fastq_gz(read_sets, out_dir, include_reverse):
         if failure != 0:
             raise OSError('Problem with cat of files: %s' % cmd)
 
-        combined_reads.append((run_prefix, sample, out_fp))
+        # Check to make sure that the combined gzip is not totally empty
+        with gzopen(out_fp, 'rb') as f:
+            data = f.read(1).strip()
+
+        if data:
+            combined_reads.append((run_prefix, sample, out_fp))
 
     return(combined_reads)
 

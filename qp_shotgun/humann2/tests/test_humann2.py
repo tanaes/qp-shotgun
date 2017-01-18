@@ -317,6 +317,35 @@ class Humann2Tests(PluginTestCase):
         self.assertTrue(fcmp(obs_out[0][2], './support_files/s1.all.fastq.gz'))
         self.assertTrue(fcmp(obs_out[1][2], './support_files/s2.all.fastq.gz'))
 
+    def test_make_single_fastq_gz_fwd_rev_empty(self):
+        self.params['read-set'] = 'fwd_rev'
+
+        read_sets = [('s1', 'SKB8.640193',
+                      './support_files/s1_paired_1.fastq.gz',
+                      './support_files/s1_paired_2.fastq.gz',
+                      './support_files/s1_unmatched_1.fastq.gz',
+                      './support_files/s1_unmatched_2.fastq.gz',
+                      None),
+                     ('s2', 'SKD8.640184',
+                      './support_files/empty.fastq.gz',
+                      './support_files/empty.fastq.gz',
+                      './support_files/empty.fastq.gz',
+                      './support_files/empty.fastq.gz',
+                      None)]
+
+        out_dir = mkdtemp()
+        self._clean_up_files.append(out_dir)
+
+        exp_out = [('s1', 'SKB8.640193',
+                    join(out_dir, 's1.fastq.gz'))]
+
+        obs_out = make_single_fastq_gz(read_sets, out_dir, True)
+
+        self.assertEqual(exp_out, obs_out)
+
+        self.assertTrue(fcmp(obs_out[0][2],
+                        './support_files/s1.all.fastq.gz'))
+
     def test_make_single_fastq_gz_paired_fwd(self):
         self.params['read-set'] = 'fwd'
 
