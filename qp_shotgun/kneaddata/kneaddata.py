@@ -219,9 +219,7 @@ def _per_sample_ainfo(out_dir, samples, fwd_and_rev=False):
     if not files:
         # KneadData did not create any files, which means that no sequence
         # was kept after quality control and filtering for host data
-        raise ValueError(
-            "All sequences filtered out due to quality control and host "
-            "contamination.")
+        raise ValueError("No sequences left after running KneadData")
 
     # Generate the missing files
     for f in missing_files:
