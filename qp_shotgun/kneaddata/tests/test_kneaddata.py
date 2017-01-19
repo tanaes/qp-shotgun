@@ -310,6 +310,7 @@ class KneaddataTests(PluginTestCase):
 
         self.assertEqual("", msg)
         self.assertTrue(success)
+
         # we are expecting 3 artifacts in total
         self.assertEqual(1, len(ainfo))
 
@@ -375,7 +376,8 @@ class KneaddataTests(PluginTestCase):
                                         self.params, out_dir)
         self.assertEqual("", msg)
         self.assertTrue(success)
-        # we are expecting 1 artifacts in total
+
+        # we are expecting 1 artifact in total
         self.assertEqual(1, len(ainfo))
 
         obs_fps = []
@@ -399,15 +401,19 @@ class KneaddataTests(PluginTestCase):
                                    ('sampleB', None, None, None)), True)
 
         obs = [files for _, _, files in walk(in_dir) if files]
+        obs_flat = [item for sublist in obs for item in sublist]
+
         exp = [['sampleA_paired_1.fastq', 'sampleA_paired_1.fastq.gz',
-                'sampleA_paired_2.fastq', 'sampleA_paired_2.fastq.gz',
                 'sampleA_unmatched_1.fastq', 'sampleA_unmatched_1.fastq.gz',
+                'sampleA_paired_2.fastq', 'sampleA_paired_2.fastq.gz',
                 'sampleA_unmatched_2.fastq', 'sampleA_unmatched_2.fastq.gz'],
                ['sampleB_paired_1.fastq', 'sampleB_paired_1.fastq.gz',
                 'sampleB_paired_2.fastq', 'sampleB_paired_2.fastq.gz',
                 'sampleB_unmatched_1.fastq', 'sampleB_unmatched_1.fastq.gz',
                 'sampleB_unmatched_2.fastq', 'sampleB_unmatched_2.fastq.gz']]
-        self.assertEqual(exp, obs)
+        exp_flat = [item for sublist in exp for item in sublist]
+
+        self.assertItemsEqual(exp_flat, obs_flat)
 
 
 MAPPING_FILE = (
