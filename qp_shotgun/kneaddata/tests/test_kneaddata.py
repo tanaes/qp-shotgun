@@ -310,6 +310,7 @@ class KneaddataTests(PluginTestCase):
 
         self.assertEqual("", msg)
         self.assertTrue(success)
+
         # we are expecting 3 artifacts in total
         self.assertEqual(1, len(ainfo))
 
