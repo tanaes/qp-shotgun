@@ -391,11 +391,33 @@ class KneaddataTests(PluginTestCase):
              (od('kd_test_2/kd_test_2.fastq.gz'), 'preprocessed_fastq')]]
         self.assertItemsEqual(exp_fps, obs_fps)
 
-    def test_per_sample_ainfo_create_files(self):
+    def test_per_sample_ainfo_error(self):
         in_dir = mkdtemp()
         self._clean_up_files.append(in_dir)
         makedirs(join(in_dir, 'sampleA'))
         makedirs(join(in_dir, 'sampleB'))
+
+        # Paired-end
+        with self.assertRaises(ValueError):
+            _per_sample_ainfo(in_dir, (('sampleA', None, None, None),
+                                       ('sampleB', None, None, None)), True)
+
+        # Single-end
+        with self.assertRaises(ValueError):
+            _per_sample_ainfo(in_dir, (('sampleA', None, None, None),
+                                       ('sampleB', None, None, None)), False)
+
+    def test_per_sample_ainfo_create_files(self):
+        # Paired-end
+        in_dir = mkdtemp()
+        self._clean_up_files.append(in_dir)
+        makedirs(join(in_dir, 'sampleA'))
+        makedirs(join(in_dir, 'sampleB'))
+
+        # Create forward read for 1 sample
+        fname = join(in_dir, 'sampleA', 'sampleA_unmatched_1.fastq')
+        with open(fname, 'w') as f:
+            f.write('@sid\nACTG\n+\n(())\n')
 
         _per_sample_ainfo(in_dir, (('sampleA', None, None, None),
                                    ('sampleB', None, None, None)), True)
@@ -413,8 +435,28 @@ class KneaddataTests(PluginTestCase):
                 'sampleB_unmatched_2.fastq', 'sampleB_unmatched_2.fastq.gz']]
         exp_flat = [item for sublist in exp for item in sublist]
 
-        self.assertItemsEqual(exp_flat, obs_flat)
+        self.assertItemsEqual(obs_flat, exp_flat)
 
+        # Single-end
+        in_dir = mkdtemp()
+        self._clean_up_files.append(in_dir)
+        makedirs(join(in_dir, 'sampleA'))
+        makedirs(join(in_dir, 'sampleB'))
+
+        # Create forward read for 1 sample
+        fname = join(in_dir, 'sampleA', 'sampleA.fastq')
+        with open(fname, 'w') as f:
+            f.write('@sid\nACTG\n+\n(())\n')
+
+        _per_sample_ainfo(in_dir, (('sampleA', None, None, None),
+                                   ('sampleB', None, None, None)), False)
+
+        obs = [files for _, _, files in walk(in_dir) if files]
+        obs_flat = [item for sublist in obs for item in sublist]
+
+        exp = ['sampleA.fastq', 'sampleB.fastq',
+               'sampleA.fastq.gz', 'sampleB.fastq.gz']
+        self.assertItemsEqual(obs_flat, exp)
 
 MAPPING_FILE = (
     "#SampleID\tplatform\tbarcode\texperiment_design_description\t"
