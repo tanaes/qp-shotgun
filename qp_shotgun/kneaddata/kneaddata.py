@@ -199,37 +199,37 @@ def _gzip_file(path):
 
 def _per_sample_ainfo(out_dir, samples, fwd_and_rev=False):
     files = []
+    missing_files = []
 
     if fwd_and_rev:
-        for rp, _, _, _ in samples:
-            smd = partial(join, out_dir, rp)
-
-            # matching forward/reverse
-            fname = smd('%s_paired_1.fastq' % rp)
-            if not exists(fname):
-                open(fname, 'w', 0).close()
-            files.append((_gzip_file(fname), 'preprocessed_fastq'))
-            fname = smd('%s_paired_2.fastq' % rp)
-            if not exists(fname):
-                open(fname, 'w', 0).close()
-            files.append((_gzip_file(fname), 'preprocessed_fastq'))
-
-            # unmatching forward
-            fname = smd('%s_unmatched_1.fastq' % rp)
-            if not exists(fname):
-                open(fname, 'w', 0).close()
-            files.append((_gzip_file(fname), 'preprocessed_fastq'))
-
-            # unmatching reverse
-            fname = smd('%s_unmatched_2.fastq' % rp)
-            if not exists(fname):
-                open(fname, 'w', 0).close()
-            files.append((_gzip_file(fname), 'preprocessed_fastq'))
+        suffixes = ['%s_paired_1.fastq', '%s_paired_2.fastq',
+                    '%s_unmatched_1.fastq', '%s_unmatched_2.fastq']
     else:
-        for rp, _, _, _ in samples:
-            fname = join(out_dir, rp, '%s.fastq' % rp)
+        suffixes = ['%s.fastq']
+
+    for rp, _, _, _ in samples:
+        smd = partial(join, out_dir, rp)
+        for suff in suffixes:
+            fname = smd(suff % rp)
             if exists(fname):
-                files.append((_gzip_file(fname), 'preprocessed_fastq'))
+                files.append(fname)
+            else:
+                missing_files.append(fname)
+
+    if not files:
+        # KneadData did not create any files, which means that no sequence
+        # was kept after quality control and filtering for host data
+        raise ValueError(
+            "All sequences filtered out due to quality control and host "
+            "contamination.")
+
+    # Generate the missing files
+    for f in missing_files:
+        open(f, 'w', 0).close()
+        files.append(f)
+
+    # Gzip all the files
+    files = [(_gzip_file(f), 'preprocessed_fastq') for f in files]
 
     return [ArtifactInfo('KneadData files', 'per_sample_FASTQ', files)]
 
