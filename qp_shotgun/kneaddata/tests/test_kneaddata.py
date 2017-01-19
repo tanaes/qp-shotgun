@@ -375,6 +375,7 @@ class KneaddataTests(PluginTestCase):
                                         self.params, out_dir)
         self.assertEqual("", msg)
         self.assertTrue(success)
+
         # we are expecting 1 artifact in total
         self.assertEqual(1, len(ainfo))
 
