@@ -310,6 +310,7 @@ class KneaddataTests(PluginTestCase):
 
         self.assertEqual("", msg)
         self.assertTrue(success)
+
         # we are expecting 3 artifacts in total
         self.assertEqual(1, len(ainfo))
 
@@ -375,7 +376,8 @@ class KneaddataTests(PluginTestCase):
                                         self.params, out_dir)
         self.assertEqual("", msg)
         self.assertTrue(success)
-        # we are expecting 1 artifacts in total
+
+        # we are expecting 1 artifact in total
         self.assertEqual(1, len(ainfo))
 
         obs_fps = []
