@@ -14,7 +14,6 @@ from functools import partial
 from subprocess import Popen
 from contextlib import contextmanager
 from tempfile import mkdtemp
-from shutil import rmtree
 from gzip import open as gzopen
 
 from qiita_client import ArtifactInfo
@@ -24,10 +23,7 @@ from qiita_client.util import system_call, get_sample_names_by_run_prefix
 @contextmanager
 def make_temp_directory(out_dir):
     temp_dir = mkdtemp(dir=out_dir)
-    try:
-        yield temp_dir
-    finally:
-        rmtree(temp_dir)
+    yield temp_dir
 
 
 def make_read_sets_per_sample(files, map_file):
