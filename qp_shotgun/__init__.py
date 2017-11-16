@@ -10,6 +10,7 @@ from qiita_client import QiitaPlugin
 
 from .humann2 import humann2_cmd
 from .kneaddata import kneaddata_cmd
+from .qc_trim import qc_trim_cmd
 
 # Initialize the plugin
 plugin = QiitaPlugin(
@@ -17,3 +18,5 @@ plugin = QiitaPlugin(
 
 plugin.register_command(humann2_cmd)
 plugin.register_command(kneaddata_cmd)
+plugin.register_command(qc_trim_cmd)
+
