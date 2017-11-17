@@ -110,7 +110,7 @@ def make_read_pairs_per_sample(forward_seqs, reverse_seqs, map_file):
     return(samples)
 
 
-def _format_kneaddata_params(parameters):
+def _format_qc_trim_params(parameters):
     params = []
 
     for param in sorted(parameters):
@@ -128,7 +128,7 @@ def _format_kneaddata_params(parameters):
     return(param_string)
 
 
-def generate_kneaddata_commands(forward_seqs, reverse_seqs, map_file,
+def generate_qc_trim_commands(forward_seqs, reverse_seqs, map_file,
                                 out_dir, parameters):
     """Generates the KneadData commands
 
@@ -232,7 +232,7 @@ def _per_sample_ainfo(out_dir, samples, fwd_and_rev=False):
     return [ArtifactInfo('KneadData files', 'per_sample_FASTQ', files)]
 
 
-def kneaddata(qclient, job_id, parameters, out_dir):
+def qc_trim(qclient, job_id, parameters, out_dir):
     """Run kneaddata with the given parameters
 
     Parameters
