@@ -17,30 +17,30 @@ from functools import partial
 from qiita_client.testing import PluginTestCase
 
 from qp_shotgun import plugin
-from qp_shotgun.kneaddata.kneaddata import (make_read_pairs_per_sample,
-                                            generate_kneaddata_commands,
-                                            _format_kneaddata_params,
-                                            kneaddata, _per_sample_ainfo)
-import kneaddata as kd
+from qp_shotgun.qc_trim.qc_trim import (make_read_pairs_per_sample,
+                                            generate_qc_trim_commands,
+                                            _format_qc_trim_params,
+                                            qc_trim, _per_sample_ainfo)
+import qp_shotgun.qc_trim as kd
 
 
-class KneaddataTests(PluginTestCase):
+class QC_TrimTests(PluginTestCase):
     maxDiff = None
 
     def setUp(self):
         plugin("https://localhost:21174", 'register', 'ignored')
 
         # to fully test the plugin we need to use the demo reference-db,
-        # which is part of the regular kneaddata install
+        # which is part of the regular qc_trim install
         self.refdb_path = join(dirname(kd.__file__),
                                "tests/data/demo_bowtie2_db/demo_db.1.bt2")
         self.params = {
-            'reference-db': self.refdb_path, 'bypass-trim': False,
-            'threads': 1, 'processes': 1, 'quality-scores': 'phred33',
-            'run-bmtagger': False, 'run-trf': False, 'run-fastqc-start': True,
-            'run-fastqc-end': False, 'max-memory': '500m',
-            'trimmomatic-options': (
-                '"LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:36"')
+        #   'reference-db': self.refdb_path, 'bypass-trim': False,
+        #    'threads': 1, 'processes': 1, 'quality-scores': 'phred33',
+        #    'run-bmtagger': False, 'run-trf': False, 'run-fastqc-start': True,
+        #    'run-fastqc-end': False, 'max-memory': '500m',
+        #    'trimmomatic-options': (
+        #        '"LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:36"')
         }
         self._clean_up_files = []
 
@@ -52,13 +52,15 @@ class KneaddataTests(PluginTestCase):
                 else:
                     remove(fp)
 
-    def test_format_kneaddata_params(self):
-        obs = _format_kneaddata_params(self.params)
-        exp = ('--max-memory 500m --processes 1 --quality-scores phred33 '
-               '--reference-db %s '
-               '--run-fastqc-start --threads 1 '
-               '--trimmomatic-options "LEADING:3 '
-               'TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:36"' % self.refdb_path)
+    def test_format_qc_trim_params(self):
+        obs = _format_qc_trim_params(self.params)
+        exp = (
+				#'--max-memory 500m --processes 1 --quality-scores phred33 '
+               #'--reference-db %s '
+               #'--run-fastqc-start --threads 1 '
+               #'--trimmomatic-options "LEADING:3 '
+               #'TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:36"' % self.refdb_path
+			   )
 
         self.assertEqual(obs, exp)
 
@@ -179,7 +181,7 @@ class KneaddataTests(PluginTestCase):
         with self.assertRaises(ValueError):
             make_read_pairs_per_sample(fwd_fp, rev_fp, fp)
 
-    def test_generate_kneaddata_analysis_commands_only_fwd(self):
+    def test_generate_qc_trim_analysis_commands_forward_reverse(self):
         fd, fp = mkstemp()
         close(fd)
         with open(fp, 'w') as f:
@@ -187,70 +189,18 @@ class KneaddataTests(PluginTestCase):
         self._clean_up_files.append(fp)
 
         exp_cmd = [
-            'kneaddata --input "fastq/s1.fastq" '
-            '--output "output/s1" --output-prefix "s1" '
-            '--max-memory 500m --processes 1 --quality-scores phred33 '
-            '--reference-db %s --run-fastqc-start --threads 1 '
-            '--trimmomatic-options "LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 '
-            'MINLEN:36"' % self.refdb_path,
-            'kneaddata --input "fastq/s2.fastq.gz" '
-            '--output "output/s2" --output-prefix "s2" '
-            '--max-memory 500m --processes 1 --quality-scores phred33 '
-            '--reference-db %s --run-fastqc-start --threads 1 '
-            '--trimmomatic-options "LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 '
-            'MINLEN:36"' % self.refdb_path,
-            'kneaddata --input "fastq/s3.fastq" '
-            '--output "output/s3" --output-prefix "s3" '
-            '--max-memory 500m --processes 1 --quality-scores phred33 '
-            '--reference-db %s --run-fastqc-start --threads 1 '
-            '--trimmomatic-options "LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 '
-            'MINLEN:36"' % self.refdb_path]
-
-        exp_sample = [('s1', 'SKB8.640193', 'fastq/s1.fastq', None),
-                      ('s2', 'SKD8.640184', 'fastq/s2.fastq.gz', None),
-                      ('s3', 'SKB7.640196', 'fastq/s3.fastq', None)]
-
-        obs_cmd, obs_sample = generate_kneaddata_commands(
-            ['fastq/s1.fastq', 'fastq/s2.fastq.gz', 'fastq/s3.fastq'], [],
-            fp, 'output', self.params)
-
-        self.assertEqual(obs_cmd, exp_cmd)
-        self.assertEqual(obs_sample, exp_sample)
-
-    def test_generate_kneaddata_analysis_commands_forward_reverse(self):
-        fd, fp = mkstemp()
-        close(fd)
-        with open(fp, 'w') as f:
-            f.write(MAPPING_FILE)
-        self._clean_up_files.append(fp)
-
-        exp_cmd = [
-            'kneaddata --input "fastq/s1.fastq" --input "fastq/s1.R2.fastq" '
-            '--output "output/s1" --output-prefix "s1" '
-            '--max-memory 500m --processes 1 --quality-scores phred33 '
-            '--reference-db %s --run-fastqc-start --threads 1 '
-            '--trimmomatic-options "LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 '
-            'MINLEN:36"' % self.refdb_path,
-            'kneaddata --input "fastq/s2.fastq.gz" '
-            '--input "fastq/s2.R2.fastq.gz" --output "output/s2" '
-            '--output-prefix "s2" --max-memory 500m '
-            '--processes 1 --quality-scores phred33 --reference-db %s '
-            '--run-fastqc-start --threads 1 --trimmomatic-options '
-            '"LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 '
-            'MINLEN:36"' % self.refdb_path,
-            'kneaddata --input "fastq/s3.fastq" --input "fastq/s3.R2.fastq" '
-            '--output "output/s3" --output-prefix "s3" '
-            '--max-memory 500m --processes 1 --quality-scores phred33 '
-            '--reference-db %s --run-fastqc-start --threads 1 '
-            '--trimmomatic-options "LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 '
-            'MINLEN:36"' % self.refdb_path]
+			'atropos --threads 4 --adapter GATCGGAAGAGCACACGTCTGAACTCCAGTCAC '
+			'-A GATCGGAAGAGCGTCGTGTAGGGAAAGGAGTGT --quality-cutoff 15 '
+			'--minimum-length 80 --pair-filter any --max-n 80 --trim-n True '
+			'--nextseq-trim False  -o output/s1 -p output/s2 -pe1 fastq/s1.fastq -pe2 fastq/s1.fastq'
+            ]
 
         exp_sample = [
             ('s1', 'SKB8.640193', 'fastq/s1.fastq', 'fastq/s1.R2.fastq'),
             ('s2', 'SKD8.640184', 'fastq/s2.fastq.gz', 'fastq/s2.R2.fastq.gz'),
             ('s3', 'SKB7.640196', 'fastq/s3.fastq', 'fastq/s3.R2.fastq')]
 
-        obs_cmd, obs_sample = generate_kneaddata_commands(
+        obs_cmd, obs_sample = generate_qc_trim_commands(
             ['fastq/s1.fastq', 'fastq/s2.fastq.gz', 'fastq/s3.fastq'],
             ['fastq/s1.R2.fastq', 'fastq/s2.R2.fastq.gz', 'fastq/s3.R2.fastq'],
             fp, 'output', self.params)
@@ -258,7 +208,7 @@ class KneaddataTests(PluginTestCase):
         self.assertEqual(obs_cmd, exp_cmd)
         self.assertEqual(obs_sample, exp_sample)
 
-    def test_kneaddata(self):
+    def test_qc_trim(self):
         # generating filepaths
         in_dir = mkdtemp()
         self._clean_up_files.append(in_dir)
@@ -274,8 +224,8 @@ class KneaddataTests(PluginTestCase):
 
         # inserting new prep template
         prep_info_dict = {
-            'SKB7.640196': {'run_prefix': 'kd_test_1'},
-            'SKB8.640193': {'run_prefix': 'kd_test_2'}
+            'SKB7.640196': {'run_prefix': 'qt_test_1'},
+            'SKB8.640193': {'run_prefix': 'qt_test_2'}
         }
         data = {'prep_info': dumps(prep_info_dict),
                 # magic #1 = testing study
@@ -291,13 +241,13 @@ class KneaddataTests(PluginTestCase):
                 (fp2_1, 'raw_forward_seqs'),
                 (fp2_2, 'raw_reverse_seqs')]),
             'type': "per_sample_FASTQ",
-            'name': "Test KneadData artifact",
+            'name': "Test QC_Trim artifact",
             'prep': pid}
         aid = self.qclient.post('/apitest/artifact/', data=data)['artifact']
 
         self.params['input'] = aid
         data = {'user': 'demo@microbio.me',
-                'command': dumps(['qp-shotgun', '0.0.1', 'KneadData 0.5.1']),
+                'command': dumps(['qp-shotgun', '0.0.2', 'atropos 1.1.15']),
                 'status': 'running',
                 'parameters': dumps(self.params)}
         jid = self.qclient.post('/apitest/processing_job/', data=data)['job']
@@ -305,7 +255,7 @@ class KneaddataTests(PluginTestCase):
         out_dir = mkdtemp()
         self._clean_up_files.append(out_dir)
 
-        success, ainfo, msg = kneaddata(self.qclient, jid,
+        success, ainfo, msg = qc_trim(self.qclient, jid,
                                         self.params, out_dir)
 
         self.assertEqual("", msg)
@@ -322,74 +272,15 @@ class KneaddataTests(PluginTestCase):
 
         ftype = 'preprocessed_fastq'
         exp_fps = [
-            [(od('kd_test_1/kd_test_1_paired_1.fastq.gz'), ftype),
-             (od('kd_test_1/kd_test_1_paired_2.fastq.gz'), ftype),
-             (od('kd_test_1/kd_test_1_unmatched_1.fastq.gz'), ftype),
-             (od('kd_test_1/kd_test_1_unmatched_2.fastq.gz'), ftype),
-             (od('kd_test_2/kd_test_2_paired_1.fastq.gz'), ftype),
-             (od('kd_test_2/kd_test_2_paired_2.fastq.gz'), ftype),
-             (od('kd_test_2/kd_test_2_unmatched_1.fastq.gz'), ftype),
-             (od('kd_test_2/kd_test_2_unmatched_2.fastq.gz'), ftype)]]
-        self.assertItemsEqual(exp_fps, obs_fps)
-
-    def test_kneaddata_just_fwd(self):
-        # generating filepaths
-        in_dir = mkdtemp()
-        self._clean_up_files.append(in_dir)
-
-        fp1_1 = join(in_dir, 'kd_test_1_R1.fastq.gz')
-        fp2_1 = join(in_dir, 'kd_test_2_R1.fastq.gz')
-        copyfile('support_files/kd_test_1_R1.fastq.gz', fp1_1)
-        copyfile('support_files/kd_test_1_R1.fastq.gz', fp2_1)
-
-        # inserting new prep template
-        prep_info_dict = {
-            'SKB7.640196': {'run_prefix': 'kd_test_1'},
-            'SKB8.640193': {'run_prefix': 'kd_test_2'}
-        }
-        data = {'prep_info': dumps(prep_info_dict),
-                # magic #1 = testing study
-                'study': 1,
-                'data_type': 'Metagenomic'}
-        pid = self.qclient.post('/apitest/prep_template/', data=data)['prep']
-
-        # inserting artifacts
-        data = {
-            'filepaths': dumps([
-                (fp1_1, 'raw_forward_seqs'), (fp2_1, 'raw_forward_seqs')]),
-            'type': "per_sample_FASTQ",
-            'name': "Test KneadData artifact",
-            'prep': pid}
-        aid = self.qclient.post('/apitest/artifact/', data=data)['artifact']
-
-        self.params['input'] = aid
-        data = {'user': 'demo@microbio.me',
-                'command': dumps(['qp-shotgun', '0.0.1', 'KneadData 0.5.1']),
-                'status': 'running',
-                'parameters': dumps(self.params)}
-        jid = self.qclient.post('/apitest/processing_job/', data=data)['job']
-
-        out_dir = mkdtemp()
-        self._clean_up_files.append(out_dir)
-
-        success, ainfo, msg = kneaddata(self.qclient, jid,
-                                        self.params, out_dir)
-        self.assertEqual("", msg)
-        self.assertTrue(success)
-
-        # we are expecting 1 artifact in total
-        self.assertEqual(1, len(ainfo))
-
-        obs_fps = []
-        for a in ainfo:
-            self.assertEqual("per_sample_FASTQ", a.artifact_type)
-            obs_fps.append(a.files)
-        od = partial(join, out_dir)
-
-        exp_fps = [
-            [(od('kd_test_1/kd_test_1.fastq.gz'), 'preprocessed_fastq'),
-             (od('kd_test_2/kd_test_2.fastq.gz'), 'preprocessed_fastq')]]
-        self.assertItemsEqual(exp_fps, obs_fps)
+            [(od('qt_test_1/qt_test_1_paired_1.fastq.gz'), ftype),
+             (od('qt_test_1/qt_test_1_paired_2.fastq.gz'), ftype),
+             (od('qt_test_1/qt_test_1_unmatched_1.fastq.gz'), ftype),
+             (od('qt_test_1/qt_test_1_unmatched_2.fastq.gz'), ftype),
+             (od('qt_test_2/qt_test_2_paired_1.fastq.gz'), ftype),
+             (od('qt_test_2/qt_test_2_paired_2.fastq.gz'), ftype),
+             (od('qt_test_2/qt_test_2_unmatched_1.fastq.gz'), ftype),
+             (od('qt_test_2/qt_test_2_unmatched_2.fastq.gz'), ftype)]]
+        self.assertEqual(exp_fps, obs_fps)
 
     def test_per_sample_ainfo_error(self):
         in_dir = mkdtemp()
@@ -435,7 +326,7 @@ class KneaddataTests(PluginTestCase):
                 'sampleB_unmatched_2.fastq', 'sampleB_unmatched_2.fastq.gz']]
         exp_flat = [item for sublist in exp for item in sublist]
 
-        self.assertItemsEqual(obs_flat, exp_flat)
+        self.assertEqual(obs_flat, exp_flat)
 
         # Single-end
         in_dir = mkdtemp()
@@ -456,7 +347,7 @@ class KneaddataTests(PluginTestCase):
 
         exp = ['sampleA.fastq', 'sampleB.fastq',
                'sampleA.fastq.gz', 'sampleB.fastq.gz']
-        self.assertItemsEqual(obs_flat, exp)
+        self.assertEqual(obs_flat, exp)
 
 MAPPING_FILE = (
     "#SampleID\tplatform\tbarcode\texperiment_design_description\t"

@@ -6,7 +6,7 @@
 # The full license is in the file LICENSE, distributed with this software.
 # -----------------------------------------------------------------------------
 
-from itertools import izip_longest
+from itertools import zip_longest
 from os.path import basename, join, exists
 from functools import partial
 from gzip import open as gopen
@@ -67,7 +67,7 @@ def make_read_pairs_per_sample(forward_seqs, reverse_seqs, map_file):
     # make pairings
     samples = []
     used_prefixes = set()
-    for i, (fwd_fp, rev_fp) in enumerate(izip_longest(forward_seqs,
+    for i, (fwd_fp, rev_fp) in enumerate(zip_longest(forward_seqs,
                                                       reverse_seqs)):
         # fwd_fp is the fwd read filepath
         fwd_fn = basename(fwd_fp)
@@ -130,7 +130,7 @@ def _format_qc_trim_params(parameters):
 
 def generate_qc_trim_commands(forward_seqs, reverse_seqs, map_file,
                                 out_dir, parameters):
-    """Generates the KneadData commands
+    """Generates the QC_Trim commands
 
     Parameters
     ----------
@@ -161,16 +161,15 @@ def generate_qc_trim_commands(forward_seqs, reverse_seqs, map_file,
     """
     # we match filenames, samples, and run prefixes
     samples = make_read_pairs_per_sample(forward_seqs, reverse_seqs, map_file)
-
+	#threads = 4
     cmds = []
 
-    param_string = _format_kneaddata_params(parameters)
+    param_string = _format_qc_trim_params(parameters)
     for run_prefix, sample, f_fp, r_fp in samples:
         r_fp_str = ' --input "%s"' % r_fp if r_fp is not None else ""
-        cmds.append('kneaddata --input "%s"%s --output "%s" '
-                    '--output-prefix "%s" %s' % (
-                        f_fp, r_fp_str, join(out_dir, run_prefix), run_prefix,
-                        param_string))
+        cmds.append('atropos --threads 4 %s'
+					'-o %s -p %s -pe1 %s -pe2 %s '
+					% (param_string, join(out_dir, run_prefix), out_dir, f_fp, r_fp))
 
     return cmds, samples
 
@@ -180,7 +179,7 @@ def _run_commands(qclient, job_id, commands, msg):
         qclient.update_job_step(job_id, msg % i)
         std_out, std_err, return_value = system_call(cmd)
         if return_value != 0:
-            error_msg = ("Error running KneadData:\nStd out: %s\nStd err: %s"
+            error_msg = ("Error running QC_Trim:\nStd out: %s\nStd err: %s"
                          "\n\nCommand run was:\n%s"
                          % (std_out, std_err, cmd))
             return False, error_msg
@@ -189,7 +188,7 @@ def _run_commands(qclient, job_id, commands, msg):
 
 
 def _gzip_file(path):
-    with open(path) as in_file:
+    with open(path, "rb") as in_file:
         gz_path = '%s.gz' % path
         with gopen(gz_path, "wb") as out_file:
             out_file.writelines(in_file)
@@ -223,13 +222,13 @@ def _per_sample_ainfo(out_dir, samples, fwd_and_rev=False):
 
     # Generate the missing files
     for f in missing_files:
-        open(f, 'w', 0).close()
+        open(f, 'w').close()
         files.append(f)
 
     # Gzip all the files
     files = [(_gzip_file(f), 'preprocessed_fastq') for f in files]
 
-    return [ArtifactInfo('KneadData files', 'per_sample_FASTQ', files)]
+    return [ArtifactInfo('QC_Trim files', 'per_sample_FASTQ', files)]
 
 
 def qc_trim(qclient, job_id, parameters, out_dir):
@@ -267,15 +266,15 @@ def qc_trim(qclient, job_id, parameters, out_dir):
 
     # Step 2 generating command kneaddata
     qclient.update_job_step(job_id, "Step 2 of 4: Generating"
-                                    " KneadData commands")
+                                    " QC_Trim commands")
     rs = fps['raw_reverse_seqs'] if 'raw_reverse_seqs' in fps else []
-    commands, samples = generate_kneaddata_commands(fps['raw_forward_seqs'],
+    commands, samples = generate_qc_trim_commands(fps['raw_forward_seqs'],
                                                     rs, qiime_map, out_dir,
                                                     parameters)
 
     # Step 3 execute kneaddata
     len_cmd = len(commands)
-    msg = "Step 3 of 4: Executing KneadData job (%d/{0})".format(len_cmd)
+    msg = "Step 3 of 4: Executing QC_Trim job (%d/{0})".format(len_cmd)
     success, msg = _run_commands(qclient, job_id, commands, msg)
     if not success:
         return False, None, msg
