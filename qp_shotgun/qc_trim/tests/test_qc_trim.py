@@ -35,12 +35,10 @@ class QC_TrimTests(PluginTestCase):
         self.refdb_path = join(dirname(kd.__file__),
                                "tests/data/demo_bowtie2_db/demo_db.1.bt2")
         self.params = {
-        #   'reference-db': self.refdb_path, 'bypass-trim': False,
-        #    'threads': 1, 'processes': 1, 'quality-scores': 'phred33',
-        #    'run-bmtagger': False, 'run-trf': False, 'run-fastqc-start': True,
-        #    'run-fastqc-end': False, 'max-memory': '500m',
-        #    'trimmomatic-options': (
-        #        '"LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:36"')
+		    'adapter': 'GATCGGAAGAGCACACGTCTGAACTCCAGTCAC',
+        'A': 'GATCGGAAGAGCGTCGTGTAGGGAAAGGAGTGT', 
+        'quality-cutoff': '15', 'minimum-length': '80', 'pair-filter': 'any',
+        'max-n': '80', 'trim-n': 'True', 'nextseq-trim': 'False'
         }
         self._clean_up_files = []
 
@@ -54,14 +52,7 @@ class QC_TrimTests(PluginTestCase):
 
     def test_format_qc_trim_params(self):
         obs = _format_qc_trim_params(self.params)
-        exp = (
-				#'--max-memory 500m --processes 1 --quality-scores phred33 '
-               #'--reference-db %s '
-               #'--run-fastqc-start --threads 1 '
-               #'--trimmomatic-options "LEADING:3 '
-               #'TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:36"' % self.refdb_path
-			   )
-
+        exp = '--A GATCGGAAGAGCGTCGTGTAGGGAAAGGAGTGT --adapter GATCGGAAGAGCACACGTCTGAACTCCAGTCAC --max-n 80 --minimum-length 80 --nextseq-trim False --pair-filter any --quality-cutoff 15 --trim-n True'
         self.assertEqual(obs, exp)
 
     def test_make_read_pairs_per_sample_match_fwd_rev(self):
@@ -189,10 +180,9 @@ class QC_TrimTests(PluginTestCase):
         self._clean_up_files.append(fp)
 
         exp_cmd = [
-			'atropos --threads 4 --adapter GATCGGAAGAGCACACGTCTGAACTCCAGTCAC '
-			'-A GATCGGAAGAGCGTCGTGTAGGGAAAGGAGTGT --quality-cutoff 15 '
-			'--minimum-length 80 --pair-filter any --max-n 80 --trim-n True '
-			'--nextseq-trim False  -o output/s1 -p output/s2 -pe1 fastq/s1.fastq -pe2 fastq/s1.fastq'
+			'atropos --threads 4 --A GATCGGAAGAGCGTCGTGTAGGGAAAGGAGTGT --adapter GATCGGAAGAGCACACGTCTGAACTCCAGTCAC --max-n 80 --minimum-length 80 --nextseq-trim False --pair-filter any --quality-cutoff 15 --trim-n True -o output/fastq/s1.fastq -p output/fastq/s1.R2.fastq -pe1 fastq/s1.fastq -pe2 fastq/s1.R2.fastq',
+            'atropos --threads 4 --A GATCGGAAGAGCGTCGTGTAGGGAAAGGAGTGT --adapter GATCGGAAGAGCACACGTCTGAACTCCAGTCAC --max-n 80 --minimum-length 80 --nextseq-trim False --pair-filter any --quality-cutoff 15 --trim-n True -o output/fastq/s2.fastq.gz -p output/fastq/s2.R2.fastq.gz -pe1 fastq/s2.fastq.gz -pe2 fastq/s2.R2.fastq.gz',
+            'atropos --threads 4 --A GATCGGAAGAGCGTCGTGTAGGGAAAGGAGTGT --adapter GATCGGAAGAGCACACGTCTGAACTCCAGTCAC --max-n 80 --minimum-length 80 --nextseq-trim False --pair-filter any --quality-cutoff 15 --trim-n True -o output/fastq/s3.fastq -p output/fastq/s3.R2.fastq -pe1 fastq/s3.fastq -pe2 fastq/s3.R2.fastq'
             ]
 
         exp_sample = [
@@ -224,8 +214,8 @@ class QC_TrimTests(PluginTestCase):
 
         # inserting new prep template
         prep_info_dict = {
-            'SKB7.640196': {'run_prefix': 'qt_test_1'},
-            'SKB8.640193': {'run_prefix': 'qt_test_2'}
+            'SKB7.640196': {'run_prefix': 'kd_test_1'},
+            'SKB8.640193': {'run_prefix': 'kd_test_2'}
         }
         data = {'prep_info': dumps(prep_info_dict),
                 # magic #1 = testing study
@@ -272,14 +262,14 @@ class QC_TrimTests(PluginTestCase):
 
         ftype = 'preprocessed_fastq'
         exp_fps = [
-            [(od('qt_test_1/qt_test_1_paired_1.fastq.gz'), ftype),
-             (od('qt_test_1/qt_test_1_paired_2.fastq.gz'), ftype),
-             (od('qt_test_1/qt_test_1_unmatched_1.fastq.gz'), ftype),
-             (od('qt_test_1/qt_test_1_unmatched_2.fastq.gz'), ftype),
-             (od('qt_test_2/qt_test_2_paired_1.fastq.gz'), ftype),
-             (od('qt_test_2/qt_test_2_paired_2.fastq.gz'), ftype),
-             (od('qt_test_2/qt_test_2_unmatched_1.fastq.gz'), ftype),
-             (od('qt_test_2/qt_test_2_unmatched_2.fastq.gz'), ftype)]]
+            [(od('kd_test_1/kd_test_1_paired_1.fastq.gz'), ftype),
+             (od('kd_test_1/kd_test_1_paired_2.fastq.gz'), ftype),
+             (od('kd_test_1/kd_test_1_unmatched_1.fastq.gz'), ftype),
+             (od('kd_test_1/kd_test_1_unmatched_2.fastq.gz'), ftype),
+             (od('kd_test_2/kd_test_2_paired_1.fastq.gz'), ftype),
+             (od('kd_test_2/kd_test_2_paired_2.fastq.gz'), ftype),
+             (od('kd_test_2/kd_test_2_unmatched_1.fastq.gz'), ftype),
+             (od('kd_test_2/kd_test_2_unmatched_2.fastq.gz'), ftype)]]
         self.assertEqual(exp_fps, obs_fps)
 
     def test_per_sample_ainfo_error(self):
@@ -317,8 +307,8 @@ class QC_TrimTests(PluginTestCase):
         obs_flat = [item for sublist in obs for item in sublist]
 
         exp = [['sampleA_paired_1.fastq', 'sampleA_paired_1.fastq.gz',
-                'sampleA_unmatched_1.fastq', 'sampleA_unmatched_1.fastq.gz',
                 'sampleA_paired_2.fastq', 'sampleA_paired_2.fastq.gz',
+				'sampleA_unmatched_1.fastq', 'sampleA_unmatched_1.fastq.gz',
                 'sampleA_unmatched_2.fastq', 'sampleA_unmatched_2.fastq.gz'],
                ['sampleB_paired_1.fastq', 'sampleB_paired_1.fastq.gz',
                 'sampleB_paired_2.fastq', 'sampleB_paired_2.fastq.gz',
@@ -345,8 +335,8 @@ class QC_TrimTests(PluginTestCase):
         obs = [files for _, _, files in walk(in_dir) if files]
         obs_flat = [item for sublist in obs for item in sublist]
 
-        exp = ['sampleA.fastq', 'sampleB.fastq',
-               'sampleA.fastq.gz', 'sampleB.fastq.gz']
+        exp = ['sampleA.fastq','sampleA.fastq.gz',
+         		'sampleB.fastq','sampleB.fastq.gz']
         self.assertEqual(obs_flat, exp)
 
 MAPPING_FILE = (

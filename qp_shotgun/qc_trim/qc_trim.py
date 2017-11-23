@@ -167,9 +167,8 @@ def generate_qc_trim_commands(forward_seqs, reverse_seqs, map_file,
     param_string = _format_qc_trim_params(parameters)
     for run_prefix, sample, f_fp, r_fp in samples:
         r_fp_str = ' --input "%s"' % r_fp if r_fp is not None else ""
-        cmds.append('atropos --threads 4 %s'
-					'-o %s -p %s -pe1 %s -pe2 %s '
-					% (param_string, join(out_dir, run_prefix), out_dir, f_fp, r_fp))
+        cmds.append('atropos --threads 4 %s -o %s -p %s -pe1 %s -pe2 %s'
+					% (param_string, join(out_dir, f_fp), join(out_dir, r_fp), f_fp, r_fp))
 
     return cmds, samples
 
