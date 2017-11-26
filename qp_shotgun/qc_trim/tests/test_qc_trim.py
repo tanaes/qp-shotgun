@@ -82,6 +82,7 @@ class QC_TrimTests(PluginTestCase):
         self.assertEqual(obs, exp)
 
     def test_make_read_pairs_per_sample_match_fwd_only(self):
+        # do we want to support forward-only yet?
         fd, fp = mkstemp()
         close(fd)
         with open(fp, 'w') as f:
@@ -180,9 +181,9 @@ class QC_TrimTests(PluginTestCase):
         self._clean_up_files.append(fp)
 
         exp_cmd = [
-            'atropos --threads 4 --A GATCGGAAGAGCGTCGTGTAGGGAAAGGAGTGT --adapter GATCGGAAGAGCACACGTCTGAACTCCAGTCAC --max-n 80 --minimum-length 80 --nextseq-trim False --pair-filter any --quality-cutoff 15 --trim-n True -o output/fastq/s1.fastq -p output/fastq/s1.R2.fastq -pe1 fastq/s1.fastq -pe2 fastq/s1.R2.fastq',
-            'atropos --threads 4 --A GATCGGAAGAGCGTCGTGTAGGGAAAGGAGTGT --adapter GATCGGAAGAGCACACGTCTGAACTCCAGTCAC --max-n 80 --minimum-length 80 --nextseq-trim False --pair-filter any --quality-cutoff 15 --trim-n True -o output/fastq/s2.fastq.gz -p output/fastq/s2.R2.fastq.gz -pe1 fastq/s2.fastq.gz -pe2 fastq/s2.R2.fastq.gz',
-            'atropos --threads 4 --A GATCGGAAGAGCGTCGTGTAGGGAAAGGAGTGT --adapter GATCGGAAGAGCACACGTCTGAACTCCAGTCAC --max-n 80 --minimum-length 80 --nextseq-trim False --pair-filter any --quality-cutoff 15 --trim-n True -o output/fastq/s3.fastq -p output/fastq/s3.R2.fastq -pe1 fastq/s3.fastq -pe2 fastq/s3.R2.fastq'
+            'atropos --threads 4 --A GATCGGAAGAGCGTCGTGTAGGGAAAGGAGTGT --adapter GATCGGAAGAGCACACGTCTGAACTCCAGTCAC --max-n 80 --minimum-length 80 --nextseq-trim False --pair-filter any --quality-cutoff 15 --trim-n True -o output/fastq/s1_trimmed.fastq -p output/fastq/s1.R2_trimmed.fastq -pe1 fastq/s1.fastq -pe2 fastq/s1.R2.fastq',
+            'atropos --threads 4 --A GATCGGAAGAGCGTCGTGTAGGGAAAGGAGTGT --adapter GATCGGAAGAGCACACGTCTGAACTCCAGTCAC --max-n 80 --minimum-length 80 --nextseq-trim False --pair-filter any --quality-cutoff 15 --trim-n True -o output/fastq/s2_trimmed.fastq.gz -p output/fastq/s2.R2_trimmed.fastq.gz -pe1 fastq/s2.fastq.gz -pe2 fastq/s2.R2.fastq.gz',
+            'atropos --threads 4 --A GATCGGAAGAGCGTCGTGTAGGGAAAGGAGTGT --adapter GATCGGAAGAGCACACGTCTGAACTCCAGTCAC --max-n 80 --minimum-length 80 --nextseq-trim False --pair-filter any --quality-cutoff 15 --trim-n True -o output/fastq/s3_trimmed.fastq -p output/fastq/s3.R2_trimmed.fastq -pe1 fastq/s3.fastq -pe2 fastq/s3.R2.fastq'
             ]
 
         exp_sample = [
@@ -264,12 +265,8 @@ class QC_TrimTests(PluginTestCase):
         exp_fps = [
             [(od('kd_test_1/kd_test_1_paired_1.fastq.gz'), ftype),
              (od('kd_test_1/kd_test_1_paired_2.fastq.gz'), ftype),
-             (od('kd_test_1/kd_test_1_unmatched_1.fastq.gz'), ftype),
-             (od('kd_test_1/kd_test_1_unmatched_2.fastq.gz'), ftype),
              (od('kd_test_2/kd_test_2_paired_1.fastq.gz'), ftype),
-             (od('kd_test_2/kd_test_2_paired_2.fastq.gz'), ftype),
-             (od('kd_test_2/kd_test_2_unmatched_1.fastq.gz'), ftype),
-             (od('kd_test_2/kd_test_2_unmatched_2.fastq.gz'), ftype)]]
+             (od('kd_test_2/kd_test_2_paired_2.fastq.gz'), ftype)]]
         self.assertEqual(exp_fps, obs_fps)
 
     def test_per_sample_ainfo_error(self):
@@ -307,13 +304,9 @@ class QC_TrimTests(PluginTestCase):
         obs_flat = [item for sublist in obs for item in sublist]
 
         exp = [['sampleA_paired_1.fastq', 'sampleA_paired_1.fastq.gz',
-                'sampleA_paired_2.fastq', 'sampleA_paired_2.fastq.gz',
-                'sampleA_unmatched_1.fastq', 'sampleA_unmatched_1.fastq.gz',
-                'sampleA_unmatched_2.fastq', 'sampleA_unmatched_2.fastq.gz'],
+                'sampleA_paired_2.fastq', 'sampleA_paired_2.fastq.gz'],
                ['sampleB_paired_1.fastq', 'sampleB_paired_1.fastq.gz',
-                'sampleB_paired_2.fastq', 'sampleB_paired_2.fastq.gz',
-                'sampleB_unmatched_1.fastq', 'sampleB_unmatched_1.fastq.gz',
-                'sampleB_unmatched_2.fastq', 'sampleB_unmatched_2.fastq.gz']]
+                'sampleB_paired_2.fastq', 'sampleB_paired_2.fastq.gz']]
         exp_flat = [item for sublist in exp for item in sublist]
 
         self.assertEqual(obs_flat, exp_flat)
