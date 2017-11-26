@@ -6,7 +6,7 @@
 # The full license is in the file LICENSE, distributed with this software.
 # -----------------------------------------------------------------------------
 
-from itertools import izip_longest
+from itertools import zip_longest
 from os.path import basename, join, exists
 from functools import partial
 from gzip import open as gopen
@@ -67,7 +67,7 @@ def make_read_pairs_per_sample(forward_seqs, reverse_seqs, map_file):
     # make pairings
     samples = []
     used_prefixes = set()
-    for i, (fwd_fp, rev_fp) in enumerate(izip_longest(forward_seqs,
+    for i, (fwd_fp, rev_fp) in enumerate(zip_longest(forward_seqs,
                                                       reverse_seqs)):
         # fwd_fp is the fwd read filepath
         fwd_fn = basename(fwd_fp)
