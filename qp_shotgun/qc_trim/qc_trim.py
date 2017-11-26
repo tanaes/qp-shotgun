@@ -161,14 +161,14 @@ def generate_qc_trim_commands(forward_seqs, reverse_seqs, map_file,
     """
     # we match filenames, samples, and run prefixes
     samples = make_read_pairs_per_sample(forward_seqs, reverse_seqs, map_file)
-	#threads = 4
+    #threads = 4
     cmds = []
 
     param_string = _format_qc_trim_params(parameters)
     for run_prefix, sample, f_fp, r_fp in samples:
-        r_fp_str = ' --input "%s"' % r_fp if r_fp is not None else ""
+
         cmds.append('atropos --threads 4 %s -o %s -p %s -pe1 %s -pe2 %s'
-					% (param_string, join(out_dir, f_fp), join(out_dir, r_fp), f_fp, r_fp))
+                    % (param_string, join(out_dir, f_fp), join(out_dir, r_fp), f_fp, r_fp))
 
     return cmds, samples
 
@@ -184,15 +184,6 @@ def _run_commands(qclient, job_id, commands, msg):
             return False, error_msg
 
     return True, ""
-
-
-def _gzip_file(path):
-    with open(path, "rb") as in_file:
-        gz_path = '%s.gz' % path
-        with gopen(gz_path, "wb") as out_file:
-            out_file.writelines(in_file)
-
-    return gz_path
 
 
 def _per_sample_ainfo(out_dir, samples, fwd_and_rev=False):
@@ -223,9 +214,6 @@ def _per_sample_ainfo(out_dir, samples, fwd_and_rev=False):
     for f in missing_files:
         open(f, 'w').close()
         files.append(f)
-
-    # Gzip all the files
-    files = [(_gzip_file(f), 'preprocessed_fastq') for f in files]
 
     return [ArtifactInfo('QC_Trim files', 'per_sample_FASTQ', files)]
 
