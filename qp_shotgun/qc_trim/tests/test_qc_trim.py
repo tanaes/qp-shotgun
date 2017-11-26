@@ -35,7 +35,7 @@ class QC_TrimTests(PluginTestCase):
         self.refdb_path = join(dirname(kd.__file__),
                                "tests/data/demo_bowtie2_db/demo_db.1.bt2")
         self.params = {
-		    'adapter': 'GATCGGAAGAGCACACGTCTGAACTCCAGTCAC',
+        'adapter': 'GATCGGAAGAGCACACGTCTGAACTCCAGTCAC',
         'A': 'GATCGGAAGAGCGTCGTGTAGGGAAAGGAGTGT', 
         'quality-cutoff': '15', 'minimum-length': '80', 'pair-filter': 'any',
         'max-n': '80', 'trim-n': 'True', 'nextseq-trim': 'False'
@@ -180,7 +180,7 @@ class QC_TrimTests(PluginTestCase):
         self._clean_up_files.append(fp)
 
         exp_cmd = [
-			'atropos --threads 4 --A GATCGGAAGAGCGTCGTGTAGGGAAAGGAGTGT --adapter GATCGGAAGAGCACACGTCTGAACTCCAGTCAC --max-n 80 --minimum-length 80 --nextseq-trim False --pair-filter any --quality-cutoff 15 --trim-n True -o output/fastq/s1.fastq -p output/fastq/s1.R2.fastq -pe1 fastq/s1.fastq -pe2 fastq/s1.R2.fastq',
+            'atropos --threads 4 --A GATCGGAAGAGCGTCGTGTAGGGAAAGGAGTGT --adapter GATCGGAAGAGCACACGTCTGAACTCCAGTCAC --max-n 80 --minimum-length 80 --nextseq-trim False --pair-filter any --quality-cutoff 15 --trim-n True -o output/fastq/s1.fastq -p output/fastq/s1.R2.fastq -pe1 fastq/s1.fastq -pe2 fastq/s1.R2.fastq',
             'atropos --threads 4 --A GATCGGAAGAGCGTCGTGTAGGGAAAGGAGTGT --adapter GATCGGAAGAGCACACGTCTGAACTCCAGTCAC --max-n 80 --minimum-length 80 --nextseq-trim False --pair-filter any --quality-cutoff 15 --trim-n True -o output/fastq/s2.fastq.gz -p output/fastq/s2.R2.fastq.gz -pe1 fastq/s2.fastq.gz -pe2 fastq/s2.R2.fastq.gz',
             'atropos --threads 4 --A GATCGGAAGAGCGTCGTGTAGGGAAAGGAGTGT --adapter GATCGGAAGAGCACACGTCTGAACTCCAGTCAC --max-n 80 --minimum-length 80 --nextseq-trim False --pair-filter any --quality-cutoff 15 --trim-n True -o output/fastq/s3.fastq -p output/fastq/s3.R2.fastq -pe1 fastq/s3.fastq -pe2 fastq/s3.R2.fastq'
             ]
@@ -308,7 +308,7 @@ class QC_TrimTests(PluginTestCase):
 
         exp = [['sampleA_paired_1.fastq', 'sampleA_paired_1.fastq.gz',
                 'sampleA_paired_2.fastq', 'sampleA_paired_2.fastq.gz',
-				'sampleA_unmatched_1.fastq', 'sampleA_unmatched_1.fastq.gz',
+                'sampleA_unmatched_1.fastq', 'sampleA_unmatched_1.fastq.gz',
                 'sampleA_unmatched_2.fastq', 'sampleA_unmatched_2.fastq.gz'],
                ['sampleB_paired_1.fastq', 'sampleB_paired_1.fastq.gz',
                 'sampleB_paired_2.fastq', 'sampleB_paired_2.fastq.gz',
@@ -336,7 +336,7 @@ class QC_TrimTests(PluginTestCase):
         obs_flat = [item for sublist in obs for item in sublist]
 
         exp = ['sampleA.fastq','sampleA.fastq.gz',
-         		'sampleB.fastq','sampleB.fastq.gz']
+               'sampleB.fastq','sampleB.fastq.gz']
         self.assertEqual(obs_flat, exp)
 
 MAPPING_FILE = (
