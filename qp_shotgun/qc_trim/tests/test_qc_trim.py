@@ -264,12 +264,8 @@ class QC_TrimTests(PluginTestCase):
         exp_fps = [
             [(od('kd_test_1/kd_test_1_paired_1.fastq.gz'), ftype),
              (od('kd_test_1/kd_test_1_paired_2.fastq.gz'), ftype),
-             (od('kd_test_1/kd_test_1_unmatched_1.fastq.gz'), ftype),
-             (od('kd_test_1/kd_test_1_unmatched_2.fastq.gz'), ftype),
              (od('kd_test_2/kd_test_2_paired_1.fastq.gz'), ftype),
-             (od('kd_test_2/kd_test_2_paired_2.fastq.gz'), ftype),
-             (od('kd_test_2/kd_test_2_unmatched_1.fastq.gz'), ftype),
-             (od('kd_test_2/kd_test_2_unmatched_2.fastq.gz'), ftype)]]
+             (od('kd_test_2/kd_test_2_paired_2.fastq.gz'), ftype)]]
         self.assertEqual(exp_fps, obs_fps)
 
     def test_per_sample_ainfo_error(self):
@@ -307,13 +303,9 @@ class QC_TrimTests(PluginTestCase):
         obs_flat = [item for sublist in obs for item in sublist]
 
         exp = [['sampleA_paired_1.fastq', 'sampleA_paired_1.fastq.gz',
-                'sampleA_paired_2.fastq', 'sampleA_paired_2.fastq.gz',
-                'sampleA_unmatched_1.fastq', 'sampleA_unmatched_1.fastq.gz',
-                'sampleA_unmatched_2.fastq', 'sampleA_unmatched_2.fastq.gz'],
+                'sampleA_paired_2.fastq', 'sampleA_paired_2.fastq.gz'],
                ['sampleB_paired_1.fastq', 'sampleB_paired_1.fastq.gz',
-                'sampleB_paired_2.fastq', 'sampleB_paired_2.fastq.gz',
-                'sampleB_unmatched_1.fastq', 'sampleB_unmatched_1.fastq.gz',
-                'sampleB_unmatched_2.fastq', 'sampleB_unmatched_2.fastq.gz']]
+                'sampleB_paired_2.fastq', 'sampleB_paired_2.fastq.gz']]
         exp_flat = [item for sublist in exp for item in sublist]
 
         self.assertEqual(obs_flat, exp_flat)
