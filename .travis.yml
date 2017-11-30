@@ -10,32 +10,41 @@ before_install:
   # Update conda itself
   - conda update --yes conda
 install:
-  # At this moment this plugin has overlapping dependencies than qiita so installing everything in the same environment
-  - conda create --yes -n qiita_env python=2.7 pip nose flake8
+  # installing qiita environment
+  - conda create --yes -n qiita python=2.7 pip nose flake8
     pyzmq networkx pyparsing natsort mock future libgfortran
     'pandas>=0.18' 'scipy>0.13.0' 'numpy>=1.7' 'h5py>=2.3.1' matplotlib
-  - source activate qiita_env
+  - source activate qiita
   - pip install sphinx sphinx-bootstrap-theme coveralls ipython[all]==2.4.1
   - pip install https://github.com/biocore/qiita/archive/master.zip --process-dependency-links
-  # installing other deps
+  - qiita-env make --no-load-ontologies
+  - sed 's/PORT = 7777/PORT = 6379/g' $HOME/miniconda3/envs/qiita/lib/python2.7/site-packages/qiita_core/support_files/config_test.cfg > config_test.cfg
+  - export QIITA_CONFIG_FP=${PWD}/config_test.cfg
+  - source deactivate
+  # installing qp-shotgun
+  - conda create --yes -n qp-shotgun python=3.6 pip nose flake8
+    pyzmq networkx pyparsing natsort mock future libgfortran
+    'pandas>=0.18' 'scipy>0.13.0' 'numpy>=1.7' 'h5py>=2.3.1' matplotlib
+  - source activate qp-shotgun-2017-11
+  - pip install -U pip
   - conda install --yes -c jjhelmus glpk
   - conda install --yes -c bioconda diamond bowtie2 trimmomatic=0.36 fastqc=0.11.5
-  #
-  - export MOI_CONFIG_FP=$PWD/miniconda3/envs/qiita_env/lib/python2.7/site-packages/qiita_core/support_files/config_test.cfg
-  - ipython profile create qiita-general --parallel
-  - qiita-env start_cluster qiita-general
-  - qiita-env make --no-load-ontologies
+  - pip install sphinx sphinx-bootstrap-theme coveralls ipython[all]==2.4.1
+  - pip install https://github.com/qiita-spots/qiita_client/archive/master.zip
+  - pip install atropos
+  - conda install --yes -c jjhelmus glpk
+  - conda install --yes -c bioconda diamond bowtie2 trimmomatic=0.36 fastqc=0.11.5
   - export QIITA_SERVER_CERT=$PWD/miniconda3/envs/qiita_env/lib/python2.7/site-packages/qiita_core/support_files/server.crt
   - pip install https://github.com/qiita-spots/qiita_client/archive/master.zip
   - pip install .
+  # installing other dependencies
   - wget --quiet https://bitbucket.org/biobakery/metaphlan2/get/default.zip
-  - unzip -qq default.zip 'biobakery-metaphlan2*/db_v20/*' 'biobakery-metaphlan2*/metaphlan2.py'
-  - ln -s $PWD/miniconda3/envs/qiita_env/share/trimmomatic-0.36-3/trimmomatic.jar $PWD/miniconda3/envs/qiita_env/bin/trimmomatic.jar
+  - unzip -qq default.zip 'biobakery-metaphlan2*/metaphlan2.py'
+  - ln -s $HOME/miniconda3/envs/qp-shotgun/share/trimmomatic-0.36-3/trimmomatic.jar $HOME/miniconda3/envs/qp-shotgun/bin/trimmomatic.jar
   - export HUMANN2_BIN=`which humann2`
   - export HUMANN2_DIR=`dirname $HUMANN2_BIN`
-  - mv biobakery-metaphlan2*/metaphlan2.py biobakery-metaphlan2*/db_v20 $HUMANN2_DIR
+  - mv biobakery-metaphlan2*/metaphlan2.py $HUMANN2_DIR
 before_script:
-  - export MOI_CONFIG_FP=$PWD/miniconda3/envs/qiita_env/lib/python2.7/site-packages/qiita_core/support_files/config_test.cfg
   - qiita pet webserver start &
   - export QIITA_PID=$!
 script:
@@ -51,9 +60,7 @@ services:
 after_success:
   - coveralls
   - kill $QIITA_PID
-  - qiita-env stop_cluster qiita-general
   - qiita-env drop
 after_failure:
   - kill $QIITA_PID
-  - qiita-env stop_cluster qiita-general
   - qiita-env drop

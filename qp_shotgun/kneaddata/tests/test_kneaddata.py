@@ -458,6 +458,7 @@ class KneaddataTests(PluginTestCase):
                'sampleA.fastq.gz', 'sampleB.fastq.gz']
         self.assertItemsEqual(obs_flat, exp)
 
+
 MAPPING_FILE = (
     "#SampleID\tplatform\tbarcode\texperiment_design_description\t"
     "library_construction_protocol\tcenter_name\tprimer\trun_prefix\t"
