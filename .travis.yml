@@ -23,9 +23,7 @@ install:
   - source deactivate
   # installing qp-shotgun
   - conda create --yes -n qp-shotgun python=3.6 pip nose flake8
-    pyzmq networkx pyparsing natsort mock future libgfortran
-    'pandas>=0.18' 'scipy>0.13.0' 'numpy>=1.7' 'h5py>=2.3.1' matplotlib
-  - source activate qp-shotgun-2017-11
+  - source activate qp-shotgun
   - pip install -U pip
   - conda install --yes -c jjhelmus glpk
   - conda install --yes -c bioconda diamond bowtie2 trimmomatic=0.36 fastqc=0.11.5
