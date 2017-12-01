@@ -91,6 +91,13 @@ def make_read_sets_per_sample(files, map_file):
     if len(single) > 0 and len(fwd_paired) > 0:
         raise ValueError('There are both paired-end and single-end sequences.')
 
+    # make the 5-tuple of sorted sequence filepaths
+    fwd_paired.sort()
+    rev_paired.sort()
+    fwd_unpaired.sort()
+    rev_unpaired.sort()
+    single.sort()
+
     # fill out unused seq file types with None and check that there exist files
     if len(fwd_paired) > 0:
         single = [None] * len(fwd_paired)
@@ -101,13 +108,6 @@ def make_read_sets_per_sample(files, map_file):
         rev_unpaired = [None] * len(single)
     else:
         raise ValueError('There are no *.fastq.gz files in the artifact')
-
-    # make the 5-tuple of sorted sequence filepaths
-    fwd_paired.sort()
-    rev_paired.sort()
-    fwd_unpaired.sort()
-    rev_unpaired.sort()
-    single.sort()
 
     seq_files = zip(fwd_paired, rev_paired, fwd_unpaired, rev_unpaired, single)
 

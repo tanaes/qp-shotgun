@@ -21,7 +21,6 @@ install:
   - sed "s#/home/travis#${PWD}#g" config_test.cfg > config_test_local.cfg
   - export QIITA_CONFIG_FP=${PWD}/config_test_local.cfg
   - export QIITA_SERVER_CERT=${PWD}/miniconda3/envs/qiita/lib/python2.7/site-packages/qiita_core/support_files/server.crt
-  - ls $QIITA_SERVER_CERT
   - qiita-env make --no-load-ontologies
   - source deactivate
   # installing qp-shotgun
