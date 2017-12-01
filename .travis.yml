@@ -1,7 +1,7 @@
 language: python
 sudo: false
 env:
-  - PYTHON_VERSION=2.7
+  - PYTHON_VERSION=3.5
 before_install:
   - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
   - chmod +x miniconda.sh
@@ -21,10 +21,11 @@ install:
   - sed "s#/home/travis#${PWD}#g" config_test.cfg > config_test_local.cfg
   - export QIITA_CONFIG_FP=${PWD}/config_test_local.cfg
   - export QIITA_SERVER_CERT=${PWD}/miniconda3/envs/qiita/lib/python2.7/site-packages/qiita_core/support_files/server.crt
+  - ls $QIITA_SERVER_CERT
   - qiita-env make --no-load-ontologies
   - source deactivate
   # installing qp-shotgun
-  - conda create --yes -n qp-shotgun python=3.6 pip nose flake8
+  - conda create --yes -n qp-shotgun ppython=$PYTHON_VERSION pip nose flake8
   - source activate qp-shotgun
   - pip install -U pip
   - conda install --yes -c jjhelmus glpk
