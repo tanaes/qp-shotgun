@@ -27,12 +27,12 @@ def make_temp_directory(out_dir):
 
 
 def make_read_sets_per_sample(files, map_file):
-    """Recovers read set information from kneaddata output
+    """Recovers read set information from kneaddata like output
 
     Parameters
     ----------
     files : list of str
-        The list of sequence filepaths from the kneaddata artifact
+        The list of sequence filepaths from the kneaddata like artifact
     map_file : str
         The path to the mapping file
 
@@ -46,14 +46,14 @@ def make_read_sets_per_sample(files, map_file):
     Raises
     ------
     ValueError
-        If there are files matching the kneaddata paired file naming convention
-        (_paired_1.fastq.gz, _unmatched_1.fastq.gz) but which don't have all 4
-        outputs.
+        If there are files matching the kneaddata like paired file naming
+        convention (_paired_1.fastq.gz, _unmatched_1.fastq.gz) but which don't
+        have all 4 outputs.
     ValueError
-        If there are files matching the kneaddata paired file naming convention
-        (_paired_1.fastq.gz, _unmatched_1.fastq.gz) in addition to fastq.gz
-        files that do not match naming convention (the latter are interpreted
-        as single read files).
+        If there are files matching the kneaddata like
+        paired file naming convention (_paired_1.fastq.gz,
+        _unmatched_1.fastq.gz) in addition to fastq.gz files that do not match
+        naming convention (the latter are interpreted as single read files).
     ValueError
         If there are no *.fastq.gz files in the artifact
 
@@ -165,7 +165,7 @@ def make_read_sets_per_sample(files, map_file):
 
 
 def make_single_fastq_gz(read_sets, out_dir, include_reverse):
-    """Recovers read set information from kneaddata output
+    """Recovers read set information from kneaddata like output
 
     Parameters
     ----------
