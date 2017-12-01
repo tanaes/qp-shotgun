@@ -46,7 +46,7 @@ install:
   - mkdir -p $HUMANN2_DIR/db_v20
   - wget --quiet https://github.com/biocore/oecophylla/blob/dev/test_data/test_dbs/mp2_mini.tar.gz?raw=true -O mp2_mini.tar.gz
   - tar zxf mp2_mini.tar.gz
-  - for f in `ls mp2_mini/*`; do mv mp2_mini/$f  $HUMANN2_DIR/db_v20/${f//mp2_mini/mpa_v20_m200}; done
+  - for f in `ls mp2_mini`; do mv mp2_mini/$f  $HUMANN2_DIR/db_v20/${f//mp2_mini/mpa_v20_m200}; done
 before_script:
   - source activate qiita
   - qiita pet webserver start &
