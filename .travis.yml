@@ -40,7 +40,7 @@ install:
   # installing other dependencies
   - wget --quiet https://bitbucket.org/biobakery/metaphlan2/get/default.zip
   - unzip -qq default.zip 'biobakery-metaphlan2*/metaphlan2.py'
-  - wget --quiet https://github.com/biocore/oecophylla/blob/dev/test_data/test_dbs/mp2_mini.tar.gz?raw=true
+  - wget --quiet https://github.com/biocore/oecophylla/blob/dev/test_data/test_dbs/mp2_mini.tar.gz?raw=true -O mp2_mini.tar.gz
   - tar zxf mp2_mini.tar.gz
   - for f in `ls -d mp2_mini/*`; do echo mv $f ${f//mpa_v20_m200.//bla}; done
   - export HUMANN2_BIN=`which humann2`
