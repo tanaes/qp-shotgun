@@ -48,7 +48,6 @@ install:
   - mv biobakery-metaphlan2*/metaphlan2.py $HUMANN2_DIR
   - mkdir -p $HUMANN2_DIR/db_v20
   - mv mp2_mini/* $HUMANN2_DIR/db_v20/.
-  - mv biobakery-metaphlan2*/metaphlan2.py $HUMANN2_DIR
 before_script:
   - source activate qiita
   - qiita pet webserver start &
