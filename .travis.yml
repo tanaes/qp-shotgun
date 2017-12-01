@@ -25,7 +25,7 @@ install:
   - qiita-env make --no-load-ontologies
   - source deactivate
   # installing qp-shotgun
-  - conda create --yes -n qp-shotgun ppython=$PYTHON_VERSION pip nose flake8
+  - conda create --yes -n qp-shotgun python=$PYTHON_VERSION pip nose flake8
   - source activate qp-shotgun
   - pip install -U pip
   - conda install --yes -c jjhelmus glpk
