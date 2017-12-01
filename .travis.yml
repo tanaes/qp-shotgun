@@ -51,6 +51,8 @@ before_script:
 script:
   - source activate qp-shotgun
   - sleep 10 # give enough time to the webserver to start
+  - echo $QIITA_SERVER_CERT
+  - ls $QIITA_SERVER_CERT
   - configure_shotgun --env-script "source activate qp-shotgun" --server-cert $QIITA_SERVER_CERT
   - nosetests --with-doctest --with-coverage
   - flake8 qp_shotgun setup.py scripts
