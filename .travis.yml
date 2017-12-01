@@ -40,7 +40,7 @@ install:
   # installing other dependencies
   - wget --quiet https://bitbucket.org/biobakery/metaphlan2/get/default.zip
   - unzip -qq default.zip 'biobakery-metaphlan2*/metaphlan2.py'
-  - ln -s $HOME/miniconda3/envs/qp-shotgun/share/trimmomatic-0.36-3/trimmomatic.jar $HOME/miniconda3/envs/qp-shotgun/bin/trimmomatic.jar
+  - ln -s ${PWD}/miniconda3/envs/qp-shotgun/share/trimmomatic-0.36-3/trimmomatic.jar ${PWD}/miniconda3/envs/qp-shotgun/bin/trimmomatic.jar
   - export HUMANN2_BIN=`which humann2`
   - export HUMANN2_DIR=`dirname $HUMANN2_BIN`
   - mv biobakery-metaphlan2*/metaphlan2.py $HUMANN2_DIR
