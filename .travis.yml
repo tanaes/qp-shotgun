@@ -20,7 +20,7 @@ install:
   - sed 's/PORT = 7777/PORT = 6379/g' ${PWD}/miniconda3/envs/qiita/lib/python2.7/site-packages/qiita_core/support_files/config_test.cfg > config_test.cfg
   - sed "s#/home/travis#${PWD}#g" config_test.cfg > config_test_local.cfg
   - export QIITA_CONFIG_FP=${PWD}/config_test_local.cfg
-  - export QIITA_SERVER_CERT=$HOME/miniconda3/envs/qiita/lib/python2.7/site-packages/qiita_core/support_files/server.crt
+  - export QIITA_SERVER_CERT=${PWD}/miniconda3/envs/qiita/lib/python2.7/site-packages/qiita_core/support_files/server.crt
   - qiita-env make --no-load-ontologies
   - source deactivate
   # installing qp-shotgun
@@ -28,19 +28,18 @@ install:
   - source activate qp-shotgun
   - pip install -U pip
   - conda install --yes -c jjhelmus glpk
-  - conda install --yes -c bioconda diamond bowtie2 trimmomatic=0.36 fastqc=0.11.5
+  - conda install --yes -c bioconda diamond bowtie2 fastqc=0.11.5
   - pip install sphinx sphinx-bootstrap-theme coveralls
   - pip install https://github.com/qiita-spots/qiita_client/archive/master.zip
   - pip install atropos
   - conda install --yes -c jjhelmus glpk
-  - conda install --yes -c bioconda diamond bowtie2 trimmomatic=0.36 fastqc=0.11.5
+  - conda install --yes -c bioconda diamond bowtie2 fastqc=0.11.5
   - export QIITA_SERVER_CERT=$PWD/miniconda3/envs/qiita_env/lib/python2.7/site-packages/qiita_core/support_files/server.crt
   - pip install https://github.com/qiita-spots/qiita_client/archive/master.zip
   - pip install .
   # installing other dependencies
   - wget --quiet https://bitbucket.org/biobakery/metaphlan2/get/default.zip
   - unzip -qq default.zip 'biobakery-metaphlan2*/metaphlan2.py'
-  - ln -s ${PWD}/miniconda3/envs/qp-shotgun/share/trimmomatic-0.36-3/trimmomatic.jar ${PWD}/miniconda3/envs/qp-shotgun/bin/trimmomatic.jar
   - export HUMANN2_BIN=`which humann2`
   - export HUMANN2_DIR=`dirname $HUMANN2_BIN`
   - mv biobakery-metaphlan2*/metaphlan2.py $HUMANN2_DIR
