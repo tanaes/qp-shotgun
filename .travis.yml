@@ -1,7 +1,7 @@
 language: python
 sudo: false
 env:
-  - PYTHON_VERSION=2.7
+  - PYTHON_VERSION=3.5
 before_install:
   - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
   - chmod +x miniconda.sh
@@ -10,35 +10,49 @@ before_install:
   # Update conda itself
   - conda update --yes conda
 install:
-  # At this moment this plugin has overlapping dependencies than qiita so installing everything in the same environment
-  - conda create --yes -n qiita_env python=2.7 pip nose flake8
+  # installing qiita environment
+  - conda create --yes -n qiita python=2.7 pip nose flake8
     pyzmq networkx pyparsing natsort mock future libgfortran
     'pandas>=0.18' 'scipy>0.13.0' 'numpy>=1.7' 'h5py>=2.3.1' matplotlib
-  - source activate qiita_env
-  - pip install sphinx sphinx-bootstrap-theme coveralls ipython[all]==2.4.1
+  - source activate qiita
+  - pip install sphinx sphinx-bootstrap-theme coveralls
   - pip install https://github.com/biocore/qiita/archive/master.zip --process-dependency-links
-  # installing other deps
-  - conda install --yes -c jjhelmus glpk
-  - conda install --yes -c bioconda diamond bowtie2 trimmomatic=0.36 fastqc=0.11.5
-  #
-  - export MOI_CONFIG_FP=$PWD/miniconda3/envs/qiita_env/lib/python2.7/site-packages/qiita_core/support_files/config_test.cfg
-  - ipython profile create qiita-general --parallel
-  - qiita-env start_cluster qiita-general
+  - sed 's/PORT = 7777/PORT = 6379/g' ${PWD}/miniconda3/envs/qiita/lib/python2.7/site-packages/qiita_core/support_files/config_test.cfg > config_test.cfg
+  - sed "s#/home/travis#${PWD}#g" config_test.cfg > config_test_local.cfg
+  - export QIITA_CONFIG_FP=${PWD}/config_test_local.cfg
+  - export QIITA_SERVER_CERT=${PWD}/miniconda3/envs/qiita/lib/python2.7/site-packages/qiita_core/support_files/server.crt
   - qiita-env make --no-load-ontologies
-  - export QIITA_SERVER_CERT=$PWD/miniconda3/envs/qiita_env/lib/python2.7/site-packages/qiita_core/support_files/server.crt
+  - source deactivate
+  # installing qp-shotgun
+  - conda create --yes -n qp-shotgun python=$PYTHON_VERSION pip nose flake8
+  - source activate qp-shotgun
+  - pip install -U pip
+  - conda install --yes -c jjhelmus glpk
+  - conda install --yes -c bioconda diamond bowtie2 fastqc=0.11.5
+  - pip install sphinx sphinx-bootstrap-theme coveralls
+  - pip install https://github.com/qiita-spots/qiita_client/archive/master.zip
+  - pip install atropos
+  - conda install --yes -c jjhelmus glpk
+  - conda install --yes -c bioconda diamond=0.8 bowtie2 fastqc=0.11.5
+  - export QIITA_SERVER_CERT=$PWD/miniconda3/envs/qiita/lib/python2.7/site-packages/qiita_core/support_files/server.crt
   - pip install https://github.com/qiita-spots/qiita_client/archive/master.zip
   - pip install .
+  # installing other dependencies
   - wget --quiet https://bitbucket.org/biobakery/metaphlan2/get/default.zip
-  - unzip -qq default.zip 'biobakery-metaphlan2*/db_v20/*' 'biobakery-metaphlan2*/metaphlan2.py'
-  - ln -s $PWD/miniconda3/envs/qiita_env/share/trimmomatic-0.36-3/trimmomatic.jar $PWD/miniconda3/envs/qiita_env/bin/trimmomatic.jar
+  - unzip -qq default.zip 'biobakery-metaphlan2*/utils/*' 'biobakery-metaphlan2*/metaphlan2.py'
   - export HUMANN2_BIN=`which humann2`
   - export HUMANN2_DIR=`dirname $HUMANN2_BIN`
-  - mv biobakery-metaphlan2*/metaphlan2.py biobakery-metaphlan2*/db_v20 $HUMANN2_DIR
+  - mv biobakery-metaphlan2*/* $HUMANN2_DIR
+  - mkdir -p $HUMANN2_DIR/db_v20
+  - wget --quiet https://github.com/biocore/oecophylla/blob/dev/test_data/test_dbs/mp2_mini.tar.gz?raw=true -O mp2_mini.tar.gz
+  - tar zxf mp2_mini.tar.gz
+  - for f in `ls mp2_mini`; do mv mp2_mini/$f  $HUMANN2_DIR/db_v20/${f//mp2_mini/mpa_v20_m200}; done
 before_script:
-  - export MOI_CONFIG_FP=$PWD/miniconda3/envs/qiita_env/lib/python2.7/site-packages/qiita_core/support_files/config_test.cfg
+  - source activate qiita
   - qiita pet webserver start &
   - export QIITA_PID=$!
 script:
+  - source activate qp-shotgun
   - sleep 10 # give enough time to the webserver to start
   - configure_shotgun --env-script "source activate qp-shotgun" --server-cert $QIITA_SERVER_CERT
   - nosetests --with-doctest --with-coverage
@@ -51,9 +65,7 @@ services:
 after_success:
   - coveralls
   - kill $QIITA_PID
-  - qiita-env stop_cluster qiita-general
   - qiita-env drop
 after_failure:
   - kill $QIITA_PID
-  - qiita-env stop_cluster qiita-general
   - qiita-env drop
