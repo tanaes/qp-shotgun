@@ -24,6 +24,7 @@ from qp_shotgun.humann2.humann2 import (
 
 class Humann2Tests(PluginTestCase):
     def setUp(self):
+        self.maxDiff=None
         plugin("https://localhost:21174", 'register', 'ignored')
         self.params = {
             'read-set': 'fwd',
@@ -564,7 +565,7 @@ class Humann2Tests(PluginTestCase):
             [(join(out_dir, 'genefamilies_cpm_unstratified.biom'), 'biom')],
             [(join(out_dir, 'pathcoverage_relab_unstratified.biom'), 'biom')],
             [(join(out_dir, 'pathabundance_relab_unstratified.biom'), 'biom')]]
-        self.assertItemsEqual(exp_fps, obs_fps)
+        self.assertEqual(exp_fps, obs_fps)
 
 
 MAPPING_FILE = (
