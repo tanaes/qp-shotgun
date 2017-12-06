@@ -266,7 +266,6 @@ def generate_humann2_analysis_commands(combined_reads, out_dir, parameters):
         cmds.append('humann2 --input "%s" --output "%s" --output-basename '
                     '"%s" --output-format biom %s' % (fp, od, sample,
                                                       ' '.join(params)))
-
     return cmds
 
 

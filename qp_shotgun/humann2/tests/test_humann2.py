@@ -540,7 +540,6 @@ class Humann2Tests(PluginTestCase):
 
         out_dir = mkdtemp()
         self._clean_up_files.append(out_dir)
-
         success, ainfo, msg = humann2(self.qclient, jid, self.params, out_dir)
 
         self.assertEqual("", msg)
