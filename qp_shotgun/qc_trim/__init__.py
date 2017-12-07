@@ -18,7 +18,7 @@ opt_params = {
     'adapter': ['string', 'GATCGGAAGAGCACACGTCTGAACTCCAGTCAC'], # 3' adapter
     'A': ['string', 'GATCGGAAGAGCGTCGTGTAGGGAAAGGAGTGT'], # 3' adapter for rev
     'quality-cutoff': ['integer', '15'], # 3' quality cutoff
-    'minimum-length': ['integer', '80'], # min length after trimming 
+    'minimum-length': ['integer', '80'], # min length after trimming
     'pair-filter': ['choice:["any", "both"]', 'any'], # drop pairs whose mates
     # are filtered out
     'max-n': ['integer', '80'], # maximum Ns to drop sequence
@@ -29,12 +29,12 @@ outputs = {'Adapter trimmed files': 'per_sample_FASTQ'}
 dflt_param_set = {
     'KAPA HyperPlus with iTru': {
         'adapter': 'GATCGGAAGAGCACACGTCTGAACTCCAGTCAC',
-        'A': 'GATCGGAAGAGCGTCGTGTAGGGAAAGGAGTGT', 
+        'A': 'GATCGGAAGAGCGTCGTGTAGGGAAAGGAGTGT',
         'quality-cutoff': 15, 'minimum-length': 80, 'pair-filter': 'any',
         'max-n': 80, 'trim-n': True, 'nextseq-trim': False
         }
 }
 
 qc_trim_cmd = QiitaCommand(
-    'Atropos v1.1.5', "Sequence QC - adapter trimming", qc_trim,
+    'Atropos v1.1.15', "Sequence QC - adapter trimming", qc_trim,
     req_params, opt_params, outputs, dflt_param_set)
