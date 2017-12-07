@@ -11,7 +11,7 @@
 from setuptools import setup
 
 
-__version__ = "0.0.2-dev"
+__version__ = "0.0.1-dev"
 
 
 classes = """
@@ -47,7 +47,7 @@ setup(name='qp-shotgun',
       scripts=['scripts/configure_shotgun', 'scripts/start_shotgun'],
       extras_require={'test': ["nose >= 0.10.1", "pep8"]},
       install_requires=['click >= 3.3', 'future', 'pandas >= 0.15', 'humann2',
-                        'h5py >= 2.3.1', 'biom-format', 'kneaddata'],
+                        'h5py >= 2.3.1', 'biom-format'],
       dependency_links=[('https://bitbucket.org/biobakery/humann2/get/'
                          '0.9.3.1.tar.gz')],
       classifiers=classifiers
