@@ -167,11 +167,12 @@ def generate_qc_trim_commands(forward_seqs, reverse_seqs, map_file,
     cmds = []
 
     param_string = _format_qc_trim_params(parameters)
+
     for run_prefix, sample, f_fp, r_fp in samples:
-
         cmds.append('atropos trim --threads 4 %s -o %s -p %s -pe1 %s -pe2 %s'
-                    % (param_string, join(out_dir, '%s.R1.trimmed.fastq.gz' % sample), join(out_dir, '%s.R2.trimmed.fastq.gz' % sample), f_fp, r_fp))
-
+                    % (param_string, join(out_dir, '%s.R1.trimmed.fastq.gz' %
+                    sample), join(out_dir, '%s.R2.trimmed.fastq.gz' % sample),
+                    f_fp, r_fp))
     return cmds, samples
 
 
@@ -192,10 +193,10 @@ def _per_sample_ainfo(out_dir, samples, fwd_and_rev=False):
     files = []
     missing_files = []
 
-    suffixes = ['%s_paired_1.fastq', '%s_paired_2.fastq']
+    suffixes = ['%s.R1.trimmed.fastq.gz', '%s.R2.trimmed.fastq.gz']
 
-    for rp, _, _, _ in samples:
-        smd = partial(join, out_dir, rp)
+    for _, rp, _, _ in samples:
+        smd = partial(join, out_dir)
         for suff in suffixes:
             fname = smd(suff % rp)
             if exists(fname):
@@ -206,7 +207,7 @@ def _per_sample_ainfo(out_dir, samples, fwd_and_rev=False):
     if not files:
         # KneadData did not create any files, which means that no sequence
         # was kept after quality control and filtering for host data
-        raise ValueError("No sequences left after running KneadData")
+        raise ValueError("No sequences left after running Atropos")
 
     return [ArtifactInfo('QC_Trim files', 'per_sample_FASTQ', files)]
 
@@ -245,7 +246,7 @@ def qc_trim(qclient, job_id, parameters, out_dir):
     qiime_map = prep_info['qiime-map']
 
 
-    # Step 2 generating command kneaddata
+    # Step 2 generating command atropos
     qclient.update_job_step(job_id, "Step 2 of 4: Generating"
                                     " QC_Trim commands")
     rs = fps['raw_reverse_seqs'] if 'raw_reverse_seqs' in fps else []
@@ -253,7 +254,7 @@ def qc_trim(qclient, job_id, parameters, out_dir):
                                                     rs, qiime_map, out_dir,
                                                     parameters)
 
-    # Step 3 execute kneaddata
+    # Step 3 execute atropos
     len_cmd = len(commands)
     msg = "Step 3 of 4: Executing QC_Trim job (%d/{0})".format(len_cmd)
     success, msg = _run_commands(qclient, job_id, commands, msg)
