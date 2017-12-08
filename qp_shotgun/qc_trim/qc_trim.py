@@ -115,13 +115,15 @@ def _format_qc_trim_params(parameters):
 
     for param in sorted(parameters):
         value = parameters[param]
-
-        if value is True:
-            params.append('--%s' % param)
-        elif value is False:
+        dash = '--'
+        if len(param)==1:
+            dash = '-'
+        if value is 'True':
+            params.append('%s%s' % (dash,param))
+        elif value is 'False':
             continue
         elif value and value != 'default':
-            params.append('--%s %s' % (param, value))
+            params.append('%s%s %s' % (dash,param, value))
 
     param_string = ' '.join(params)
 
@@ -167,8 +169,8 @@ def generate_qc_trim_commands(forward_seqs, reverse_seqs, map_file,
     param_string = _format_qc_trim_params(parameters)
     for run_prefix, sample, f_fp, r_fp in samples:
 
-        cmds.append('atropos --threads 4 %s -o %s -p %s -pe1 %s -pe2 %s'
-                    % (param_string, join(out_dir, f_fp), join(out_dir, r_fp), f_fp, r_fp))
+        cmds.append('atropos trim --threads 4 %s -o %s -p %s -pe1 %s -pe2 %s'
+                    % (param_string, join(out_dir, '%s.R1.trimmed.fastq.gz' % sample), join(out_dir, '%s.R2.trimmed.fastq.gz' % sample), f_fp, r_fp))
 
     return cmds, samples
 
@@ -241,6 +243,7 @@ def qc_trim(qclient, job_id, parameters, out_dir):
     prep_info = qclient.get('/qiita_db/prep_template/%s/'
                             % artifact_info['prep_information'][0])
     qiime_map = prep_info['qiime-map']
+
 
     # Step 2 generating command kneaddata
     qclient.update_job_step(job_id, "Step 2 of 4: Generating"
