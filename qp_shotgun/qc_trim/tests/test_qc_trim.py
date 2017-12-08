@@ -263,12 +263,12 @@ class QC_TrimTests(PluginTestCase):
             obs_fps.append(a.files)
         od = partial(join, out_dir)
 
-        ftype = 'preprocessed_fastq'
+        #ftype = 'per_sample_FASTQ'
         exp_fps = [
-            [(od('kd_test_1/kd_test_1_paired_1.fastq.gz'), ftype),
-             (od('kd_test_1/kd_test_1_paired_2.fastq.gz'), ftype),
-             (od('kd_test_2/kd_test_2_paired_1.fastq.gz'), ftype),
-             (od('kd_test_2/kd_test_2_paired_2.fastq.gz'), ftype)]]
+            [od('1.SKB7.640196.R1.trimmed.fastq.gz'),
+             od('1.SKB7.640196.R2.trimmed.fastq.gz'),
+             od('1.SKB8.640193.R1.trimmed.fastq.gz'),
+             od('1.SKB8.640193.R2.trimmed.fastq.gz')]]
         self.assertEqual(exp_fps, obs_fps)
 
     def test_per_sample_ainfo_error(self):
