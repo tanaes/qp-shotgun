@@ -52,7 +52,9 @@ class QC_TrimTests(PluginTestCase):
 
     def test_format_qc_trim_params(self):
         obs = _format_qc_trim_params(self.params)
-        exp = '--A GATCGGAAGAGCGTCGTGTAGGGAAAGGAGTGT --adapter GATCGGAAGAGCACACGTCTGAACTCCAGTCAC --max-n 80 --minimum-length 80 --nextseq-trim False --pair-filter any --quality-cutoff 15 --trim-n True'
+        exp = ('-A GATCGGAAGAGCGTCGTGTAGGGAAAGGAGTGT --adapter GATCGGAAGAGCACACGT'
+              'CTGAACTCCAGTCAC --max-n 80 --minimum-length 80 '
+              '--pair-filter any --quality-cutoff 15 --trim-n')
         self.assertEqual(obs, exp)
 
     def test_make_read_pairs_per_sample_match_fwd_rev(self):
@@ -181,19 +183,19 @@ class QC_TrimTests(PluginTestCase):
         self._clean_up_files.append(fp)
 
         exp_cmd = [
-            'atropos --threads 4 --A GATCGGAAGAGCGTCGTGTAGGGAAAGGAGTGT --adapter GATCGGAAGAGCACACGTCTGAACTCCAGTCAC --max-n 80 --minimum-length 80 --nextseq-trim False --pair-filter any --quality-cutoff 15 --trim-n True -o output/fastq/s1_trimmed.fastq -p output/fastq/s1.R2_trimmed.fastq -pe1 fastq/s1.fastq -pe2 fastq/s1.R2.fastq',
-            'atropos --threads 4 --A GATCGGAAGAGCGTCGTGTAGGGAAAGGAGTGT --adapter GATCGGAAGAGCACACGTCTGAACTCCAGTCAC --max-n 80 --minimum-length 80 --nextseq-trim False --pair-filter any --quality-cutoff 15 --trim-n True -o output/fastq/s2_trimmed.fastq.gz -p output/fastq/s2.R2_trimmed.fastq.gz -pe1 fastq/s2.fastq.gz -pe2 fastq/s2.R2.fastq.gz',
-            'atropos --threads 4 --A GATCGGAAGAGCGTCGTGTAGGGAAAGGAGTGT --adapter GATCGGAAGAGCACACGTCTGAACTCCAGTCAC --max-n 80 --minimum-length 80 --nextseq-trim False --pair-filter any --quality-cutoff 15 --trim-n True -o output/fastq/s3_trimmed.fastq -p output/fastq/s3.R2_trimmed.fastq -pe1 fastq/s3.fastq -pe2 fastq/s3.R2.fastq'
+            'atropos trim --threads 4 -A GATCGGAAGAGCGTCGTGTAGGGAAAGGAGTGT --adapter GATCGGAAGAGCACACGTCTGAACTCCAGTCAC --max-n 80 --minimum-length 80 --pair-filter any --quality-cutoff 15 --trim-n -o output/SKB8.640193.R1.trimmed.fastq.gz -p output/SKB8.640193.R2.trimmed.fastq.gz -pe1 fastq/s1.fastq.gz -pe2 fastq/s1.R2.fastq.gz',
+            'atropos trim --threads 4 -A GATCGGAAGAGCGTCGTGTAGGGAAAGGAGTGT --adapter GATCGGAAGAGCACACGTCTGAACTCCAGTCAC --max-n 80 --minimum-length 80 --pair-filter any --quality-cutoff 15 --trim-n -o output/SKD8.640184.R1.trimmed.fastq.gz -p output/SKD8.640184.R2.trimmed.fastq.gz -pe1 fastq/s2.fastq.gz -pe2 fastq/s2.R2.fastq.gz',
+            'atropos trim --threads 4 -A GATCGGAAGAGCGTCGTGTAGGGAAAGGAGTGT --adapter GATCGGAAGAGCACACGTCTGAACTCCAGTCAC --max-n 80 --minimum-length 80 --pair-filter any --quality-cutoff 15 --trim-n -o output/SKB7.640196.R1.trimmed.fastq.gz -p output/SKB7.640196.R2.trimmed.fastq.gz -pe1 fastq/s3.fastq.gz -pe2 fastq/s3.R2.fastq.gz'
             ]
 
         exp_sample = [
-            ('s1', 'SKB8.640193', 'fastq/s1.fastq', 'fastq/s1.R2.fastq'),
+            ('s1', 'SKB8.640193', 'fastq/s1.fastq.gz', 'fastq/s1.R2.fastq.gz'),
             ('s2', 'SKD8.640184', 'fastq/s2.fastq.gz', 'fastq/s2.R2.fastq.gz'),
-            ('s3', 'SKB7.640196', 'fastq/s3.fastq', 'fastq/s3.R2.fastq')]
+            ('s3', 'SKB7.640196', 'fastq/s3.fastq.gz', 'fastq/s3.R2.fastq.gz')]
 
         obs_cmd, obs_sample = generate_qc_trim_commands(
-            ['fastq/s1.fastq', 'fastq/s2.fastq.gz', 'fastq/s3.fastq'],
-            ['fastq/s1.R2.fastq', 'fastq/s2.R2.fastq.gz', 'fastq/s3.R2.fastq'],
+            ['fastq/s1.fastq.gz', 'fastq/s2.fastq.gz', 'fastq/s3.fastq.gz'],
+            ['fastq/s1.R2.fastq.gz', 'fastq/s2.R2.fastq.gz', 'fastq/s3.R2.fastq.gz'],
             fp, 'output', self.params)
 
         self.assertEqual(obs_cmd, exp_cmd)
@@ -238,7 +240,7 @@ class QC_TrimTests(PluginTestCase):
 
         self.params['input'] = aid
         data = {'user': 'demo@microbio.me',
-                'command': dumps(['qp-shotgun', '0.0.2', 'atropos 1.1.15']),
+                'command': dumps(['qp-shotgun', '0.0.1', 'Atropos v1.1.15']),
                 'status': 'running',
                 'parameters': dumps(self.params)}
         jid = self.qclient.post('/apitest/processing_job/', data=data)['job']
