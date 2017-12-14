@@ -29,12 +29,10 @@ install:
   - source activate qp-shotgun
   - pip install -U pip
   - conda install --yes -c jjhelmus glpk
-  - conda install --yes -c bioconda diamond bowtie2 fastqc=0.11.5
+  - conda install --yes -c bioconda diamond=0.8 bowtie2 fastqc=0.11.5
   - pip install sphinx sphinx-bootstrap-theme coveralls
   - pip install https://github.com/qiita-spots/qiita_client/archive/master.zip
   - pip install atropos
-  - conda install --yes -c jjhelmus glpk
-  - conda install --yes -c bioconda diamond=0.8 bowtie2 fastqc=0.11.5
   - export QIITA_SERVER_CERT=$PWD/miniconda3/envs/qiita/lib/python2.7/site-packages/qiita_core/support_files/server.crt
   - pip install https://github.com/qiita-spots/qiita_client/archive/master.zip
   - pip install .
