@@ -33,7 +33,6 @@ install:
   - pip install sphinx sphinx-bootstrap-theme coveralls
   - pip install https://github.com/qiita-spots/qiita_client/archive/master.zip
   - pip install atropos
-  - pip install humann2
   - export QIITA_SERVER_CERT=$PWD/miniconda3/envs/qiita/lib/python2.7/site-packages/qiita_core/support_files/server.crt
   - pip install .
   # installing other dependencies
@@ -54,7 +53,7 @@ script:
   - source activate qp-shotgun
   - sleep 10 # give enough time to the webserver to start
   - configure_shotgun --env-script "source activate qp-shotgun" --server-cert $QIITA_SERVER_CERT
-  - date; travis_wait nosetests --with-doctest --with-coverage;date
+  - date; travis_wait 40 nosetests --with-doctest --with-coverage;date
   - flake8 qp_shotgun setup.py scripts
 addons:
   postgresql: "9.3"
