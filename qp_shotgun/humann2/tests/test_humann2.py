@@ -499,18 +499,13 @@ class Humann2Tests(PluginTestCase):
         fd, fp1 = mkstemp(prefix='demo_SKB7_', suffix='_seqs.fastq.gz')
         close(fd)
         self._clean_up_files.append(fp1)
-        fd, fp2 = mkstemp(prefix='demo_SKB8_', suffix='_seqs.fastq.gz')
-        close(fd)
-        self._clean_up_files.append(fp2)
+
         copyfile('support_files/demo.fastq.gz', fp1)
-        copyfile('support_files/demo.fastq.gz', fp2)
 
         # inserting new prep template
         prep_info_dict = {
             'SKB7.640196': {
-                'run_prefix': basename(fp1).replace('.fastq.gz', '')},
-            'SKB8.640193': {
-                'run_prefix': basename(fp2).replace('.fastq.gz', '')}}
+                'run_prefix': basename(fp1).replace('.fastq.gz', '')}}
         data = {'prep_info': dumps(prep_info_dict),
                 # magic #1 = testing study
                 'study': 1,
@@ -519,9 +514,7 @@ class Humann2Tests(PluginTestCase):
 
         # inserting artifacts
         data = {
-            'filepaths': dumps([
-                (fp1, 'preprocessed_fastq'),
-                (fp2, 'preprocessed_fastq')]),
+            'filepaths': dumps([(fp1, 'preprocessed_fastq')]),
             'type': "per_sample_FASTQ",
             'name': "New test artifact",
             'prep': pid}
@@ -539,7 +532,6 @@ class Humann2Tests(PluginTestCase):
 
         out_dir = mkdtemp()
         self._clean_up_files.append(out_dir)
-
         success, ainfo, msg = humann2(self.qclient, jid, self.params, out_dir)
 
         self.assertEqual("", msg)
@@ -564,7 +556,7 @@ class Humann2Tests(PluginTestCase):
             [(join(out_dir, 'genefamilies_cpm_unstratified.biom'), 'biom')],
             [(join(out_dir, 'pathcoverage_relab_unstratified.biom'), 'biom')],
             [(join(out_dir, 'pathabundance_relab_unstratified.biom'), 'biom')]]
-        self.assertItemsEqual(exp_fps, obs_fps)
+        self.assertEqual(exp_fps, obs_fps)
 
 
 MAPPING_FILE = (
