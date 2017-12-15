@@ -24,11 +24,8 @@ The default pipeline is:
 3. Renormalize the tables: gene families - CPM, path coverage - relative abundance, path abundance - relative abundance.
 4. Stratify the renormalized tables.
 
-- `KneadData <https://bitbucket.org/biobakery/kneaddata/wiki/Home`_
-
 Note that:
 - HUMAnN2 depends on `metaphlan2 <https://bitbucket.org/biobakery/metaphlan2/get/default.zip>`__ but neither the HUMAnN2 or this plugin automatically install that dependency. Remember that you need to put the `db_v20` folder in the path that the `metaphlan2.py` executable.
-- KneadData depends on `fastqc <http://www.bioinformatics.babraham.ac.uk/projects/download.html>`__ and `trimmomatic <http://www.usadellab.org/cms/?page=trimmomatic>`__ but neither the KneadData or this plugin automatically install that dependency.
 
 .. |Build Status| image:: http://kl-ci.ucsd.edu:8080/job/qp-shotgun-job/badge/icon
    :target: http://kl-ci.ucsd.edu:8080/job/qp-shotgun-job/
