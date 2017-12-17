@@ -15,15 +15,15 @@ __all__ = ['qc_trim']
 # Define the kneaddata command
 req_params = {'input': ('artifact', ['per_sample_FASTQ'])}
 opt_params = {
-    'adapter': ['string', 'GATCGGAAGAGCACACGTCTGAACTCCAGTCAC'], # 3' adapter
-    'A': ['string', 'GATCGGAAGAGCGTCGTGTAGGGAAAGGAGTGT'], # 3' adapter for rev
-    'quality-cutoff': ['integer', '15'], # 3' quality cutoff
-    'minimum-length': ['integer', '80'], # min length after trimming
-    'pair-filter': ['choice:["any", "both"]', 'any'], # drop pairs whose mates
+    'adapter': ['string', 'GATCGGAAGAGCACACGTCTGAACTCCAGTCAC'],  # 3' adapter
+    'A': ['string', 'GATCGGAAGAGCGTCGTGTAGGGAAAGGAGTGT'],  # 3' adapter for rev
+    'quality-cutoff': ['integer', '15'],  # 3' quality cutoff
+    'minimum-length': ['integer', '80'],  # min length after trimming
+    'pair-filter': ['choice:["any", "both"]', 'any'],  # drop pairs whose mates
     # are filtered out
-    'max-n': ['integer', '80'], # maximum Ns to drop sequence
-    'trim-n': ['boolean', 'True'], # trim Ns on end of read
-    'nextseq-trim': ['boolean', 'False'], # NextSeq-specific quality trimming
+    'max-n': ['integer', '80'],  # maximum Ns to drop sequence
+    'trim-n': ['boolean', 'True'],  # trim Ns on end of read
+    'nextseq-trim': ['boolean', 'False'],  # NextSeq-specific quality trimming
     }
 outputs = {'Adapter trimmed files': 'per_sample_FASTQ'}
 dflt_param_set = {

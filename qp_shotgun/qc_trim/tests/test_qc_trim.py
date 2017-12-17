@@ -7,7 +7,7 @@
 # -----------------------------------------------------------------------------
 
 from unittest import main
-from os import close, remove, walk, makedirs
+from os import close, remove, makedirs
 from os.path import exists, isdir, join, dirname
 from shutil import rmtree, copyfile
 from tempfile import mkstemp, mkdtemp
@@ -18,9 +18,9 @@ from qiita_client.testing import PluginTestCase
 
 from qp_shotgun import plugin
 from qp_shotgun.qc_trim.qc_trim import (make_read_pairs_per_sample,
-                                            generate_qc_trim_commands,
-                                            _format_qc_trim_params,
-                                            qc_trim, _per_sample_ainfo)
+                                        generate_qc_trim_commands,
+                                        _format_qc_trim_params,
+                                        qc_trim, _per_sample_ainfo)
 import qp_shotgun.qc_trim as kd
 
 
@@ -35,10 +35,11 @@ class QC_TrimTests(PluginTestCase):
         self.refdb_path = join(dirname(kd.__file__),
                                "tests/data/demo_bowtie2_db/demo_db.1.bt2")
         self.params = {
-        'adapter': 'GATCGGAAGAGCACACGTCTGAACTCCAGTCAC',
-        'A': 'GATCGGAAGAGCGTCGTGTAGGGAAAGGAGTGT',
-        'quality-cutoff': '15', 'minimum-length': '80', 'pair-filter': 'any',
-        'max-n': '80', 'trim-n': 'True', 'nextseq-trim': 'False'
+                       'adapter': 'GATCGGAAGAGCACACGTCTGAACTCCAGTCAC',
+                       'A': 'GATCGGAAGAGCGTCGTGTAGGGAAAGGAGTGT',
+                       'quality-cutoff': '15', 'minimum-length': '80',
+                       'pair-filter': 'any', 'max-n': '80', 'trim-n': 'True',
+                       'nextseq-trim': 'False'
         }
         self._clean_up_files = []
 
@@ -52,9 +53,9 @@ class QC_TrimTests(PluginTestCase):
 
     def test_format_qc_trim_params(self):
         obs = _format_qc_trim_params(self.params)
-        exp = ('-A GATCGGAAGAGCGTCGTGTAGGGAAAGGAGTGT --adapter GATCGGAAGAGCACACGT'
-              'CTGAACTCCAGTCAC --max-n 80 --minimum-length 80 '
-              '--pair-filter any --quality-cutoff 15 --trim-n')
+        exp = ('-A GATCGGAAGAGCGTCGTGTAGGGAAAGGAGTGT --adapter GATCGGAAGAGCACA'
+               'CGTCTGAACTCCAGTCAC --max-n 80 --minimum-length 80 '
+               '--pair-filter any --quality-cutoff 15 --trim-n')
         self.assertEqual(obs, exp)
 
     def test_make_read_pairs_per_sample_match_fwd_rev(self):
@@ -183,9 +184,24 @@ class QC_TrimTests(PluginTestCase):
         self._clean_up_files.append(fp)
 
         exp_cmd = [
-            'atropos trim --threads 4 -A GATCGGAAGAGCGTCGTGTAGGGAAAGGAGTGT --adapter GATCGGAAGAGCACACGTCTGAACTCCAGTCAC --max-n 80 --minimum-length 80 --pair-filter any --quality-cutoff 15 --trim-n -o output/SKB8.640193.R1.trimmed.fastq.gz -p output/SKB8.640193.R2.trimmed.fastq.gz -pe1 fastq/s1.fastq.gz -pe2 fastq/s1.R2.fastq.gz',
-            'atropos trim --threads 4 -A GATCGGAAGAGCGTCGTGTAGGGAAAGGAGTGT --adapter GATCGGAAGAGCACACGTCTGAACTCCAGTCAC --max-n 80 --minimum-length 80 --pair-filter any --quality-cutoff 15 --trim-n -o output/SKD8.640184.R1.trimmed.fastq.gz -p output/SKD8.640184.R2.trimmed.fastq.gz -pe1 fastq/s2.fastq.gz -pe2 fastq/s2.R2.fastq.gz',
-            'atropos trim --threads 4 -A GATCGGAAGAGCGTCGTGTAGGGAAAGGAGTGT --adapter GATCGGAAGAGCACACGTCTGAACTCCAGTCAC --max-n 80 --minimum-length 80 --pair-filter any --quality-cutoff 15 --trim-n -o output/SKB7.640196.R1.trimmed.fastq.gz -p output/SKB7.640196.R2.trimmed.fastq.gz -pe1 fastq/s3.fastq.gz -pe2 fastq/s3.R2.fastq.gz'
+            'atropos trim --threads 4 -A GATCGGAAGAGCGTCGTGTAGGGAAAGGAGTGT'
+            '--adapter GATCGGAAGAGCACACGTCTGAACTCCAGTCAC --max-n 80'
+            '--minimum-length 80 --pair-filter any --quality-cutoff 15'
+            '--trim-n -o output/SKB8.640193.R1.trimmed.fastq.gz'
+            '-p output/SKB8.640193.R2.trimmed.fastq.gz -pe1 fastq/s1.fastq.gz'
+            '-pe2 fastq/s1.R2.fastq.gz',
+            'atropos trim --threads 4 -A GATCGGAAGAGCGTCGTGTAGGGAAAGGAGTGT'
+            '--adapter GATCGGAAGAGCACACGTCTGAACTCCAGTCAC --max-n 80'
+            '--minimum-length 80 --pair-filter any --quality-cutoff 15'
+            '--trim-n -o output/SKD8.640184.R1.trimmed.fastq.gz'
+            '-p output/SKD8.640184.R2.trimmed.fastq.gz -pe1 fastq/s2.fastq.gz'
+            '-pe2 fastq/s2.R2.fastq.gz',
+            'atropos trim --threads 4 -A GATCGGAAGAGCGTCGTGTAGGGAAAGGAGTGT'
+            '--adapter GATCGGAAGAGCACACGTCTGAACTCCAGTCAC --max-n 80'
+            '--minimum-length 80 --pair-filter any --quality-cutoff 15'
+            '--trim-n -o output/SKB7.640196.R1.trimmed.fastq.gz'
+            '-p output/SKB7.640196.R2.trimmed.fastq.gz -pe1 fastq/s3.fastq.gz'
+            '-pe2 fastq/s3.R2.fastq.gz'
             ]
 
         exp_sample = [
@@ -195,7 +211,8 @@ class QC_TrimTests(PluginTestCase):
 
         obs_cmd, obs_sample = generate_qc_trim_commands(
             ['fastq/s1.fastq.gz', 'fastq/s2.fastq.gz', 'fastq/s3.fastq.gz'],
-            ['fastq/s1.R2.fastq.gz', 'fastq/s2.R2.fastq.gz', 'fastq/s3.R2.fastq.gz'],
+            ['fastq/s1.R2.fastq.gz', 'fastq/s2.R2.fastq.gz',
+             'fastq/s3.R2.fastq.gz'],
             fp, 'output', self.params)
 
         self.assertEqual(obs_cmd, exp_cmd)
@@ -249,7 +266,7 @@ class QC_TrimTests(PluginTestCase):
         self._clean_up_files.append(out_dir)
 
         success, ainfo, msg = qc_trim(self.qclient, jid,
-                                        self.params, out_dir)
+                                      self.params, out_dir)
 
         self.assertEqual("", msg)
         self.assertTrue(success)
@@ -263,7 +280,7 @@ class QC_TrimTests(PluginTestCase):
             obs_fps.append(a.files)
         od = partial(join, out_dir)
 
-        #ftype = 'per_sample_FASTQ'
+        # ftype = 'per_sample_FASTQ'
         exp_fps = [
             [od('1.SKB7.640196.R1.trimmed.fastq.gz'),
              od('1.SKB7.640196.R2.trimmed.fastq.gz'),
