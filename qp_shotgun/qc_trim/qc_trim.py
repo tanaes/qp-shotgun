@@ -9,7 +9,6 @@
 from itertools import zip_longest
 from os.path import basename, join, exists
 from functools import partial
-from gzip import open as gopen
 
 from qiita_client import ArtifactInfo
 
@@ -68,7 +67,7 @@ def make_read_pairs_per_sample(forward_seqs, reverse_seqs, map_file):
     samples = []
     used_prefixes = set()
     for i, (fwd_fp, rev_fp) in enumerate(zip_longest(forward_seqs,
-                                                      reverse_seqs)):
+                                                     reverse_seqs)):
         # fwd_fp is the fwd read filepath
         fwd_fn = basename(fwd_fp)
 
@@ -116,14 +115,14 @@ def _format_qc_trim_params(parameters):
     for param in sorted(parameters):
         value = parameters[param]
         dash = '--'
-        if len(param)==1:
+        if len(param) == 1:
             dash = '-'
         if value is 'True':
-            params.append('%s%s' % (dash,param))
+            params.append('%s%s' % (dash, param))
         elif value is 'False':
             continue
         elif value and value != 'default':
-            params.append('%s%s %s' % (dash,param, value))
+            params.append('%s%s %s' % (dash, param, value))
 
     param_string = ' '.join(params)
 
@@ -131,7 +130,7 @@ def _format_qc_trim_params(parameters):
 
 
 def generate_qc_trim_commands(forward_seqs, reverse_seqs, map_file,
-                                out_dir, parameters):
+                              out_dir, parameters):
     """Generates the QC_Trim commands
 
     Parameters
@@ -163,7 +162,6 @@ def generate_qc_trim_commands(forward_seqs, reverse_seqs, map_file,
     """
     # we match filenames, samples, and run prefixes
     samples = make_read_pairs_per_sample(forward_seqs, reverse_seqs, map_file)
-    #threads = 4
     cmds = []
 
     param_string = _format_qc_trim_params(parameters)
@@ -171,8 +169,8 @@ def generate_qc_trim_commands(forward_seqs, reverse_seqs, map_file,
     for run_prefix, sample, f_fp, r_fp in samples:
         cmds.append('atropos trim --threads 4 %s -o %s -p %s -pe1 %s -pe2 %s'
                     % (param_string, join(out_dir, '%s.R1.trimmed.fastq.gz' %
-                    sample), join(out_dir, '%s.R2.trimmed.fastq.gz' % sample),
-                    f_fp, r_fp))
+                       sample), join(out_dir, '%s.R2.trimmed.fastq.gz' %
+                       sample), f_fp, r_fp))
     return cmds, samples
 
 
@@ -245,14 +243,13 @@ def qc_trim(qclient, job_id, parameters, out_dir):
                             % artifact_info['prep_information'][0])
     qiime_map = prep_info['qiime-map']
 
-
     # Step 2 generating command atropos
     qclient.update_job_step(job_id, "Step 2 of 4: Generating"
                                     " QC_Trim commands")
     rs = fps['raw_reverse_seqs'] if 'raw_reverse_seqs' in fps else []
     commands, samples = generate_qc_trim_commands(fps['raw_forward_seqs'],
-                                                    rs, qiime_map, out_dir,
-                                                    parameters)
+                                                  rs, qiime_map, out_dir,
+                                                  parameters)
 
     # Step 3 execute atropos
     len_cmd = len(commands)
