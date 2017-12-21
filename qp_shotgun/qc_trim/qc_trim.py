@@ -167,7 +167,7 @@ def generate_qc_trim_commands(forward_seqs, reverse_seqs, map_file,
     param_string = _format_qc_trim_params(parameters)
 
     for run_prefix, sample, f_fp, r_fp in samples:
-        cmds.append('atropos trim --threads 4 %s -o %s -p %s -pe1 %s -pe2 %s'
+        cmds.append('atropos trim %s -o %s -p %s -pe1 %s -pe2 %s'
                     % (param_string, join(out_dir, '%s.R1.trimmed.fastq.gz' %
                        sample), join(out_dir, '%s.R2.trimmed.fastq.gz' %
                        sample), f_fp, r_fp))

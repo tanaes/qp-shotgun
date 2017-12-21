@@ -38,7 +38,8 @@ class QC_TrimTests(PluginTestCase):
                        'adapter': 'GATCGGAAGAGCACACGTCTGAACTCCAGTCAC',
                        'A': 'GATCGGAAGAGCGTCGTGTAGGGAAAGGAGTGT',
                        'quality-cutoff': '15', 'minimum-length': '80',
-                       'pair-filter': 'any', 'max-n': '80', 'trim-n': 'True',
+                       'pair-filter': 'any', 'max-n': '80', 'threads': '4',
+                       'trim-n': 'True',
                        'nextseq-trim': 'False'
         }
         self._clean_up_files = []
@@ -55,7 +56,7 @@ class QC_TrimTests(PluginTestCase):
         obs = _format_qc_trim_params(self.params)
         exp = ('-A GATCGGAAGAGCGTCGTGTAGGGAAAGGAGTGT --adapter GATCGGAAGAGCACA'
                'CGTCTGAACTCCAGTCAC --max-n 80 --minimum-length 80 '
-               '--pair-filter any --quality-cutoff 15 --trim-n')
+               '--pair-filter any --quality-cutoff 15 --threads 4 --trim-n')
         self.assertEqual(obs, exp)
 
     def test_make_read_pairs_per_sample_match_fwd_rev(self):
@@ -184,23 +185,23 @@ class QC_TrimTests(PluginTestCase):
         self._clean_up_files.append(fp)
 
         exp_cmd = [
-            'atropos trim --threads 4 -A GATCGGAAGAGCGTCGTGTAGGGAAAGGAGTGT'
-            '--adapter GATCGGAAGAGCACACGTCTGAACTCCAGTCAC --max-n 80'
-            '--minimum-length 80 --pair-filter any --quality-cutoff 15'
-            '--trim-n -o output/SKB8.640193.R1.trimmed.fastq.gz'
-            '-p output/SKB8.640193.R2.trimmed.fastq.gz -pe1 fastq/s1.fastq.gz'
+            'atropos trim -A GATCGGAAGAGCGTCGTGTAGGGAAAGGAGTGT '
+            '--adapter GATCGGAAGAGCACACGTCTGAACTCCAGTCAC --max-n 80 '
+            '--minimum-length 80 --pair-filter any --quality-cutoff 15 '
+            '--threads 4 --trim-n -o output/SKB8.640193.R1.trimmed.fastq.gz '
+            '-p output/SKB8.640193.R2.trimmed.fastq.gz -pe1 fastq/s1.fastq.gz '
             '-pe2 fastq/s1.R2.fastq.gz',
-            'atropos trim --threads 4 -A GATCGGAAGAGCGTCGTGTAGGGAAAGGAGTGT'
-            '--adapter GATCGGAAGAGCACACGTCTGAACTCCAGTCAC --max-n 80'
-            '--minimum-length 80 --pair-filter any --quality-cutoff 15'
-            '--trim-n -o output/SKD8.640184.R1.trimmed.fastq.gz'
-            '-p output/SKD8.640184.R2.trimmed.fastq.gz -pe1 fastq/s2.fastq.gz'
+            'atropos trim -A GATCGGAAGAGCGTCGTGTAGGGAAAGGAGTGT '
+            '--adapter GATCGGAAGAGCACACGTCTGAACTCCAGTCAC --max-n 80 '
+            '--minimum-length 80 --pair-filter any --quality-cutoff 15 '
+            '--threads 4 --trim-n -o output/SKD8.640184.R1.trimmed.fastq.gz '
+            '-p output/SKD8.640184.R2.trimmed.fastq.gz -pe1 fastq/s2.fastq.gz '
             '-pe2 fastq/s2.R2.fastq.gz',
-            'atropos trim --threads 4 -A GATCGGAAGAGCGTCGTGTAGGGAAAGGAGTGT'
-            '--adapter GATCGGAAGAGCACACGTCTGAACTCCAGTCAC --max-n 80'
-            '--minimum-length 80 --pair-filter any --quality-cutoff 15'
-            '--trim-n -o output/SKB7.640196.R1.trimmed.fastq.gz'
-            '-p output/SKB7.640196.R2.trimmed.fastq.gz -pe1 fastq/s3.fastq.gz'
+            'atropos trim -A GATCGGAAGAGCGTCGTGTAGGGAAAGGAGTGT '
+            '--adapter GATCGGAAGAGCACACGTCTGAACTCCAGTCAC --max-n 80 '
+            '--minimum-length 80 --pair-filter any --quality-cutoff 15 '
+            '--threads 4 --trim-n -o output/SKB7.640196.R1.trimmed.fastq.gz '
+            '-p output/SKB7.640196.R2.trimmed.fastq.gz -pe1 fastq/s3.fastq.gz '
             '-pe2 fastq/s3.R2.fastq.gz'
             ]
 
