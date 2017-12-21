@@ -120,11 +120,13 @@ def make_read_pairs_per_sample(forward_seqs, reverse_seqs, map_file):
 
 def _format_qc_trim_params(parameters):
     params = []
-
+    # Loop through all of the commands alphabetically
     for param in sorted(ATROPOS_PARAMS):
+        # Find the value using long parameter names
         parameter = ATROPOS_PARAMS[param]
         value = parameters[parameter]
         dash = '--'
+        # Check for single letter commands
         if len(param) == 1:
             dash = '-'
         if value is 'True':
@@ -159,7 +161,7 @@ def generate_qc_trim_commands(forward_seqs, reverse_seqs, map_file,
     Returns
     -------
     cmds: list of str
-        The KneadData commands
+        The QC_Trim commands
     samples: list of tup
         list of 4-tuples with run prefix, sample name, fwd read fp, rev read fp
 
@@ -213,7 +215,7 @@ def _per_sample_ainfo(out_dir, samples, fwd_and_rev=False):
                 missing_files.append(fname)
 
     if not files:
-        # KneadData did not create any files, which means that no sequence
+        # Atropos did not create any files, which means that no sequence
         # was kept after quality control and filtering for host data
         raise ValueError("No sequences left after running Atropos")
 
@@ -221,7 +223,7 @@ def _per_sample_ainfo(out_dir, samples, fwd_and_rev=False):
 
 
 def qc_trim(qclient, job_id, parameters, out_dir):
-    """Run kneaddata with the given parameters
+    """Run Atropos with the given parameters
 
     Parameters
     ----------
@@ -239,7 +241,7 @@ def qc_trim(qclient, job_id, parameters, out_dir):
     bool, list, str
         The results of the job
     """
-    # Step 1 get the rest of the information need to run kneaddata
+    # Step 1 get the rest of the information need to run Atropos
     qclient.update_job_step(job_id, "Step 1 of 4: Collecting information")
     artifact_id = parameters['input']
     del parameters['input']
