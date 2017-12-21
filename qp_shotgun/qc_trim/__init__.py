@@ -21,8 +21,9 @@ opt_params = {
     'minimum-length': ['integer', '80'],  # min length after trimming
     'pair-filter': ['choice:["any", "both"]', 'any'],  # drop pairs whose mates
     # are filtered out
-    'max-n': ['integer', '80'],  # maximum Ns to drop sequence
+    'max-n': ['integer', '90'],  # maximum Ns to drop sequence
     'trim-n': ['boolean', 'True'],  # trim Ns on end of read
+    'threads': ['integer', '4'],  # Threads used
     'nextseq-trim': ['boolean', 'False'],  # NextSeq-specific quality trimming
     }
 outputs = {'Adapter trimmed files': 'per_sample_FASTQ'}
@@ -31,7 +32,7 @@ dflt_param_set = {
         'adapter': 'GATCGGAAGAGCACACGTCTGAACTCCAGTCAC',
         'A': 'GATCGGAAGAGCGTCGTGTAGGGAAAGGAGTGT',
         'quality-cutoff': 15, 'minimum-length': 80, 'pair-filter': 'any',
-        'max-n': 80, 'trim-n': True, 'nextseq-trim': False
+        'max-n': 90, 'trim-n': True, 'nextseq-trim': False, 'threads': 4
         }
 }
 
