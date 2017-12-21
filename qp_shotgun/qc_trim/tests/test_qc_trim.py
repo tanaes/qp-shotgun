@@ -35,12 +35,15 @@ class QC_TrimTests(PluginTestCase):
         self.refdb_path = join(dirname(kd.__file__),
                                "tests/data/demo_bowtie2_db/demo_db.1.bt2")
         self.params = {
-                       'adapter': 'GATCGGAAGAGCACACGTCTGAACTCCAGTCAC',
-                       'A': 'GATCGGAAGAGCGTCGTGTAGGGAAAGGAGTGT',
-                       'quality-cutoff': '15', 'minimum-length': '80',
-                       'pair-filter': 'any', 'max-n': '80', 'threads': '4',
-                       'trim-n': 'True',
-                       'nextseq-trim': 'False'
+                       'Fwd read adapter': 'GATCGGAAGAGCACACGTCTGAACTCCAGTCAC',
+                       'Rev read adapter': 'GATCGGAAGAGCGTCGTGTAGGGAAAGGAGTGT',
+                       'Trim low-quality bases': '15',
+                       'Minimum trimmed read length': '80',
+                       'Pair-end read required to match': 'any',
+                       'Maximum number of N bases in a read to keep it': '80',
+                       'Trim Ns on ends of reads': 'True',
+                       'NextSeq-specific quality trimming': 'False',
+                       'Number of threads used': '4'
         }
         self._clean_up_files = []
 

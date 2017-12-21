@@ -14,6 +14,15 @@ from qiita_client import ArtifactInfo
 
 from qiita_client.util import system_call, get_sample_names_by_run_prefix
 
+ATROPOS_PARAMS = {
+    'adapter': 'Fwd read adapter', 'A': 'Rev read adapter',
+    'quality-cutoff': 'Trim low-quality bases',
+    'minimum-length': 'Minimum trimmed read length',
+    'pair-filter': 'Pair-end read required to match',
+    'max-n': 'Maximum number of N bases in a read to keep it',
+    'trim-n': 'Trim Ns on ends of reads', 'threads': 'Number of threads used',
+    'nextseq-trim': 'NextSeq-specific quality trimming'}
+
 
 def make_read_pairs_per_sample(forward_seqs, reverse_seqs, map_file):
     """Recovers read pairing information
@@ -112,8 +121,9 @@ def make_read_pairs_per_sample(forward_seqs, reverse_seqs, map_file):
 def _format_qc_trim_params(parameters):
     params = []
 
-    for param in sorted(parameters):
-        value = parameters[param]
+    for param in sorted(ATROPOS_PARAMS):
+        parameter = ATROPOS_PARAMS[param]
+        value = parameters[parameter]
         dash = '--'
         if len(param) == 1:
             dash = '-'
