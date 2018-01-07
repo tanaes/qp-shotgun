@@ -22,10 +22,10 @@ outputs = {'Filtered files': 'per_sample_FASTQ'}
 dflt_param_set = {
     'Human Filtering': {
         'Bowtie2 database to filter': 'Human',
-        'Number of threads used': 4
+        'Number of threads to be used': 4
         }
 }
 
-qc_trim_cmd = QiitaCommand(
+qc_filter_cmd = QiitaCommand(
     'QC_Filter', "Sequence QC - Filtering", qc_filter,
     req_params, opt_params, outputs, dflt_param_set)
