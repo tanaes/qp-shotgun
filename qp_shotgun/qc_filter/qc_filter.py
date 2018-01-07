@@ -11,6 +11,7 @@ import os
 from os.path import basename, join, exists
 from functools import partial
 from tempfile import mkstemp, mkdtemp
+from shutil import rmtree
 
 from qiita_client import ArtifactInfo
 
@@ -181,13 +182,13 @@ def generate_qc_filter_commands(forward_seqs, reverse_seqs, map_file,
 
     for run_prefix, sample, f_fp, r_fp in samples:
         cmds.append('bowtie2 %s --very-sensitive -1 %s -2 %s | '
-                    'samtools view -f 12 -F 256 -b -o %s'
+                    'samtools view -f 12 -F 256 -b -o %s;'
 
-                    'samtools sort -T %s -@ %s -n -o %s %s'
+                    'samtools sort -T %s -@ %s -n -o %s %s;'
 
-                    'bedtools bamtofastq -i %s -fq %s -fq2 %s'
+                    'bedtools bamtofastq -i %s -fq %s -fq2 %s;'
 
-                    'pigz -p %s -c %s > %s'
+                    'pigz -p %s -c %s > %s;'
                     'pigz -p %s -c %s > %s'
 
                     % (param_string, f_fp, r_fp,
@@ -208,6 +209,40 @@ def generate_qc_filter_commands(forward_seqs, reverse_seqs, map_file,
 
     return cmds, samples
 
+def _run_commands(qclient, job_id, commands, msg):
+    for i, cmd in enumerate(commands):
+        qclient.update_job_step(job_id, msg % i)
+        std_out, std_err, return_value = system_call(cmd)
+        if return_value != 0:
+            error_msg = ("Error running QC_Filter:\nStd out: %s\nStd err: %s"
+                         "\n\nCommand run was:\n%s"
+                         % (std_out, std_err, cmd))
+            return False, error_msg
+
+    return True, ""
+
+def _per_sample_ainfo(out_dir, samples, fwd_and_rev=False):
+    files = []
+    missing_files = []
+
+    suffixes = ['%s.R1.trimmed.filtered.fastq.gz',
+                '%s.R2.trimmed.filtered.fastq.gz']
+
+    for _, rp, _, _ in samples:
+        smd = partial(join, out_dir)
+        for suff in suffixes:
+            fname = smd(suff % rp)
+            if exists(fname):
+                files.append(fname)
+            else:
+                missing_files.append(fname)
+
+    if not files:
+        # QC_Filter did not create any files, which means that no sequence
+        # was kept after filteration
+        raise ValueError("No sequences left after filtering")
+
+    return [ArtifactInfo('QC_Trim files', 'per_sample_FASTQ', files)]
 
 def qc_filter(qclient, job_id, parameters, out_dir):
     """Run filtering using Bowtie2 with the given parameters
@@ -241,3 +276,31 @@ def qc_filter(qclient, job_id, parameters, out_dir):
     prep_info = qclient.get('/qiita_db/prep_template/%s/'
                             % artifact_info['prep_information'][0])
     qiime_map = prep_info['qiime-map']
+
+    # Step 2 generating command
+    qclient.update_job_step(job_id, "Step 2 of 4: Generating"
+                                    " QC_Filter commands")
+    # Creating temp directory for intermediate files
+    temp_dir = mkdtemp()
+
+    rs = fps['raw_reverse_seqs'] if 'raw_reverse_seqs' in fps else []
+    commands, samples = generate_qc_filter_commands(fps['raw_forward_seqs'],
+                                                  rs, qiime_map, out_dir,
+                                                  temp_dir, parameters)
+
+    print ('Running')
+    # Step 3 execute filtering command
+    len_cmd = len(commands)
+    msg = "Step 3 of 4: Executing QC_Trim job (%d/{0})".format(len_cmd)
+    success, msg = _run_commands(qclient, job_id, commands, msg)
+    if not success:
+        return False, None, msg
+
+    # Step 4 generating artifacts
+    msg = "Step 4 of 4: Generating new artifacts (%d/{0})".format(len_cmd)
+    success, msg = _run_commands(qclient, job_id, commands, msg)
+    ainfo = _per_sample_ainfo(out_dir, samples, bool(rs))
+
+    rmtree(temp_dir)
+
+    return True, ainfo, ""
