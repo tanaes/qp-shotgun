@@ -10,7 +10,7 @@ from itertools import zip_longest
 import os
 from os.path import basename, join, exists
 from functools import partial
-from tempfile import mkstemp, mkdtemp
+from tempfile import mkdtemp
 from shutil import rmtree
 
 from qiita_client import ArtifactInfo
@@ -23,6 +23,7 @@ BOWTIE2_PARAMS = {
 
 DATABASE_PREFIX = {
     'Human': 'Human/phix'}
+
 
 def make_read_pairs_per_sample(forward_seqs, reverse_seqs, map_file):
     """Recovers read pairing information
@@ -115,6 +116,7 @@ def make_read_pairs_per_sample(forward_seqs, reverse_seqs, map_file):
 
     return(samples)
 
+
 def _format_qc_filter_params(parameters):
     params = []
     # Loop through all of the commands alphabetically
@@ -134,15 +136,16 @@ def _format_qc_filter_params(parameters):
             # Check for database option
             if param is 'x':
                 db_path = os.environ["QC_FILTER_DB_DP"]
-                value = join(db_path,DATABASE_PREFIX[value])
+                value = join(db_path, DATABASE_PREFIX[value])
             params.append('%s%s %s' % (dash, param, value))
 
     param_string = ' '.join(params)
 
     return(param_string)
 
+
 def generate_qc_filter_commands(forward_seqs, reverse_seqs, map_file,
-                              out_dir, temp_dir, parameters):
+                                out_dir, temp_dir, parameters):
     """Generates the QC_Filter commands
 
     Parameters
@@ -193,21 +196,25 @@ def generate_qc_filter_commands(forward_seqs, reverse_seqs, map_file,
 
                     % (param_string, f_fp, r_fp,
                        join(temp_dir, '%s.unsorted.bam' % sample),
-                       join(temp_dir,'%s' % sample), threads,
+                       join(temp_dir, '%s' % sample), threads,
                        join(temp_dir, '%s.bam' % sample),
                        join(temp_dir, '%s.unsorted.bam' % sample),
                        join(temp_dir, '%s.bam' % sample),
                        join(temp_dir, '%s.R1.trimmed.filtered.fastq' % sample),
                        join(temp_dir, '%s.R2.trimmed.filtered.fastq' % sample),
                        threads,
-                       join(temp_dir, '%s.R1.trimmed.filtered.fastq' % sample),
-                       join(out_dir, '%s.R1.trimmed.filtered.fastq.gz' % sample)
-                       ,threads,
+                       join(temp_dir, '%s.R1.trimmed.filtered.fastq'
+                            % sample),
+                       join(out_dir, '%s.R1.trimmed.filtered.fastq.gz'
+                            % sample),
+                       threads,
                        join(temp_dir, '%s.R2.trimmed.filtered.fastq' % sample),
-                       join(out_dir, '%s.R2.trimmed.filtered.fastq.gz' % sample)
+                       join(out_dir, '%s.R2.trimmed.filtered.fastq.gz'
+                            % sample)
                        ))
 
     return cmds, samples
+
 
 def _run_commands(qclient, job_id, commands, msg):
     for i, cmd in enumerate(commands):
@@ -220,6 +227,7 @@ def _run_commands(qclient, job_id, commands, msg):
             return False, error_msg
 
     return True, ""
+
 
 def _per_sample_ainfo(out_dir, samples, fwd_and_rev=False):
     files = []
@@ -243,6 +251,7 @@ def _per_sample_ainfo(out_dir, samples, fwd_and_rev=False):
         raise ValueError("No sequences left after filtering")
 
     return [ArtifactInfo('QC_Trim files', 'per_sample_FASTQ', files)]
+
 
 def qc_filter(qclient, job_id, parameters, out_dir):
     """Run filtering using Bowtie2 with the given parameters
@@ -285,10 +294,9 @@ def qc_filter(qclient, job_id, parameters, out_dir):
 
     rs = fps['raw_reverse_seqs'] if 'raw_reverse_seqs' in fps else []
     commands, samples = generate_qc_filter_commands(fps['raw_forward_seqs'],
-                                                  rs, qiime_map, out_dir,
-                                                  temp_dir, parameters)
+                                                    rs, qiime_map, out_dir,
+                                                    temp_dir, parameters)
 
-    print ('Running')
     # Step 3 execute filtering command
     len_cmd = len(commands)
     msg = "Step 3 of 4: Executing QC_Trim job (%d/{0})".format(len_cmd)

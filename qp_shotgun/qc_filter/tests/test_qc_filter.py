@@ -8,7 +8,7 @@
 
 from unittest import main
 from os import close, remove, makedirs
-from os.path import exists, isdir, join, dirname
+from os.path import exists, isdir, join
 from shutil import rmtree, copyfile
 from tempfile import mkstemp, mkdtemp
 from json import dumps
@@ -18,12 +18,10 @@ import os
 from qiita_client.testing import PluginTestCase
 
 from qp_shotgun import plugin
-from qp_shotgun.qc_filter.qc_filter import (qc_filter,
-                                            make_read_pairs_per_sample,
+from qp_shotgun.qc_filter.qc_filter import (make_read_pairs_per_sample,
                                             _format_qc_filter_params,
                                             generate_qc_filter_commands,
                                             qc_filter, _per_sample_ainfo)
-import qp_shotgun.qc_filter as kd
 
 
 class QC_FilterTests(PluginTestCase):
@@ -179,27 +177,25 @@ class QC_FilterTests(PluginTestCase):
         db_path = os.environ["QC_FILTER_DB_DP"]
 
         exp_cmd = [
-            ('bowtie2 -p 1 -x %sHuman/phix --very-sensitive -1 fastq/s1.fastq.gz '
-            '-2 fastq/s1.R2.fastq.gz | '
-            'samtools view -f 12 -F 256 -b -o temp/SKB8.640193.unsorted.bam;'
+            ('bowtie2 -p 1 -x %sHuman/phix --very-sensitive '
+             '-1 fastq/s1.fastq.gz -2 fastq/s1.R2.fastq.gz | '
+             'samtools view -f 12 -F 256 -b -o temp/SKB8.640193.unsorted.bam;'
 
-            'samtools sort -T temp/SKB8.640193 -@ 1 -n -o temp/SKB8.640193.bam '
-            'temp/SKB8.640193.unsorted.bam;'
+             'samtools sort -T temp/SKB8.640193 -@ 1 -n '
+             '-o temp/SKB8.640193.bam temp/SKB8.640193.unsorted.bam;'
 
-            'bedtools bamtofastq -i temp/SKB8.640193.bam -fq '
-            'temp/SKB8.640193.R1.trimmed.filtered.fastq -fq2 '
-            'temp/SKB8.640193.R2.trimmed.filtered.fastq;'
+             'bedtools bamtofastq -i temp/SKB8.640193.bam -fq '
+             'temp/SKB8.640193.R1.trimmed.filtered.fastq -fq2 '
+             'temp/SKB8.640193.R2.trimmed.filtered.fastq;'
 
-            'pigz -p 1 -c temp/SKB8.640193.R1.trimmed.filtered.fastq > '
-            'output/SKB8.640193.R1.trimmed.filtered.fastq.gz;'
-            'pigz -p 1 -c temp/SKB8.640193.R2.trimmed.filtered.fastq > '
-            'output/SKB8.640193.R2.trimmed.filtered.fastq.gz') % db_path
+             'pigz -p 1 -c temp/SKB8.640193.R1.trimmed.filtered.fastq > '
+             'output/SKB8.640193.R1.trimmed.filtered.fastq.gz;'
+             'pigz -p 1 -c temp/SKB8.640193.R2.trimmed.filtered.fastq > '
+             'output/SKB8.640193.R2.trimmed.filtered.fastq.gz') % db_path
             ]
 
         exp_sample = [
             ('s1', 'SKB8.640193', 'fastq/s1.fastq.gz', 'fastq/s1.R2.fastq.gz')
-            #('s2', 'SKD8.640184', 'fastq/s2.fastq.gz', 'fastq/s2.R2.fastq.gz'),
-            #('s3', 'SKB7.640196', 'fastq/s3.fastq.gz', 'fastq/s3.R2.fastq.gz')
             ]
 
         obs_cmd, obs_sample = generate_qc_filter_commands(
@@ -290,7 +286,6 @@ class QC_FilterTests(PluginTestCase):
         with self.assertRaises(ValueError):
             _per_sample_ainfo(in_dir, (('sampleA', None, None, None),
                                        ('sampleB', None, None, None)), True)
-
 
 
 MAPPING_FILE = (

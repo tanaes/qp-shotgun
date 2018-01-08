@@ -15,7 +15,7 @@ __all__ = ['qc_filter']
 # Define the qc_filter command
 req_params = {'input': ('artifact', ['per_sample_FASTQ'])}
 opt_params = {
-    'Bowtie2 database to filter': ['choice:["Human"]','Human'],
+    'Bowtie2 database to filter': ['choice:["Human"]', 'Human'],
     'Number of threads to be used': ['integer', '4']
     }
 outputs = {'Filtered files': 'per_sample_FASTQ'}
