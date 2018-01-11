@@ -272,7 +272,6 @@ def qc_trim(qclient, job_id, parameters, out_dir):
 
     # Step 4 generating artifacts
     msg = "Step 4 of 4: Generating new artifacts (%d/{0})".format(len_cmd)
-    success, msg = _run_commands(qclient, job_id, commands, msg)
     ainfo = _per_sample_ainfo(out_dir, samples, bool(rs))
 
     return True, ainfo, ""
