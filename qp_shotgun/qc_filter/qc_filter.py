@@ -184,33 +184,35 @@ def generate_qc_filter_commands(forward_seqs, reverse_seqs, map_file,
     threads = parameters['Number of threads to be used']
 
     for run_prefix, sample, f_fp, r_fp in samples:
-        cmds.append('bowtie2 %s --very-sensitive -1 %s -2 %s | '
-                    'samtools view -f 12 -F 256 -b -o %s;'
+        cmds.append('bowtie2 {params} --very-sensitive -1 {fwd_ip} -2 {rev_ip}'
+                    ' | samtools view -f 12 -F 256 -b -o {bow_op}; '
 
-                    'samtools sort -T %s -@ %s -n -o %s %s;'
+                    'samtools sort -T {sample_path} -@ {thrds} -n -o {sam_op} '
+                    '{sam_un_op}; '
 
-                    'bedtools bamtofastq -i %s -fq %s -fq2 %s;'
+                    'bedtools bamtofastq -i {sam_op} -fq {bedtools_op_one} '
+                    '-fq2 {bedtools_op_two}; '
+                    'pigz -p {thrds} -c {bedtools_op_one} > {gz_op_one}; '
+                    'pigz -p {thrds} -c {bedtools_op_two} > {gz_op_two};'
 
-                    'pigz -p %s -c %s > %s;'
-                    'pigz -p %s -c %s > %s'
-
-                    % (param_string, f_fp, r_fp,
-                       join(temp_dir, '%s.unsorted.bam' % sample),
-                       join(temp_dir, '%s' % sample), threads,
-                       join(temp_dir, '%s.bam' % sample),
-                       join(temp_dir, '%s.unsorted.bam' % sample),
-                       join(temp_dir, '%s.bam' % sample),
-                       join(temp_dir, '%s.R1.trimmed.filtered.fastq' % sample),
-                       join(temp_dir, '%s.R2.trimmed.filtered.fastq' % sample),
-                       threads,
-                       join(temp_dir, '%s.R1.trimmed.filtered.fastq'
-                            % sample),
-                       join(out_dir, '%s.R1.trimmed.filtered.fastq.gz'
-                            % sample),
-                       threads,
-                       join(temp_dir, '%s.R2.trimmed.filtered.fastq' % sample),
-                       join(out_dir, '%s.R2.trimmed.filtered.fastq.gz'
-                            % sample)
+                    .format(params = param_string, thrds = threads,
+                       fwd_ip = f_fp, rev_ip = r_fp,
+                       bow_op = join(temp_dir, '%s.unsorted.bam' % sample),
+                       sample_path = join(temp_dir, '%s' % sample),
+                       sam_op = join(temp_dir, '%s.bam' % sample),
+                       sam_un_op = join(temp_dir, '%s.unsorted.bam' % sample),
+                       bedtools_op_one = join(temp_dir,
+                                              '%s.R1.trimmed.filtered.fastq'
+                                              % sample),
+                       bedtools_op_two = join(temp_dir,
+                                              '%s.R2.trimmed.filtered.fastq'
+                                              % sample),
+                       gz_op_one = join(out_dir,
+                                        '%s.R1.trimmed.filtered.fastq.gz'
+                                        % sample),
+                       gz_op_two = join(out_dir,
+                                        '%s.R2.trimmed.filtered.fastq.gz'
+                                        % sample)
                        ))
 
     return cmds, samples

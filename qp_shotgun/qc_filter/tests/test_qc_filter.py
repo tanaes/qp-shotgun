@@ -179,19 +179,19 @@ class QC_FilterTests(PluginTestCase):
         exp_cmd = [
             ('bowtie2 -p 1 -x %sHuman/phix --very-sensitive '
              '-1 fastq/s1.fastq.gz -2 fastq/s1.R2.fastq.gz | '
-             'samtools view -f 12 -F 256 -b -o temp/SKB8.640193.unsorted.bam;'
+             'samtools view -f 12 -F 256 -b -o temp/SKB8.640193.unsorted.bam; '
 
              'samtools sort -T temp/SKB8.640193 -@ 1 -n '
-             '-o temp/SKB8.640193.bam temp/SKB8.640193.unsorted.bam;'
+             '-o temp/SKB8.640193.bam temp/SKB8.640193.unsorted.bam; '
 
              'bedtools bamtofastq -i temp/SKB8.640193.bam -fq '
              'temp/SKB8.640193.R1.trimmed.filtered.fastq -fq2 '
-             'temp/SKB8.640193.R2.trimmed.filtered.fastq;'
+             'temp/SKB8.640193.R2.trimmed.filtered.fastq; '
 
              'pigz -p 1 -c temp/SKB8.640193.R1.trimmed.filtered.fastq > '
-             'output/SKB8.640193.R1.trimmed.filtered.fastq.gz;'
+             'output/SKB8.640193.R1.trimmed.filtered.fastq.gz; '
              'pigz -p 1 -c temp/SKB8.640193.R2.trimmed.filtered.fastq > '
-             'output/SKB8.640193.R2.trimmed.filtered.fastq.gz') % db_path
+             'output/SKB8.640193.R2.trimmed.filtered.fastq.gz;') % db_path
             ]
 
         exp_sample = [
