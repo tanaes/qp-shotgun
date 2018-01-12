@@ -37,6 +37,7 @@ install:
   - export QIITA_SERVER_CERT=$PWD/miniconda3/envs/qiita/lib/python2.7/site-packages/qiita_core/support_files/server.crt
   - pip install .
   - export QC_FILTER_DB_DP=$PWD/qp_shotgun/qc_filter/database/
+  - export QC_FILTER_TEMP_DP=$PWD/qp_shotgun/qc_filter/temp/
   # installing other dependencies
   - wget --quiet https://bitbucket.org/biobakery/metaphlan2/get/default.zip
   - unzip -qq default.zip 'biobakery-metaphlan2*/utils/*' 'biobakery-metaphlan2*/metaphlan2.py'

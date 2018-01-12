@@ -18,8 +18,7 @@ import os
 from qiita_client.testing import PluginTestCase
 
 from qp_shotgun import plugin
-from qp_shotgun.qc_filter.qc_filter import (make_read_pairs_per_sample,
-                                            _format_qc_filter_params,
+from qp_shotgun.qc_filter.qc_filter import (_format_qc_filter_params,
                                             generate_qc_filter_commands,
                                             qc_filter, _per_sample_ainfo,
                                             get_dbs, get_dbs_list,
@@ -33,7 +32,8 @@ class QC_FilterTests(PluginTestCase):
         plugin("https://localhost:21174", 'register', 'ignored')
         db_path = os.environ["QC_FILTER_DB_DP"]
         self.params = {
-                       'Bowtie2 database to filter': join(db_path, 'phix/phix'),
+                       'Bowtie2 database to filter': join(db_path,
+                                                          'phix/phix'),
                        'Number of threads to be used': '1'
         }
         self._clean_up_files = []
@@ -63,9 +63,9 @@ class QC_FilterTests(PluginTestCase):
     def test_generate_qc_filter_dflt_params(self):
         db_path = os.environ["QC_FILTER_DB_DP"]
         obs = generate_qc_filter_dflt_params()
-        exp = {'phix': {'Bowtie2 database to filter':join(db_path, 'phix',
+        exp = {'phix': {'Bowtie2 database to filter': join(db_path, 'phix',
                                                            'phix'),
-                         'Number of threads to be used': 4}}
+                        'Number of threads to be used': 4}}
 
         self.assertEqual(obs, exp)
 

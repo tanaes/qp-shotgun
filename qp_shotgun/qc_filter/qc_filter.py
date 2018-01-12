@@ -6,24 +6,24 @@
 # The full license is in the file LICENSE, distributed with this software.
 # -----------------------------------------------------------------------------
 
-from itertools import zip_longest
 import os
-from os.path import basename, join, exists, isdir
+from os.path import join, exists, isdir
 from functools import partial
-from tempfile import mkdtemp
-from shutil import rmtree
+from tempfile import TemporaryDirectory
 from qp_shotgun.qc_trim.qc_trim import make_read_pairs_per_sample
 
 from qiita_client import ArtifactInfo
 
-from qiita_client.util import system_call, get_sample_names_by_run_prefix
+from qiita_client.util import system_call
 
 BOWTIE2_PARAMS = {
     'x': 'Bowtie2 database to filter',
     'p': 'Number of threads to be used'}
 
+
 def get_dbs(db_folder):
-    dbs= {}
+    dbs = {}
+    # Loop through the databases and create a dict of them
     for folder in os.listdir(db_folder):
             folder_path = join(db_folder, folder)
             if isdir(folder_path):
@@ -31,8 +31,10 @@ def get_dbs(db_folder):
 
     return(dbs)
 
+
 def get_dbs_list(db_folder):
-    dbs= []
+    dbs = []
+    # Loop through the databases and create a list string
     for folder in sorted(os.listdir(db_folder)):
             folder_path = join(db_folder, folder)
             if isdir(folder_path):
@@ -45,12 +47,15 @@ def get_dbs_list(db_folder):
 def generate_qc_filter_dflt_params():
     dflt_param_set = {}
     db_parent_path = os.environ["QC_FILTER_DB_DP"]
+    # Get a the databases available and the database name
     dbs = get_dbs(db_parent_path)
+    # Create dict with command options per database
     for db in dbs:
         dflt_param_set[db] = {'Bowtie2 database to filter': dbs[db],
                               'Number of threads to be used': 4}
 
     return(dflt_param_set)
+
 
 def _format_qc_filter_params(parameters):
     params = []
@@ -126,25 +131,25 @@ def generate_qc_filter_commands(forward_seqs, reverse_seqs, map_file,
                     'pigz -p {thrds} -c {bedtools_op_one} > {gz_op_one}; '
                     'pigz -p {thrds} -c {bedtools_op_two} > {gz_op_two};'
 
-                    .format(params = param_string, thrds = threads,
-                       fwd_ip = f_fp, rev_ip = r_fp,
-                       bow_op = join(temp_dir, '%s.unsorted.bam' % sample),
-                       sample_path = join(temp_dir, '%s' % sample),
-                       sam_op = join(temp_dir, '%s.bam' % sample),
-                       sam_un_op = join(temp_dir, '%s.unsorted.bam' % sample),
-                       bedtools_op_one = join(temp_dir,
-                                              '%s.R1.trimmed.filtered.fastq'
-                                              % sample),
-                       bedtools_op_two = join(temp_dir,
-                                              '%s.R2.trimmed.filtered.fastq'
-                                              % sample),
-                       gz_op_one = join(out_dir,
-                                        '%s.R1.trimmed.filtered.fastq.gz'
-                                        % sample),
-                       gz_op_two = join(out_dir,
-                                        '%s.R2.trimmed.filtered.fastq.gz'
-                                        % sample)
-                       ))
+                    .format(params=param_string, thrds=threads,
+                            fwd_ip=f_fp, rev_ip=r_fp,
+                            bow_op=join(temp_dir, '%s.unsorted.bam' % sample),
+                            sample_path=join(temp_dir, '%s' % sample),
+                            sam_op=join(temp_dir, '%s.bam' % sample),
+                            sam_un_op=join(temp_dir,
+                                           '%s.unsorted.bam' % sample),
+                            bedtools_op_one=join(temp_dir,
+                                                 '%s.R1.trimmed.filtered.fastq'
+                                                 % sample),
+                            bedtools_op_two=join(temp_dir,
+                                                 '%s.R2.trimmed.filtered.fastq'
+                                                 % sample),
+                            gz_op_one=join(out_dir,
+                                           '%s.R1.trimmed.filtered.fastq.gz'
+                                           % sample),
+                            gz_op_two=join(out_dir,
+                                           '%s.R2.trimmed.filtered.fastq.gz'
+                                           % sample)))
 
     return cmds, samples
 
@@ -180,10 +185,10 @@ def _per_sample_ainfo(out_dir, samples, fwd_and_rev=False):
 
     if not files:
         # QC_Filter did not create any files, which means that no sequence
-        # was kept after filteration
+        # was kept after Filtering
         raise ValueError("No sequences left after filtering")
 
-    return [ArtifactInfo('QC_Trim files', 'per_sample_FASTQ', files)]
+    return [ArtifactInfo('QC_Filter files', 'per_sample_FASTQ', files)]
 
 
 def qc_filter(qclient, job_id, parameters, out_dir):
@@ -223,24 +228,23 @@ def qc_filter(qclient, job_id, parameters, out_dir):
     qclient.update_job_step(job_id, "Step 2 of 4: Generating"
                                     " QC_Filter commands")
     # Creating temp directory for intermediate files
-    temp_dir = mkdtemp()
+    temp_path = os.environ['QC_FILTER_TEMP_DP']
+    with TemporaryDirectory(dir=temp_path, prefix='qc_filter_') as temp_dir:
+        rs = fps['raw_reverse_seqs'] if 'raw_reverse_seqs' in fps else []
+        commands, samples = generate_qc_filter_commands(fps[
+                                                        'raw_forward_seqs'],
+                                                        rs, qiime_map, out_dir,
+                                                        temp_dir, parameters)
 
-    rs = fps['raw_reverse_seqs'] if 'raw_reverse_seqs' in fps else []
-    commands, samples = generate_qc_filter_commands(fps['raw_forward_seqs'],
-                                                    rs, qiime_map, out_dir,
-                                                    temp_dir, parameters)
-
-    # Step 3 execute filtering command
-    len_cmd = len(commands)
-    msg = "Step 3 of 4: Executing QC_Trim job (%d/{0})".format(len_cmd)
-    success, msg = _run_commands(qclient, job_id, commands, msg)
-    if not success:
-        return False, None, msg
+        # Step 3 execute filtering command
+        len_cmd = len(commands)
+        msg = "Step 3 of 4: Executing QC_Trim job (%d/{0})".format(len_cmd)
+        success, msg = _run_commands(qclient, job_id, commands, msg)
+        if not success:
+            return False, None, msg
 
     # Step 4 generating artifacts
     msg = "Step 4 of 4: Generating new artifacts (%d/{0})".format(len_cmd)
     ainfo = _per_sample_ainfo(out_dir, samples, bool(rs))
-
-    rmtree(temp_dir)
 
     return True, ainfo, ""
