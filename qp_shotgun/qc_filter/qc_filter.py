@@ -227,7 +227,7 @@ def qc_filter(qclient, job_id, parameters, out_dir):
     # Step 2 generating command
     qclient.update_job_step(job_id, "Step 2 of 4: Generating"
                                     " QC_Filter commands")
-    # Creating temp directory for intermediate files
+    # Creating temporary directory for intermediate files
     temp_path = os.environ['QC_FILTER_TEMP_DP']
     with TemporaryDirectory(dir=temp_path, prefix='qc_filter_') as temp_dir:
         rs = fps['raw_reverse_seqs'] if 'raw_reverse_seqs' in fps else []
