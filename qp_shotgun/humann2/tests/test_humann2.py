@@ -23,9 +23,9 @@ from qp_shotgun.humann2.humann2 import (
 
 
 class Humann2Tests(PluginTestCase):
-    maxDiff = None
 
     def setUp(self):
+        self.maxDiff = None
         plugin("https://localhost:21174", 'register', 'ignored')
         self.params = {
             'read-set': 'fwd',
