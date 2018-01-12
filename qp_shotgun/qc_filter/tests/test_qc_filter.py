@@ -21,7 +21,9 @@ from qp_shotgun import plugin
 from qp_shotgun.qc_filter.qc_filter import (make_read_pairs_per_sample,
                                             _format_qc_filter_params,
                                             generate_qc_filter_commands,
-                                            qc_filter, _per_sample_ainfo)
+                                            qc_filter, _per_sample_ainfo,
+                                            get_dbs, get_dbs_list,
+                                            generate_qc_filter_dflt_params)
 
 
 class QC_FilterTests(PluginTestCase):
@@ -29,9 +31,9 @@ class QC_FilterTests(PluginTestCase):
 
     def setUp(self):
         plugin("https://localhost:21174", 'register', 'ignored')
-
+        db_path = os.environ["QC_FILTER_DB_DP"]
         self.params = {
-                       'Bowtie2 database to filter': 'Human',
+                       'Bowtie2 database to filter': join(db_path, 'phix/phix'),
                        'Number of threads to be used': '1'
         }
         self._clean_up_files = []
@@ -44,10 +46,34 @@ class QC_FilterTests(PluginTestCase):
                 else:
                     remove(fp)
 
+    def test_get_dbs(self):
+        db_path = os.environ["QC_FILTER_DB_DP"]
+        obs = get_dbs(db_path)
+        exp = {'phix': join(db_path, 'phix', 'phix')}
+
+        self.assertEqual(obs, exp)
+
+    def test_get_dbs_list(self):
+        db_path = os.environ["QC_FILTER_DB_DP"]
+        obs = get_dbs_list(db_path)
+        exp = join(join('"'+db_path, 'phix', 'phix')+'"')
+
+        self.assertEqual(obs, exp)
+
+    def test_generate_qc_filter_dflt_params(self):
+        db_path = os.environ["QC_FILTER_DB_DP"]
+        obs = generate_qc_filter_dflt_params()
+        exp = {'phix': {'Bowtie2 database to filter':join(db_path, 'phix',
+                                                           'phix'),
+                         'Number of threads to be used': 4}}
+
+        self.assertEqual(obs, exp)
+
     def test_format_qc_filter_params(self):
         db_path = os.environ["QC_FILTER_DB_DP"]
         obs = _format_qc_filter_params(self.params)
-        exp = ('-p 1 -x %sHuman/phix') % db_path
+        exp = ('-p 1 -x %sphix/phix') % db_path
+
         self.assertEqual(obs, exp)
 
     def test_generate_qc_filter_analysis_commands_forward_reverse(self):
@@ -59,7 +85,7 @@ class QC_FilterTests(PluginTestCase):
         db_path = os.environ["QC_FILTER_DB_DP"]
 
         exp_cmd = [
-            ('bowtie2 -p 1 -x %sHuman/phix --very-sensitive '
+            ('bowtie2 -p 1 -x %sphix/phix --very-sensitive '
              '-1 fastq/s1.fastq.gz -2 fastq/s1.R2.fastq.gz | '
              'samtools view -f 12 -F 256 -b -o temp/SKB8.640193.unsorted.bam; '
 

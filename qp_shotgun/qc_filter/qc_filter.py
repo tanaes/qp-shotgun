@@ -8,7 +8,7 @@
 
 from itertools import zip_longest
 import os
-from os.path import basename, join, exists
+from os.path import basename, join, exists, isdir
 from functools import partial
 from tempfile import mkdtemp
 from shutil import rmtree
@@ -22,8 +22,35 @@ BOWTIE2_PARAMS = {
     'x': 'Bowtie2 database to filter',
     'p': 'Number of threads to be used'}
 
-DATABASE_PREFIX = {
-    'Human': 'Human/phix'}
+def get_dbs(db_folder):
+    dbs= {}
+    for folder in os.listdir(db_folder):
+            folder_path = join(db_folder, folder)
+            if isdir(folder_path):
+                dbs[folder] = join(folder_path, folder)
+
+    return(dbs)
+
+def get_dbs_list(db_folder):
+    dbs= []
+    for folder in sorted(os.listdir(db_folder)):
+            folder_path = join(db_folder, folder)
+            if isdir(folder_path):
+                dbs.append(join(folder_path, folder))
+    dbs_formatted = (', '.join('"' + item + '"' for item in dbs))
+
+    return(dbs_formatted)
+
+
+def generate_qc_filter_dflt_params():
+    dflt_param_set = {}
+    db_parent_path = os.environ["QC_FILTER_DB_DP"]
+    dbs = get_dbs(db_parent_path)
+    for db in dbs:
+        dflt_param_set[db] = {'Bowtie2 database to filter': dbs[db],
+                              'Number of threads to be used': 4}
+
+    return(dflt_param_set)
 
 def _format_qc_filter_params(parameters):
     params = []
@@ -41,10 +68,6 @@ def _format_qc_filter_params(parameters):
         elif value is 'False':
             continue
         elif value and value != 'default':
-            # Check for database option
-            if param is 'x':
-                db_path = os.environ["QC_FILTER_DB_DP"]
-                value = join(db_path, DATABASE_PREFIX[value])
             params.append('%s%s %s' % (dash, param, value))
 
     param_string = ' '.join(params)
