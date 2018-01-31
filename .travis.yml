@@ -33,7 +33,7 @@ install:
   - conda install --yes -c bioconda diamond=0.8 bowtie2 fastqc=0.11.5 samtools bedtools
   - pip install sphinx sphinx-bootstrap-theme coveralls
   - pip install https://github.com/qiita-spots/qiita_client/archive/master.zip
-  - pip install atropos
+  - pip install atropos humann2
   - export QIITA_SERVER_CERT=$PWD/miniconda3/envs/qiita/lib/python2.7/site-packages/qiita_core/support_files/server.crt
   - pip install .
   - export QC_FILTER_DB_DP=$PWD/qp_shotgun/qc_filter/database/
@@ -56,7 +56,7 @@ script:
   - source activate qp-shotgun
   - sleep 10 # give enough time to the webserver to start
   - configure_shotgun --env-script "source activate qp-shotgun" --server-cert $QIITA_SERVER_CERT
-  - travis_wait 40 nosetests --with-doctest --with-coverage --verbosity=3
+  - travis_wait 40 nosetests nosetests qp_shotgun/humann2/tests/test_humann2.py:Humann2Tests --with-doctest --with-coverage --verbosity=3
   - flake8 qp_shotgun setup.py scripts
 addons:
   postgresql: "9.3"
