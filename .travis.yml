@@ -31,7 +31,7 @@ install:
   - conda install --yes -c jjhelmus glpk
   - conda install --yes pigz
   - conda install --yes -c bioconda diamond=0.8 bowtie2 fastqc=0.11.5 samtools bedtools
-  - pip install sphinx sphinx-bootstrap-theme coveralls
+  - pip install sphinx sphinx-bootstrap-theme coveralls biopython
   - pip install https://github.com/qiita-spots/qiita_client/archive/master.zip
   - pip install atropos
   - export QIITA_SERVER_CERT=$PWD/miniconda3/envs/qiita/lib/python2.7/site-packages/qiita_core/support_files/server.crt

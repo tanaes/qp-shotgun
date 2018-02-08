@@ -29,7 +29,7 @@ def make_read_pairs_per_sample(forward_seqs, reverse_seqs, map_file):
 
     Parameters
     ----------
-    forward_seqs : list of str
+    forward_seqs : list of strs
         The list of forward seqs filepaths
     reverse_seqs : list of str
         The list of reverse seqs filepaths
