@@ -11,7 +11,7 @@
 from setuptools import setup
 
 
-__version__ = "0.1.0-dev"
+__version__ = "0.0.1-dev"
 
 
 classes = """
@@ -21,7 +21,7 @@ classes = """
     Topic :: Software Development :: Libraries :: Application Frameworks
     Topic :: Software Development :: Libraries :: Python Modules
     Programming Language :: Python
-    Programming Language :: Python :: 2.7
+    Programming Language :: Python :: 3.6
     Programming Language :: Python :: Implementation :: CPython
     Operating System :: POSIX :: Linux
     Operating System :: MacOS :: MacOS X
@@ -42,7 +42,7 @@ setup(name='qp-shotgun',
       author_email="qiita.help@gmail.com",
       url='https://github.com/biocore/qiita',
       test_suite='nose.collector',
-      packages=['qp_shotgun', 'qp_shotgun/humann2'],
+      packages=['qp_shotgun', 'qp_shotgun/humann2', 'qp_shotgun/qc_trim'],
       package_data={'qp_shotgun': ['support_files/config_file.cfg']},
       scripts=['scripts/configure_shotgun', 'scripts/start_shotgun'],
       extras_require={'test': ["nose >= 0.10.1", "pep8"]},
