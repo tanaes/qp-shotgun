@@ -7,78 +7,16 @@
 # -----------------------------------------------------------------------------
 
 import os
-from os.path import join, exists, isdir
-from functools import partial
+from os.path import join
 from tempfile import TemporaryDirectory
-from qp_shotgun.qc_trim.qc_trim import make_read_pairs_per_sample
-
-from qiita_client import ArtifactInfo
+from qp_shotgun.utils import (_format_qc_params, make_read_pairs_per_sample,
+    _run_commands, _per_sample_ainfo)
 
 from qiita_client.util import system_call
 
 BOWTIE2_PARAMS = {
     'x': 'Bowtie2 database to filter',
-    'p': 'Number of threads to be used'}
-
-
-def get_dbs(db_folder):
-    dbs = {}
-    # Loop through the databases and create a dict of them
-    for folder in os.listdir(db_folder):
-            folder_path = join(db_folder, folder)
-            if isdir(folder_path):
-                dbs[folder] = join(folder_path, folder)
-
-    return(dbs)
-
-
-def get_dbs_list(db_folder):
-    dbs = []
-    # Loop through the databases and create a list string
-    for folder in sorted(os.listdir(db_folder)):
-            folder_path = join(db_folder, folder)
-            if isdir(folder_path):
-                dbs.append(join(folder_path, folder))
-    dbs_formatted = (', '.join('"' + item + '"' for item in dbs))
-
-    return(dbs_formatted)
-
-
-def generate_qc_filter_dflt_params():
-    dflt_param_set = {}
-    db_parent_path = os.environ["QC_FILTER_DB_DP"]
-    # Get a the databases available and the database name
-    dbs = get_dbs(db_parent_path)
-    # Create dict with command options per database
-    for db in dbs:
-        dflt_param_set[db] = {'Bowtie2 database to filter': dbs[db],
-                              'Number of threads to be used': 4}
-
-    return(dflt_param_set)
-
-
-def _format_qc_filter_params(parameters):
-    params = []
-    # Loop through all of the commands alphabetically
-    for param in sorted(BOWTIE2_PARAMS):
-        # Find the value using long parameter names
-        parameter = BOWTIE2_PARAMS[param]
-        value = parameters[parameter]
-        dash = '--'
-        # Check for single letter commands
-        if len(param) == 1:
-            dash = '-'
-        if value is 'True':
-            params.append('%s%s' % (dash, param))
-        elif value is 'False':
-            continue
-        elif value and value != 'default':
-            params.append('%s%s %s' % (dash, param, value))
-
-    param_string = ' '.join(params)
-
-    return(param_string)
-
+    'p': 'Number of threads'}
 
 def generate_qc_filter_commands(forward_seqs, reverse_seqs, map_file,
                                 out_dir, temp_dir, parameters):
@@ -116,8 +54,8 @@ def generate_qc_filter_commands(forward_seqs, reverse_seqs, map_file,
 
     cmds = []
 
-    param_string = _format_qc_filter_params(parameters)
-    threads = parameters['Number of threads to be used']
+    param_string = _format_qc_params(parameters, BOWTIE2_PARAMS)
+    threads = parameters['Number of threads']
 
     for run_prefix, sample, f_fp, r_fp in samples:
         cmds.append('bowtie2 {params} --very-sensitive -1 {fwd_ip} -2 {rev_ip}'
@@ -152,44 +90,6 @@ def generate_qc_filter_commands(forward_seqs, reverse_seqs, map_file,
                                            % sample)))
 
     return cmds, samples
-
-
-def _run_commands(qclient, job_id, commands, msg):
-    for i, cmd in enumerate(commands):
-        qclient.update_job_step(job_id, msg % i)
-        std_out, std_err, return_value = system_call(cmd)
-        if return_value != 0:
-            error_msg = ("Error running QC_Filter:\nStd out: %s\nStd err: %s"
-                         "\n\nCommand run was:\n%s"
-                         % (std_out, std_err, cmd))
-            return False, error_msg
-
-    return True, ""
-
-
-def _per_sample_ainfo(out_dir, samples, fwd_and_rev=False):
-    files = []
-    missing_files = []
-
-    suffixes = ['%s.R1.trimmed.filtered.fastq.gz',
-                '%s.R2.trimmed.filtered.fastq.gz']
-
-    for _, rp, _, _ in samples:
-        smd = partial(join, out_dir)
-        for suff in suffixes:
-            fname = smd(suff % rp)
-            if exists(fname):
-                files.append(fname)
-            else:
-                missing_files.append(fname)
-
-    if not files:
-        # QC_Filter did not create any files, which means that no sequence
-        # was kept after Filtering
-        raise ValueError("No sequences left after filtering")
-
-    return [ArtifactInfo('QC_Filter files', 'per_sample_FASTQ', files)]
-
 
 def qc_filter(qclient, job_id, parameters, out_dir):
     """Run filtering using Bowtie2 with the given parameters
@@ -239,12 +139,18 @@ def qc_filter(qclient, job_id, parameters, out_dir):
         # Step 3 execute filtering command
         len_cmd = len(commands)
         msg = "Step 3 of 4: Executing QC_Trim job (%d/{0})".format(len_cmd)
-        success, msg = _run_commands(qclient, job_id, commands, msg)
+        success, msg = _run_commands(qclient, job_id, commands, msg,
+            'QC_Filter')
         if not success:
             return False, None, msg
 
     # Step 4 generating artifacts
     msg = "Step 4 of 4: Generating new artifacts (%d/{0})".format(len_cmd)
-    ainfo = _per_sample_ainfo(out_dir, samples, bool(rs))
+    suffixes = ['%s.R1.trimmed.filtered.fastq.gz',
+                '%s.R2.trimmed.filtered.fastq.gz']
+    prg_name = 'Filtering'
+    file_type_name = 'QC_Filter files'
+    ainfo = _per_sample_ainfo(out_dir, samples, suffixes, prg_name,
+        file_type_name, bool(rs))
 
     return True, ainfo, ""

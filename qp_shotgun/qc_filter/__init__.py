@@ -7,8 +7,8 @@
 # -----------------------------------------------------------------------------
 
 from qiita_client import QiitaCommand
-from .qc_filter import (qc_filter, generate_qc_filter_dflt_params,
-                        get_dbs_list)
+from .utils import (generate_qc_filter_dflt_params, get_dbs_list)
+from .qc_filter import qc_filter
 from os.path import join
 from os import environ
 __all__ = ['qc_filter']
@@ -20,7 +20,7 @@ req_params = {'input': ('artifact', ['per_sample_FASTQ'])}
 opt_params = {
     'Bowtie2 database to filter': ["choice: [%s]" % default_db_list,
                                    default_db],
-    'Number of threads to be used': ['integer', '4']
+    'Number of threads': ['integer', '4']
     }
 outputs = {'Filtered files': 'per_sample_FASTQ'}
 dflt_param_set = generate_qc_filter_dflt_params()

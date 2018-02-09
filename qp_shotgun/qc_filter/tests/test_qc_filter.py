@@ -18,12 +18,17 @@ import os
 from qiita_client.testing import PluginTestCase
 
 from qp_shotgun import plugin
-from qp_shotgun.qc_filter.qc_filter import (_format_qc_filter_params,
-                                            generate_qc_filter_commands,
-                                            qc_filter, _per_sample_ainfo,
-                                            get_dbs, get_dbs_list,
-                                            generate_qc_filter_dflt_params)
+from qp_shotgun.qc_filter.qc_filter import (generate_qc_filter_commands,
+    qc_filter)
+from qp_shotgun.qc_filter.utils import (get_dbs, get_dbs_list,
+    generate_qc_filter_dflt_params)
+from qp_shotgun.utils import (make_read_pairs_per_sample, _format_qc_params,
+    _run_commands, _per_sample_ainfo)
 
+
+BOWTIE2_PARAMS = {
+    'x': 'Bowtie2 database to filter',
+    'p': 'Number of threads'}
 
 class QC_FilterTests(PluginTestCase):
     maxDiff = None
@@ -34,7 +39,7 @@ class QC_FilterTests(PluginTestCase):
         self.params = {
                        'Bowtie2 database to filter': join(db_path,
                                                           'phix/phix'),
-                       'Number of threads to be used': '1'
+                       'Number of threads': '1'
         }
         self._clean_up_files = []
 
@@ -65,13 +70,13 @@ class QC_FilterTests(PluginTestCase):
         obs = generate_qc_filter_dflt_params()
         exp = {'phix': {'Bowtie2 database to filter': join(db_path, 'phix',
                                                            'phix'),
-                        'Number of threads to be used': 4}}
+                        'Number of threads': 4}}
 
         self.assertEqual(obs, exp)
 
     def test_format_qc_filter_params(self):
         db_path = os.environ["QC_FILTER_DB_DP"]
-        obs = _format_qc_filter_params(self.params)
+        obs = _format_qc_params(self.params, BOWTIE2_PARAMS)
         exp = ('-p 1 -x %sphix/phix') % db_path
 
         self.assertEqual(obs, exp)
@@ -193,7 +198,8 @@ class QC_FilterTests(PluginTestCase):
         # Paired-end
         with self.assertRaises(ValueError):
             _per_sample_ainfo(in_dir, (('sampleA', None, None, None),
-                                       ('sampleB', None, None, None)), True)
+                                       ('sampleB', None, None, None)), [],
+                                       'filtering', 'QC_Filter Files', True)
 
 
 MAPPING_FILE = (
