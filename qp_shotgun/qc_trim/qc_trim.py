@@ -7,10 +7,9 @@
 # -----------------------------------------------------------------------------
 
 from os.path import join
-from qp_shotgun.utils import (_format_qc_params, make_read_pairs_per_sample,
+from qp_shotgun.utils import (
+    _format_qc_params, make_read_pairs_per_sample,
     _run_commands, _per_sample_ainfo)
-
-from qiita_client.util import system_call, get_sample_names_by_run_prefix
 
 ATROPOS_PARAMS = {
     'adapter': 'Fwd read adapter', 'A': 'Rev read adapter',
@@ -20,6 +19,7 @@ ATROPOS_PARAMS = {
     'max-n': 'Maximum number of N bases in a read to keep it',
     'trim-n': 'Trim Ns on ends of reads', 'threads': 'Number of threads used',
     'nextseq-trim': 'NextSeq-specific quality trimming'}
+
 
 def generate_qc_trim_commands(forward_seqs, reverse_seqs, map_file,
                               out_dir, parameters):
@@ -64,6 +64,7 @@ def generate_qc_trim_commands(forward_seqs, reverse_seqs, map_file,
                        sample), join(out_dir, '%s.R2.trimmed.fastq.gz' %
                        sample), f_fp, r_fp))
     return cmds, samples
+
 
 def qc_trim(qclient, job_id, parameters, out_dir):
     """Run Atropos with the given parameters
@@ -118,7 +119,7 @@ def qc_trim(qclient, job_id, parameters, out_dir):
     suffixes = ['%s.R1.trimmed.fastq.gz', '%s.R2.trimmed.fastq.gz']
     prg_name = 'Atropos'
     file_type_name = 'QC_Trim files'
-    ainfo = _per_sample_ainfo(out_dir, samples, suffixes, prg_name,
-        file_type_name, bool(rs))
+    ainfo = _per_sample_ainfo(
+        out_dir, samples, suffixes, prg_name, file_type_name, bool(rs))
 
     return True, ainfo, ""

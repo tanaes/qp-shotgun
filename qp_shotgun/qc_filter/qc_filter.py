@@ -9,14 +9,14 @@
 import os
 from os.path import join
 from tempfile import TemporaryDirectory
-from qp_shotgun.utils import (_format_qc_params, make_read_pairs_per_sample,
+from qp_shotgun.utils import (
+    _format_qc_params, make_read_pairs_per_sample,
     _run_commands, _per_sample_ainfo)
-
-from qiita_client.util import system_call
 
 BOWTIE2_PARAMS = {
     'x': 'Bowtie2 database to filter',
     'p': 'Number of threads'}
+
 
 def generate_qc_filter_commands(forward_seqs, reverse_seqs, map_file,
                                 out_dir, temp_dir, parameters):
@@ -91,6 +91,7 @@ def generate_qc_filter_commands(forward_seqs, reverse_seqs, map_file,
 
     return cmds, samples
 
+
 def qc_filter(qclient, job_id, parameters, out_dir):
     """Run filtering using Bowtie2 with the given parameters
 
@@ -139,8 +140,8 @@ def qc_filter(qclient, job_id, parameters, out_dir):
         # Step 3 execute filtering command
         len_cmd = len(commands)
         msg = "Step 3 of 4: Executing QC_Trim job (%d/{0})".format(len_cmd)
-        success, msg = _run_commands(qclient, job_id, commands, msg,
-            'QC_Filter')
+        success, msg = _run_commands(
+            qclient, job_id, commands, msg, 'QC_Filter')
         if not success:
             return False, None, msg
 
@@ -150,7 +151,7 @@ def qc_filter(qclient, job_id, parameters, out_dir):
                 '%s.R2.trimmed.filtered.fastq.gz']
     prg_name = 'Filtering'
     file_type_name = 'QC_Filter files'
-    ainfo = _per_sample_ainfo(out_dir, samples, suffixes, prg_name,
-        file_type_name, bool(rs))
+    ainfo = _per_sample_ainfo(
+        out_dir, samples, suffixes, prg_name, file_type_name, bool(rs))
 
     return True, ainfo, ""

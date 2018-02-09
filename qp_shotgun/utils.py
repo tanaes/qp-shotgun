@@ -6,9 +6,9 @@
 # The full license is in the file LICENSE, distributed with this software.
 # -----------------------------------------------------------------------------
 
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # This file contains functions used by multiple commands
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 from qiita_client.util import system_call, get_sample_names_by_run_prefix
 from itertools import zip_longest
 from os.path import basename, join, exists
@@ -43,7 +43,8 @@ def make_read_pairs_per_sample(forward_seqs, reverse_seqs, map_file):
     -----
     At this stage it is required that if reverse sequences are present that all
     samples have both a forward and a reverse sequence. However, the read
-    trimming/filtering step can sometimes eliminate all reverse reads, especially in low
+    trimming/filtering step can sometimes eliminate all reverse reads,
+    especially in low
     coverage samples with poor overall reverse read quality.
     """
 
@@ -109,6 +110,7 @@ def make_read_pairs_per_sample(forward_seqs, reverse_seqs, map_file):
 
     return(samples)
 
+
 def _format_qc_params(parameters, func_params):
     params = []
     # Loop through all of the commands alphabetically
@@ -131,6 +133,7 @@ def _format_qc_params(parameters, func_params):
 
     return(param_string)
 
+
 def _run_commands(qclient, job_id, commands, msg, cmd_name):
     for i, cmd in enumerate(commands):
         qclient.update_job_step(job_id, msg % i)
@@ -143,13 +146,14 @@ def _run_commands(qclient, job_id, commands, msg, cmd_name):
 
     return True, ""
 
-def _per_sample_ainfo(out_dir, samples, suffixes, prg_name,
-    files_type_name, fwd_and_rev=False):
+
+def _per_sample_ainfo(
+        out_dir, samples, suffixes, prg_name,
+        files_type_name, fwd_and_rev=False):
     files = []
     missing_files = []
-
+    smd = partial(join, out_dir)
     for _, rp, _, _ in samples:
-        smd = partial(join, out_dir)
         for suff in suffixes:
             fname = smd(suff % rp)
             if exists(fname):
@@ -158,7 +162,7 @@ def _per_sample_ainfo(out_dir, samples, suffixes, prg_name,
                 missing_files.append(fname)
 
     if not files:
-        # Atropos did not create any files, which means that no sequence
+        # Command did not create any files, which means that no sequence
         # was kept after quality control and filtering for host data
         raise ValueError("No sequences left after %s" % prg_name)
 

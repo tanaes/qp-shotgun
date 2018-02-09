@@ -18,9 +18,10 @@ from qiita_client.testing import PluginTestCase
 
 from qp_shotgun import plugin
 from qp_shotgun.qc_trim.qc_trim import (generate_qc_trim_commands, qc_trim)
-from qp_shotgun.utils import (_format_qc_params, make_read_pairs_per_sample,
-    _run_commands, _per_sample_ainfo)
+from qp_shotgun.utils import (
+    _format_qc_params, make_read_pairs_per_sample, _per_sample_ainfo)
 import qp_shotgun.qc_trim as kd
+
 ATROPOS_PARAMS = {
     'adapter': 'Fwd read adapter', 'A': 'Rev read adapter',
     'quality-cutoff': 'Trim low-quality bases',
@@ -29,6 +30,7 @@ ATROPOS_PARAMS = {
     'max-n': 'Maximum number of N bases in a read to keep it',
     'trim-n': 'Trim Ns on ends of reads', 'threads': 'Number of threads used',
     'nextseq-trim': 'NextSeq-specific quality trimming'}
+
 
 class QC_TrimTests(PluginTestCase):
     maxDiff = None
@@ -308,7 +310,7 @@ class QC_TrimTests(PluginTestCase):
         with self.assertRaises(ValueError):
             _per_sample_ainfo(in_dir, (('sampleA', None, None, None),
                                        ('sampleB', None, None, None)), [],
-                                       'Atropos', 'QC_Trim Files', True)
+                              'Atropos', 'QC_Trim Files', True)
 
 
 MAPPING_FILE = (
