@@ -12,7 +12,7 @@ from .qc_trim import qc_trim
 
 __all__ = ['qc_trim']
 
-# Define the kneaddata command
+# Define the qc_trim command
 req_params = {'input': ('artifact', ['per_sample_FASTQ'])}
 opt_params = {
     # 3' adapter

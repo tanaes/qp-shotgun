@@ -23,6 +23,7 @@ from qp_shotgun.humann2.humann2 import (
 
 
 class Humann2Tests(PluginTestCase):
+
     def setUp(self):
         plugin("https://localhost:21174", 'register', 'ignored')
         self.params = {
@@ -495,6 +496,7 @@ class Humann2Tests(PluginTestCase):
         self.assertEqual(obs, exp)
 
     def test_humann2(self):
+        self.maxDiff = None
         # generating filepaths
         fd, fp1 = mkstemp(prefix='demo_SKB7_', suffix='_seqs.fastq.gz')
         close(fd)
@@ -533,7 +535,6 @@ class Humann2Tests(PluginTestCase):
         out_dir = mkdtemp()
         self._clean_up_files.append(out_dir)
         success, ainfo, msg = humann2(self.qclient, jid, self.params, out_dir)
-
         self.assertEqual("", msg)
         self.assertTrue(success)
         # we are expecting 6 artifacts

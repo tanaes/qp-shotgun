@@ -17,11 +17,19 @@ from functools import partial
 from qiita_client.testing import PluginTestCase
 
 from qp_shotgun import plugin
-from qp_shotgun.qc_trim.qc_trim import (make_read_pairs_per_sample,
-                                        generate_qc_trim_commands,
-                                        _format_qc_trim_params,
-                                        qc_trim, _per_sample_ainfo)
+from qp_shotgun.qc_trim.qc_trim import (generate_qc_trim_commands, qc_trim)
+from qp_shotgun.utils import (
+    _format_qc_params, make_read_pairs_per_sample, _per_sample_ainfo)
 import qp_shotgun.qc_trim as kd
+
+ATROPOS_PARAMS = {
+    'adapter': 'Fwd read adapter', 'A': 'Rev read adapter',
+    'quality-cutoff': 'Trim low-quality bases',
+    'minimum-length': 'Minimum trimmed read length',
+    'pair-filter': 'Pair-end read required to match',
+    'max-n': 'Maximum number of N bases in a read to keep it',
+    'trim-n': 'Trim Ns on ends of reads', 'threads': 'Number of threads used',
+    'nextseq-trim': 'NextSeq-specific quality trimming'}
 
 
 class QC_TrimTests(PluginTestCase):
@@ -56,7 +64,7 @@ class QC_TrimTests(PluginTestCase):
                     remove(fp)
 
     def test_format_qc_trim_params(self):
-        obs = _format_qc_trim_params(self.params)
+        obs = _format_qc_params(self.params, ATROPOS_PARAMS)
         exp = ('-A GATCGGAAGAGCGTCGTGTAGGGAAAGGAGTGT --adapter GATCGGAAGAGCACA'
                'CGTCTGAACTCCAGTCAC --max-n 80 --minimum-length 80 '
                '--pair-filter any --quality-cutoff 15 --threads 4 --trim-n')
@@ -301,7 +309,8 @@ class QC_TrimTests(PluginTestCase):
         # Paired-end
         with self.assertRaises(ValueError):
             _per_sample_ainfo(in_dir, (('sampleA', None, None, None),
-                                       ('sampleB', None, None, None)), True)
+                                       ('sampleB', None, None, None)), [],
+                              'Atropos', 'QC_Trim Files', True)
 
 
 MAPPING_FILE = (
