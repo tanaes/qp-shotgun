@@ -34,6 +34,7 @@ install:
   - pip install sphinx sphinx-bootstrap-theme coveralls biopython
   - pip install https://github.com/qiita-spots/qiita_client/archive/master.zip
   - pip install atropos
+  - pip install git+https://github.com/knights-lab/SHOGUN.git
   - export QIITA_SERVER_CERT=$PWD/miniconda3/envs/qiita/lib/python2.7/site-packages/qiita_core/support_files/server.crt
   - pip install .
   - export QC_FILTER_DB_DP=$PWD/qp_shotgun/qc_filter/database/
