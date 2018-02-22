@@ -30,7 +30,8 @@ install:
   - pip install -U pip
   - conda install --yes -c jjhelmus glpk
   - conda install --yes pigz
-  - conda install --yes -c bioconda diamond=0.8 bowtie2 fastqc=0.11.5 samtools bedtools
+  - conda install --yes -c bioconda diamond=0.8 bowtie2 fastqc=0.11.5 samtools bedtools seqtk
+  - conda install --yes -c knights-lab shogun
   - pip install sphinx sphinx-bootstrap-theme coveralls biopython
   - pip install https://github.com/qiita-spots/qiita_client/archive/master.zip
   - pip install atropos
@@ -39,6 +40,8 @@ install:
   - pip install .
   - export QC_FILTER_DB_DP=$PWD/qp_shotgun/qc_filter/database/
   - export QC_FILTER_TEMP_DP=$PWD/qp_shotgun/qc_filter/temp/
+  - export QC_SHOGUN_DB_DP=$PWD/qp_shotgun/qc_shogun/database/
+  - export QC_SHOGUN_TEMP_DP=$PWD/qp_shotgun/qc_filter/temp/
   # installing other dependencies
   - wget --quiet https://bitbucket.org/biobakery/metaphlan2/get/default.zip
   - unzip -qq default.zip 'biobakery-metaphlan2*/utils/*' 'biobakery-metaphlan2*/metaphlan2.py'
