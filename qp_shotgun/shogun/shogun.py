@@ -5,11 +5,47 @@
 #
 # The full license is in the file LICENSE, distributed with this software.
 # -----------------------------------------------------------------------------
-
+import os
+from os.path import join
+from tempfile import TemporaryDirectory
+from qp_shotgun.utils import (
+    _format_qc_params, make_read_pairs_per_sample,
+    _run_commands, _per_sample_ainfo)
+    
 SHOGUN_PARAMS = {
     'Database': 'database', 'Aligner tool': 'aligner',
     'Taxonomic Level': 'levels', 'Number of threads': 'threads'}
 
+def _read_fastq_seqs(filepath):
+    # This reading method is adopted from qiime2 demux
+    fh = gzip.open(filepath, 'rt')
+    for seq_header, seq, qual_header, qual in itertools.zip_longest(*[fh] * 4):
+        yield (seq_header.strip(), seq.strip(), qual_header.strip(),
+               qual.strip())
+
+def generate_fna_file(fwd_seqs, rev_seqs, temp_path, map_file):
+    # Combines reverse and forward seqs per sample
+    # Returns filepaths of new combined files
+    both_fp = []
+    samples = make_read_pairs_per_sample(fwd_seqs, rev_seqs, map_file)
+    for run_prefix, sample, f_fp, r_fp in samples:
+        counter = 0
+        output_fp = join(temp_path, sample, '_both.fna')
+        output = open(output_fp, "a")
+        # Loop through forward file
+        for seq_header, seq, qual_header, qual in _read_fastq_seqs(f_fp):
+            output.write("%s_%d\n" % (sample, counter))
+            output.write("%s\n" % seq)
+            count+=1
+        # Loop through reverse file
+        for seq_header, seq, qual_header, qual in _read_fastq_seqs(r_fp):
+            output.write("%s_%d\n" % (sample, counter))
+            output.write("%s\n" % seq)
+            count+=1
+        output.close()
+        both_fp.append(output_fp)
+
+    return both_fp
 
 def shogun(qclient, job_id, parameters, out_dir):
     """Run Shogun with the given parameters
@@ -48,24 +84,11 @@ def shogun(qclient, job_id, parameters, out_dir):
     print(fps, qiime_map)
     qclient.update_job_step(
         job_id, "Step 2 of 6: Converting to FNA for Shogun")
-    # for sample in sample_S22282 sample_S22205
-    # do
-    #
-    #     seqtk mergepe ${sample}.R1.*.gz ${sample}.R2.*.gz | \
-    #     seqtk seq -A > ${sample}.fna
-    #
-    # done
-    # sample = sys.argv[1]
-    # with open('%s.out.fna' % sample, 'w') as o:
-    #     with open('%s.fna' % sample) as f:
-    #         seq = 1
-    #         for line in f:
-    #             if line.startswith('>'):
-    #                 lineout = '>%s_%s\n' * (sample, seq)
-    #                 seq += 1
-    #                 o.write(lineout)
-    #             else:
-    #                 o.write(line)
+    temp_path = os.environ['QC_SHOGUN_TEMP_DP']
+    with TemporaryDirectory(dir=temp_path, prefix='shogun_') as temp_dir:
+        rs = fps['raw_reverse_seqs'] if 'raw_reverse_seqs' in fps else []
+        both_fps = generate_fna_file(
+            fps['raw_forward_seqs'], rs, temp_dir, qiime_map)
 
     # Step 3 align
     qclient.update_job_step(job_id, "Step 3 of 6: Aligning FNA with Shogun")
