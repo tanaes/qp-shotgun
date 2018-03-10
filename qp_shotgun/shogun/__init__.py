@@ -7,16 +7,22 @@
 # -----------------------------------------------------------------------------
 
 from qiita_client import QiitaCommand
-
 from .shogun import shogun
+from .utils import (generate_shogun_dflt_params, get_dbs_list)
+from os.path import join
+from os import environ
 
-__all__ = ['qc_shogun']
 
-# Define the qc_trim command
+__all__ = ['Shogun']
+
+# Define the shogun command
+default_db = join(environ["QC_SHOGUN_DB_DP"], 'shogun.tar.bz2')
+default_db_list = get_dbs_list(environ["QC_SHOGUN_DB_DP"])
 req_params = {'input': ('artifact', ['per_sample_FASTQ'])}
 opt_params = {
     # database
-    'Database': ['string', ''],
+    'Database': ["choice: [%s]" % default_db_list,
+                 default_db],
     # aligner
     'Aligner tool': ['choice:["utree", "burst", "bowtie2"]', 'bowtie2'],
     # taxonomic levels
@@ -27,15 +33,8 @@ opt_params = {
     'Number of threads': ['integer', '1'],
     }
 outputs = {'Functional Predictions': 'BIOM', 'Taxonomic Predictions': 'BIOM'}
-dflt_param_set = {
-    'Shogun': {
-        'Database': '',
-        'Aligner tool': 'bowtie2',
-        'Taxonomy Level': 'all',
-        'Number of threads': 1,
-        }
-}
+dflt_param_set = generate_shogun_dflt_params()
 
-shogun = QiitaCommand(
+shogun_cmd = QiitaCommand(
     'Shogun', "Functional and Taxonomic Predictions", shogun,
     req_params, opt_params, outputs, dflt_param_set)

@@ -30,12 +30,11 @@ install:
   - pip install -U pip
   - conda install --yes -c jjhelmus glpk
   - conda install --yes pigz
-  - conda install --yes -c bioconda diamond=0.8 bowtie2 fastqc=0.11.5 samtools bedtools seqtk
+  - conda install --yes -c bioconda diamond=0.8 bowtie2 fastqc=0.11.5 samtools bedtools
   - conda install --yes -c knights-lab shogun
   - pip install sphinx sphinx-bootstrap-theme coveralls biopython
   - pip install https://github.com/qiita-spots/qiita_client/archive/master.zip
   - pip install atropos
-  - pip install git+https://github.com/knights-lab/SHOGUN.git
   - export QIITA_SERVER_CERT=$PWD/miniconda3/envs/qiita/lib/python2.7/site-packages/qiita_core/support_files/server.crt
   - pip install .
   - export QC_FILTER_DB_DP=$PWD/qp_shotgun/qc_filter/database/
@@ -52,6 +51,12 @@ install:
   - wget --quiet https://github.com/biocore/oecophylla/blob/dev/test_data/test_dbs/mp2_mini.tar.gz?raw=true -O mp2_mini.tar.gz
   - tar zxf mp2_mini.tar.gz
   - for f in `ls mp2_mini`; do mv mp2_mini/$f  $HUMANN2_DIR/db_v20/${f//mp2_mini/mpa_v20_m200}; done
+  - wget https://github.com/knights-lab/UTree/releases/download/v2.0c/utree-search_gg
+  - chmod 755 utree-search_gg
+  - mv utree-search_gg $CONDA_PREFIX/bin
+  - wget https://github.com/knights-lab/BURST/releases/download/v0.99.4a/burst_linux_DB15
+  - chmod 755 burst_linux_DB15
+  - mv burst_linux_DB15 $CONDA_PREFIX/bin/burst15
 before_script:
   - source activate qiita
   - qiita pet webserver start &
