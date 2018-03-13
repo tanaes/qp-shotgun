@@ -11,7 +11,7 @@ from qiita_client import QiitaPlugin
 from .humann2 import humann2_cmd
 from .qc_trim import qc_trim_cmd
 from .qc_filter import qc_filter_cmd
-from .qc_shogun import shogun_cmd
+from .shogun import shogun_cmd
 
 
 # Initialize the plugin

@@ -7,7 +7,7 @@
 # -----------------------------------------------------------------------------
 
 from qiita_client import QiitaCommand
-from .qc_shogun import shogun
+from .shogun import shogun
 from .utils import (generate_shogun_dflt_params, get_dbs_list)
 from os.path import join
 from os import environ
