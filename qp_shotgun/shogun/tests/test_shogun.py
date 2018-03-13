@@ -14,9 +14,9 @@ from os.path import exists, isdir, join
 from shutil import rmtree
 from tempfile import TemporaryDirectory
 from qp_shotgun import plugin
-from qp_shotgun.shogun.utils import (
+from qp_shotgun.qc_shogun.utils import (
     get_dbs, get_dbs_list, generate_shogun_dflt_params)
-from qp_shotgun.shogun.shogun import (
+from qp_shotgun.qc_shogun.shogun import (
     generate_shogun_align_commands, _format_params,
     generate_shogun_assign_taxonomy_commands)
 import tarfile
