@@ -39,7 +39,7 @@ install:
   - pip install .
   - export QC_FILTER_DB_DP=$PWD/qp_shotgun/qc_filter/database/
   - export QC_FILTER_TEMP_DP=$PWD/qp_shotgun/qc_filter/temp/
-  - export QC_SHOGUN_DB_DP=$PWD/qp_shotgun/qc_shogun/database/
+  - export QC_SHOGUN_DB_DP=$PWD/qp_shotgun/shogun/database/
   - export QC_SHOGUN_TEMP_DP=$PWD/qp_shotgun/qc_filter/temp/
   # installing other dependencies
   - wget --quiet https://bitbucket.org/biobakery/metaphlan2/get/default.zip
