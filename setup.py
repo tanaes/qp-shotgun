@@ -47,7 +47,7 @@ setup(name='qp-shotgun',
       package_data={
         'qp_shotgun': [
             'support_files/config_file.cfg',
-            'shogun/database/*']},
+            'shogun/databases/*']},
       scripts=['scripts/configure_shotgun', 'scripts/start_shotgun'],
       extras_require={'test': ["nose >= 0.10.1", "pep8"]},
       install_requires=['click >= 3.3', 'future', 'pandas >= 0.15', 'humann2',
