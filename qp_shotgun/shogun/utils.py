@@ -12,7 +12,7 @@
 # ------------------------------------------------------------------------------
 
 import os
-from os.path import join
+from os.path import join, isdir
 
 ALIGNERS = ["utree", "burst", "bowtie2"]
 
@@ -21,9 +21,9 @@ def get_dbs(db_folder):
     dbs = {}
     # Loop through the databases and create a dict of them
     for folder in os.listdir(db_folder):
-            folder_path = join(db_folder, folder)
-            name = folder.split('.')[0]
-            dbs[name] = folder_path
+        folder_path = join(db_folder, folder)
+        if isdir(folder_path):
+            dbs[folder] = folder_path
 
     return(dbs)
 
@@ -31,8 +31,9 @@ def get_dbs(db_folder):
 def get_dbs_list(db_folder):
     dbs = []
     # Loop through the databases and create a list string
-    for files in sorted(os.listdir(db_folder)):
-            folder_path = join(db_folder, files)
+    for folder in sorted(os.listdir(db_folder)):
+        folder_path = join(db_folder, folder)
+        if isdir(folder_path):
             dbs.append(folder_path)
     dbs_formatted = (', '.join('"' + item + '"' for item in dbs))
 

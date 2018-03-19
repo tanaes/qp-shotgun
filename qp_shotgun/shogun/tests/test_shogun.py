@@ -18,7 +18,7 @@ from qp_shotgun.shogun.utils import (
     get_dbs, get_dbs_list, generate_shogun_dflt_params)
 from qp_shotgun.shogun.shogun import (
     generate_shogun_align_commands, _format_params,
-    generate_shogun_assign_taxonomy_commands)
+    generate_shogun_assign_taxonomy_commands, generate_fna_file)
 import tarfile
 
 SHOGUN_PARAMS = {
@@ -33,7 +33,7 @@ class ShogunTests(PluginTestCase):
 
         self.db_path = os.environ["QC_SHOGUN_DB_DP"]
         self.params = {
-            'Database': join(self.db_path, 'shogun.tar.bz2'),
+            'Database': join(self.db_path, 'shogun'),
             'Aligner tool': 'bowtie2',
             'Taxonomic Level': 'all',
             'Number of threads': 1
@@ -51,14 +51,14 @@ class ShogunTests(PluginTestCase):
     def test_get_dbs(self):
         db_path = self.db_path
         obs = get_dbs(db_path)
-        exp = {'shogun': join(db_path, 'shogun.tar.bz2')}
+        exp = {'shogun': join(db_path, 'shogun')}
 
         self.assertEqual(obs, exp)
 
     def test_get_dbs_list(self):
         db_path = self.db_path
         obs = get_dbs_list(db_path)
-        exp = join(join('"'+db_path, 'shogun.tar.bz2')+'"')
+        exp = join(join('"'+db_path, 'shogun')+'"')
 
         self.assertEqual(obs, exp)
 
@@ -66,29 +66,39 @@ class ShogunTests(PluginTestCase):
         obs = generate_shogun_dflt_params()
         exp = {
             'shogun_bowtie2': {
-                'Database': join(self.db_path, 'shogun.tar.bz2'),
+                'Database': join(self.db_path, 'shogun'),
                 'Aligner tool': 'bowtie2',
                 'Taxonomy Level': 'all',
                 'Number of threads': 1},
             'shogun_utree': {
-                'Database': join(self.db_path, 'shogun.tar.bz2'),
+                'Database': join(self.db_path, 'shogun'),
                 'Aligner tool': 'utree',
                 'Taxonomy Level': 'all',
                 'Number of threads': 1},
             'shogun_burst': {
-                'Database': join(self.db_path, 'shogun.tar.bz2'),
+                'Database': join(self.db_path, 'shogun'),
                 'Aligner tool': 'burst',
                 'Taxonomy Level': 'all',
                 'Number of threads': 1}}
 
         self.assertEqual(obs, exp)
 
+    def test_generate_fna_file(self):
+        temp_path = os.environ['QC_SHOGUN_TEMP_DP']
+        with TemporaryDirectory(dir=temp_path, prefix='shogun_') as fp:
+            sample = [
+                ('s1', 'SKB8.640193', 'support_files/kd_test_1_R1.fastq.gz',
+                 'support_files/kd_test_1_R2.fastq.gz')
+                ]
+            exp = join(fp, 'combined.fna')
+            obs = generate_fna_file(fp, sample)
+
+        self.assertEqual(obs, exp)
+
     def test_format_shogun_params(self):
         obs = _format_params(self.params, SHOGUN_PARAMS)
-        with tarfile.open(obs['database'], 'r:bz2') as db:
-            obs['database'] = db.getnames()[0]
         exp = {
-            'database': 'shogun',
+            'database': join(self.db_path, 'shogun'),
             'aligner': 'bowtie2',
             'levels': 'all',
             'threads': 1
@@ -102,17 +112,15 @@ class ShogunTests(PluginTestCase):
 
             exp_cmd = [
                 ('shogun align --aligner bowtie2 --threads 1 '
-                 '--database %s/shogun --input %s/combined.fna '
+                 '--database %sshogun --input %s/combined.fna '
                  '--output %s/output') %
-                (temp_dir, temp_dir, temp_dir)
+                (self.db_path, temp_dir, temp_dir)
                 ]
 
             params = _format_params(self.params, SHOGUN_PARAMS)
-            with tarfile.open(params['database'], 'r:bz2') as db:
-                params['database'] = join(temp_dir, db.getnames()[0])
-                obs_cmd = generate_shogun_align_commands(
-                    join(temp_dir, 'combined.fna'), join(temp_dir, 'output'),
-                    temp_dir, params)
+            obs_cmd = generate_shogun_align_commands(
+                join(temp_dir, 'combined.fna'), join(temp_dir, 'output'),
+                temp_dir, params)
 
         self.assertEqual(obs_cmd, exp_cmd)
 
@@ -122,17 +130,15 @@ class ShogunTests(PluginTestCase):
 
             exp_cmd = [
                 ('shogun assign_taxonomy --aligner bowtie2 '
-                 '--database %s/shogun --input %s/alignment.bowtie2.sam '
+                 '--database %sshogun --input %s/alignment.bowtie2.sam '
                  '--output %s/profile.tsv') %
-                (temp_dir, temp_dir, temp_dir)
+                (self.db_path, temp_dir, temp_dir)
                 ]
 
             params = _format_params(self.params, SHOGUN_PARAMS)
-            with tarfile.open(params['database'], 'r:bz2') as db:
-                params['database'] = join(temp_dir, db.getnames()[0])
-                obs_cmd = generate_shogun_assign_taxonomy_commands(
-                    join(temp_dir, 'combined.fna'), temp_dir,
-                    temp_dir, params)
+            obs_cmd = generate_shogun_assign_taxonomy_commands(
+                join(temp_dir, 'combined.fna'), temp_dir,
+                temp_dir, params)
 
         self.assertEqual(obs_cmd, exp_cmd)
 

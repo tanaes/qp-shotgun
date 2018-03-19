@@ -18,11 +18,10 @@ SHOGUN_PARAMS = {
     'Taxonomic Level': 'levels', 'Number of threads': 'threads'}
 
 
-def generate_fna_file(fwd_seqs, rev_seqs, temp_path, map_file):
+def generate_fna_file(temp_path, samples):
     # Combines reverse and forward seqs per sample
     # Returns filepaths of new combined files
-    samples = make_read_pairs_per_sample(fwd_seqs, rev_seqs, map_file)
-    output_fp = join(temp_path, '_combined.fna')
+    output_fp = join(temp_path, 'combined.fna')
     output = open(output_fp, "a")
     count = 0
     for run_prefix, sample, f_fp, r_fp in samples:
@@ -126,38 +125,38 @@ def shogun(qclient, job_id, parameters, out_dir):
 
     with TemporaryDirectory(dir=temp_path, prefix='shogun_') as temp_dir:
         rs = fps['raw_reverse_seqs'] if 'raw_reverse_seqs' in fps else []
+        samples = make_read_pairs_per_sample(samples)
+
         comb_fp = generate_fna_file(
             fps['raw_forward_seqs'], rs, temp_dir, qiime_map)
         # Combining files
         parameters = _format_params(parameters, SHOGUN_PARAMS)
-        with tarfile.open(parameters['database'], 'r:bz2') as db:
-            db.extractall(temp_dir)
-            parameters['database'] = join(temp_dir, db.getnames()[0])
-            # Step 3 align
-            qclient.update_job_step(
-                job_id, "Step 3 of 6: Aligning FNA with Shogun")
-            generate_shogun_align_commands(
-                comb_fp, out_dir, temp_dir, parameters)
-            # Step 4 taxonomic profile
-            qclient.update_job_step(
-                job_id, "Step 4 of 6: Taxonomic profile with Shogun")
-            generate_shogun_assign_taxonomy_commands(
-                comb_fp, out_dir, temp_dir, parameters)
-            # Step 5 functional profile
-            qclient.update_job_step(
-                job_id, "Step 5 of 6: Functional profile with Shogun")
-            # shogun functional \
-            # --database {params.db} \
-            # --input alignment.utree.tsv \
-            # --output {temp_dir} \
-            # --level $level \
 
-            # Step 6 functional profile
-            qclient.update_job_step(
-                job_id, "Step 6 of 6: Converting results to BIOM")
-            # biom convert -i otu_table.taxonomy.txt -o otu_table.from_txt.biom
-            # --table-type="OTU table" --process-obs-metadata taxonomy
-            # --to-hdf5
+        # Step 3 align
+        qclient.update_job_step(
+            job_id, "Step 3 of 6: Aligning FNA with Shogun")
+        generate_shogun_align_commands(
+            comb_fp, out_dir, temp_dir, parameters)
+        # Step 4 taxonomic profile
+        qclient.update_job_step(
+            job_id, "Step 4 of 6: Taxonomic profile with Shogun")
+        generate_shogun_assign_taxonomy_commands(
+            comb_fp, out_dir, temp_dir, parameters)
+        # Step 5 functional profile
+        qclient.update_job_step(
+            job_id, "Step 5 of 6: Functional profile with Shogun")
+        # shogun functional \
+        # --database {params.db} \
+        # --input alignment.utree.tsv \
+        # --output {temp_dir} \
+        # --level $level \
+
+        # Step 6 functional profile
+        qclient.update_job_step(
+            job_id, "Step 6 of 6: Converting results to BIOM")
+        # biom convert -i otu_table.taxonomy.txt -o otu_table.from_txt.biom
+        # --table-type="OTU table" --process-obs-metadata taxonomy
+        # --to-hdf5
 
     ainfo = {}
 
