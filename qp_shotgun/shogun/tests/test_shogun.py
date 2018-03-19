@@ -19,7 +19,6 @@ from qp_shotgun.shogun.utils import (
 from qp_shotgun.shogun.shogun import (
     generate_shogun_align_commands, _format_params,
     generate_shogun_assign_taxonomy_commands, generate_fna_file)
-import tarfile
 
 SHOGUN_PARAMS = {
     'Database': 'database', 'Aligner tool': 'aligner',

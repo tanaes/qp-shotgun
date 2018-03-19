@@ -11,7 +11,6 @@ from tempfile import TemporaryDirectory
 from .utils import readfq
 from qp_shotgun.utils import (make_read_pairs_per_sample)
 import gzip
-import tarfile
 
 SHOGUN_PARAMS = {
     'Database': 'database', 'Aligner tool': 'aligner',
@@ -125,10 +124,10 @@ def shogun(qclient, job_id, parameters, out_dir):
 
     with TemporaryDirectory(dir=temp_path, prefix='shogun_') as temp_dir:
         rs = fps['raw_reverse_seqs'] if 'raw_reverse_seqs' in fps else []
-        samples = make_read_pairs_per_sample(samples)
+        samples = make_read_pairs_per_sample(
+            fps['raw_forward_seqs'], rs, qiime_map)
 
-        comb_fp = generate_fna_file(
-            fps['raw_forward_seqs'], rs, temp_dir, qiime_map)
+        comb_fp = generate_fna_file(temp_dir, samples)
         # Combining files
         parameters = _format_params(parameters, SHOGUN_PARAMS)
 
