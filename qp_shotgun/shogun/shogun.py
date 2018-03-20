@@ -5,7 +5,6 @@
 #
 # The full license is in the file LICENSE, distributed with this software.
 # -----------------------------------------------------------------------------
-import os
 from os.path import join
 from tempfile import TemporaryDirectory
 from .utils import readfq
@@ -86,18 +85,32 @@ def generate_shogun_assign_taxonomy_commands(temp_dir, parameters):
     return cmds, output_fp
 
 
-def generate_shogun_functional_commands(profile_dir,
-                                        temp_dir, parameters):
+def generate_shogun_functional_commands(profile_dir, temp_dir,
+                                        parameters, sel_level):
     cmds = []
     cmds.append(
         'shogun functional '
         '--database {database} '
         '--input {input} '
         '--output {output} '
-        '--level species'.format(
+        '--level {level}'.format(
             database=parameters['database'],
             input=profile_dir,
-            output=temp_dir))
+            output=join(temp_dir, 'profile.functional.%s.tsv' % sel_level),
+            level=sel_level))
+
+    return cmds
+
+
+def generate_biom_conversion_commands(input_fp, output_dir, level):
+    cmds = []
+    cmds.append(
+        'biom convert -i {input} '
+        '-o {output} '
+        '--table-type="OTU table" '
+        '--process-obs-metadata taxonomy --to-hdf5'.format(
+            input=input_fp,
+            output=join(output_dir, 'otu_table.%s.biom' % level)))
 
     return cmds
 
@@ -138,9 +151,8 @@ def shogun(qclient, job_id, parameters, out_dir):
     # Step 2 converting to fna
     qclient.update_job_step(
         job_id, "Step 2 of 6: Converting to FNA for Shogun")
-    temp_path = os.environ['QC_SHOGUN_TEMP_DP']
 
-    with TemporaryDirectory(dir=temp_path, prefix='shogun_') as temp_dir:
+    with TemporaryDirectory(dir=out_dir, prefix='shogun_') as temp_dir:
         rs = fps['raw_reverse_seqs'] if 'raw_reverse_seqs' in fps else []
         samples = make_read_pairs_per_sample(
             fps['raw_forward_seqs'], rs, qiime_map)
@@ -161,13 +173,16 @@ def shogun(qclient, job_id, parameters, out_dir):
         # Step 5 functional profile
         qclient.update_job_step(
             job_id, "Step 5 of 6: Functional profile with Shogun")
-        generate_shogun_functional_commands(profile_fp, temp_dir, parameters)
+        levels = ['genus', 'species', 'level']
+        for level in levels:
+            generate_shogun_functional_commands(
+                profile_fp, temp_dir, parameters, level)
         # Step 6 functional profile
         qclient.update_job_step(
             job_id, "Step 6 of 6: Converting results to BIOM")
-        # biom convert -i otu_table.taxonomy.txt -o otu_table.from_txt.biom
-        # --table-type="OTU table" --process-obs-metadata taxonomy
-        # --to-hdf5
+        for level in levels:
+            input_fp = ('profile.functional.%s.tsv' % level)
+            generate_biom_conversion_commands(input_fp, out_dir, level)
 
     ainfo = {}
 
