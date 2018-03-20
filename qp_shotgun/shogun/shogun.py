@@ -89,8 +89,6 @@ def generate_shogun_assign_taxonomy_commands(temp_dir, parameters):
 def generate_shogun_functional_commands(profile_dir,
                                         temp_dir, parameters):
     cmds = []
-    aln2ext = {'utree': 'tsv', 'burst': 'b6', 'bowtie2': 'sam'}
-    ext = aln2ext[parameters['aligner']]
     cmds.append(
         'shogun functional '
         '--database {database} '
@@ -163,7 +161,7 @@ def shogun(qclient, job_id, parameters, out_dir):
         # Step 5 functional profile
         qclient.update_job_step(
             job_id, "Step 5 of 6: Functional profile with Shogun")
-        generate_shogun_functional_commands(profile_dir, temp_dir, parameters)
+        generate_shogun_functional_commands(profile_fp, temp_dir, parameters)
         # Step 6 functional profile
         qclient.update_job_step(
             job_id, "Step 6 of 6: Converting results to BIOM")

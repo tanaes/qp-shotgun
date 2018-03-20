@@ -66,7 +66,7 @@ script:
   - source activate qp-shotgun
   - sleep 10 # give enough time to the webserver to start
   - configure_shotgun --env-script "source activate qp-shotgun" --server-cert $QIITA_SERVER_CERT
-  - travis_wait 60 nosetests --with-doctest --with-coverage -vv
+  - travis_wait 40 nosetests --with-doctest --with-coverage -vv 
   - flake8 qp_shotgun setup.py scripts
 addons:
   postgresql: "9.3"
