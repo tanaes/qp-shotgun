@@ -18,7 +18,8 @@ from qp_shotgun.shogun.utils import (
     get_dbs, get_dbs_list, generate_shogun_dflt_params)
 from qp_shotgun.shogun.shogun import (
     generate_shogun_align_commands, _format_params,
-    generate_shogun_assign_taxonomy_commands, generate_fna_file)
+    generate_shogun_assign_taxonomy_commands, generate_fna_file,
+    generate_shogun_functional_commands)
 
 SHOGUN_PARAMS = {
     'Database': 'database', 'Aligner tool': 'aligner',
@@ -26,6 +27,7 @@ SHOGUN_PARAMS = {
 
 
 class ShogunTests(PluginTestCase):
+    maxDiff = None
 
     def setUp(self):
         plugin("https://localhost:21174", 'register', 'ignored')
@@ -112,14 +114,13 @@ class ShogunTests(PluginTestCase):
             exp_cmd = [
                 ('shogun align --aligner bowtie2 --threads 1 '
                  '--database %sshogun --input %s/combined.fna '
-                 '--output %s/output') %
+                 '--output %s') %
                 (self.db_path, temp_dir, temp_dir)
                 ]
 
             params = _format_params(self.params, SHOGUN_PARAMS)
             obs_cmd = generate_shogun_align_commands(
-                join(temp_dir, 'combined.fna'), join(temp_dir, 'output'),
-                temp_dir, params)
+                join(temp_dir, 'combined.fna'), temp_dir, params)
 
         self.assertEqual(obs_cmd, exp_cmd)
 
@@ -133,11 +134,28 @@ class ShogunTests(PluginTestCase):
                  '--output %s/profile.tsv') %
                 (self.db_path, temp_dir, temp_dir)
                 ]
-
+            exp_output_fp = join(temp_dir, 'profile.tsv')
             params = _format_params(self.params, SHOGUN_PARAMS)
-            obs_cmd = generate_shogun_assign_taxonomy_commands(
-                join(temp_dir, 'combined.fna'), temp_dir,
+            obs_cmd, obs_output_fp = generate_shogun_assign_taxonomy_commands(
                 temp_dir, params)
+
+        self.assertEqual(obs_cmd, exp_cmd)
+        self.assertEqual(obs_output_fp, exp_output_fp)
+
+    def test_generate_shogun_functional_commands(self):
+        temp_path = os.environ['QC_SHOGUN_TEMP_DP']
+        with TemporaryDirectory(dir=temp_path, prefix='shogun_') as temp_dir:
+
+            exp_cmd = [
+                ('shogun functional '
+                 '--database %sshogun --input %s '
+                 '--output %s --level species') %
+                (self.db_path, join(temp_dir, 'profile.tsv'), temp_dir)
+                ]
+            profile_dir = join(temp_dir, 'profile.tsv')
+            params = _format_params(self.params, SHOGUN_PARAMS)
+            obs_cmd = generate_shogun_functional_commands(profile_dir,
+                                                          temp_dir, params)
 
         self.assertEqual(obs_cmd, exp_cmd)
 

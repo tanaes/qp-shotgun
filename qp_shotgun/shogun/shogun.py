@@ -53,7 +53,7 @@ def _format_params(parameters, func_params):
     return params
 
 
-def generate_shogun_align_commands(input_fp, out_dir, temp_dir, parameters):
+def generate_shogun_align_commands(input_fp, temp_dir, parameters):
     cmds = []
     cmds.append(
         'shogun align --aligner {aligner} --threads {threads} '
@@ -62,24 +62,44 @@ def generate_shogun_align_commands(input_fp, out_dir, temp_dir, parameters):
             threads=parameters['threads'],
             database=parameters['database'],
             input=input_fp,
-            output=out_dir))
+            output=temp_dir))
 
     return cmds
 
 
-def generate_shogun_assign_taxonomy_commands(input_fp, out_dir,
-                                             temp_dir, parameters):
+def generate_shogun_assign_taxonomy_commands(temp_dir, parameters):
+    cmds = []
+    aln2ext = {'utree': 'tsv', 'burst': 'b6', 'bowtie2': 'sam'}
+    ext = aln2ext[parameters['aligner']]
+    output_fp = join(temp_dir, 'profile.tsv')
+    cmds.append(
+        'shogun assign_taxonomy '
+        '--aligner {aligner} '
+        '--database {database} '
+        '--input {input} --output {output}'.format(
+            aligner=parameters['aligner'],
+            database=parameters['database'],
+            input=join(temp_dir, 'alignment.%s.%s' % (parameters['aligner'],
+                                                      ext)),
+            output=output_fp))
+
+    return cmds, output_fp
+
+
+def generate_shogun_functional_commands(profile_dir,
+                                        temp_dir, parameters):
     cmds = []
     aln2ext = {'utree': 'tsv', 'burst': 'b6', 'bowtie2': 'sam'}
     ext = aln2ext[parameters['aligner']]
     cmds.append(
-        'shogun assign_taxonomy --aligner {aligner} '
-        '--database {database} --input {input} --output {output}'.format(
-            aligner=parameters['aligner'],
+        'shogun functional '
+        '--database {database} '
+        '--input {input} '
+        '--output {output} '
+        '--level species'.format(
             database=parameters['database'],
-            input=join(out_dir, 'alignment.%s.%s' % (parameters['aligner'],
-                                                     ext)),
-            output=join(out_dir, 'profile.tsv')))
+            input=profile_dir,
+            output=temp_dir))
 
     return cmds
 
@@ -130,26 +150,20 @@ def shogun(qclient, job_id, parameters, out_dir):
         comb_fp = generate_fna_file(temp_dir, samples)
         # Combining files
         parameters = _format_params(parameters, SHOGUN_PARAMS)
-
         # Step 3 align
         qclient.update_job_step(
             job_id, "Step 3 of 6: Aligning FNA with Shogun")
         generate_shogun_align_commands(
-            comb_fp, out_dir, temp_dir, parameters)
+            comb_fp, temp_dir, parameters)
         # Step 4 taxonomic profile
         qclient.update_job_step(
             job_id, "Step 4 of 6: Taxonomic profile with Shogun")
-        generate_shogun_assign_taxonomy_commands(
-            comb_fp, out_dir, temp_dir, parameters)
+        cmd, profile_fp = generate_shogun_assign_taxonomy_commands(
+            temp_dir, parameters)
         # Step 5 functional profile
         qclient.update_job_step(
             job_id, "Step 5 of 6: Functional profile with Shogun")
-        # shogun functional \
-        # --database {params.db} \
-        # --input alignment.utree.tsv \
-        # --output {temp_dir} \
-        # --level $level \
-
+        generate_shogun_functional_commands(profile_dir, temp_dir, parameters)
         # Step 6 functional profile
         qclient.update_job_step(
             job_id, "Step 6 of 6: Converting results to BIOM")
