@@ -8,8 +8,9 @@
 from os.path import join
 from tempfile import TemporaryDirectory
 from .utils import readfq
-from qp_shotgun.utils import (make_read_pairs_per_sample)
+from qp_shotgun.utils import (make_read_pairs_per_sample, _run_commands)
 import gzip
+from qiita_client import ArtifactInfo
 
 SHOGUN_PARAMS = {
     'Database': 'database', 'Aligner tool': 'aligner',
@@ -88,6 +89,7 @@ def generate_shogun_assign_taxonomy_commands(temp_dir, parameters):
 def generate_shogun_functional_commands(profile_dir, temp_dir,
                                         parameters, sel_level):
     cmds = []
+    output = join(temp_dir, 'profile.functional.%s.tsv' % sel_level)
     cmds.append(
         'shogun functional '
         '--database {database} '
@@ -96,23 +98,42 @@ def generate_shogun_functional_commands(profile_dir, temp_dir,
         '--level {level}'.format(
             database=parameters['database'],
             input=profile_dir,
-            output=join(temp_dir, 'profile.functional.%s.tsv' % sel_level),
+            output=output,
             level=sel_level))
 
     return cmds
 
 
-def generate_biom_conversion_commands(input_fp, output_dir, level):
+def generate_shogun_redist_commands(profile_dir, temp_dir,
+                                    parameters, sel_level):
     cmds = []
+    output = join(temp_dir, 'profile.redist.%s.tsv' % sel_level)
+    cmds.append(
+        'shogun redistribute '
+        '--database {database} '
+        '--level {level} '
+        '--input {input} '
+        '--output {output}'.format(
+            database=parameters['database'],
+            input=profile_dir,
+            output=output,
+            level=sel_level))
+
+    return cmds, output
+
+
+def generate_biom_conversion_commands(input_fp, output_dir, level, version):
+    cmds = []
+    output = join(output_dir, 'otu_table.%s.%s.biom' % (level, version))
     cmds.append(
         'biom convert -i {input} '
         '-o {output} '
         '--table-type="OTU table" '
         '--process-obs-metadata taxonomy --to-hdf5'.format(
             input=input_fp,
-            output=join(output_dir, 'otu_table.%s.biom' % level)))
+            output=output))
 
-    return cmds
+    return cmds, output
 
 
 def shogun(qclient, job_id, parameters, out_dir):
@@ -135,7 +156,7 @@ def shogun(qclient, job_id, parameters, out_dir):
         The results of the job
     """
     # Step 1 get the rest of the information need to run Atropos
-    qclient.update_job_step(job_id, "Step 1 of 6: Collecting information")
+    qclient.update_job_step(job_id, "Step 1 of 7: Collecting information")
     artifact_id = parameters['input']
     del parameters['input']
 
@@ -150,40 +171,91 @@ def shogun(qclient, job_id, parameters, out_dir):
 
     # Step 2 converting to fna
     qclient.update_job_step(
-        job_id, "Step 2 of 6: Converting to FNA for Shogun")
+        job_id, "Step 2 of 7: Converting to FNA for Shogun")
 
     with TemporaryDirectory(dir=out_dir, prefix='shogun_') as temp_dir:
         rs = fps['raw_reverse_seqs'] if 'raw_reverse_seqs' in fps else []
         samples = make_read_pairs_per_sample(
             fps['raw_forward_seqs'], rs, qiime_map)
 
-        comb_fp = generate_fna_file(temp_dir, samples)
         # Combining files
+        comb_fp = generate_fna_file(temp_dir, samples)
+
+        # Formatting parameters
         parameters = _format_params(parameters, SHOGUN_PARAMS)
+
         # Step 3 align
-        qclient.update_job_step(
-            job_id, "Step 3 of 6: Aligning FNA with Shogun")
-        generate_shogun_align_commands(
+        msg = "Step 3 of 7: Aligning FNA with Shogun"
+        align_cmd = generate_shogun_align_commands(
             comb_fp, temp_dir, parameters)
+        success, msg = _run_commands(
+            qclient, job_id, align_cmd, msg, 'Shogun Align')
+        if not success:
+            return False, None, msg
+
         # Step 4 taxonomic profile
-        qclient.update_job_step(
-            job_id, "Step 4 of 6: Taxonomic profile with Shogun")
-        cmd, profile_fp = generate_shogun_assign_taxonomy_commands(
+        msg = "Step 4 of 7: Taxonomic profile with Shogun"
+        assign_cmd, profile_fp = generate_shogun_assign_taxonomy_commands(
             temp_dir, parameters)
-        # Step 5 functional profile
-        qclient.update_job_step(
-            job_id, "Step 5 of 6: Functional profile with Shogun")
+        success, msg = _run_commands(
+            qclient, job_id, assign_cmd, msg, 'Shogun taxonomy assignment')
+        if not success:
+            return False, None, msg
+
+        # Step 5 redistribute profile
+        msg = "Step 5 of 7: Redistributed profile with Shogun"
         levels = ['genus', 'species', 'level']
+        redist_fps = []
         for level in levels:
-            generate_shogun_functional_commands(
+            redist_cmd, output = generate_shogun_redist_commands(
                 profile_fp, temp_dir, parameters, level)
+            redist_fps.append(output)
+            success, msg = _run_commands(
+                qclient, job_id, redist_cmd, msg, 'Shogun redistribute')
+            if not success:
+                return False, None, msg
+
+        # Step 6 functional profile
+        msg = "Step 6 of 7: Functional profile with Shogun"
+        levels = ['genus', 'species', 'level']
+        func_fps = []
+        for level in levels:
+            func_cmd, output = generate_shogun_functional_commands(
+                profile_fp, temp_dir, parameters, level)
+            func_fps.append(output)
+            success, msg = _run_commands(
+                qclient, job_id, func_cmd, msg, 'Shogun functional')
+            if not success:
+                return False, None, msg
+
         # Step 6 functional profile
         qclient.update_job_step(
-            job_id, "Step 6 of 6: Converting results to BIOM")
-        for level in levels:
-            input_fp = ('profile.functional.%s.tsv' % level)
-            generate_biom_conversion_commands(input_fp, out_dir, level)
-
-    ainfo = {}
+            job_id, "Step 7 of 7: Converting results to BIOM")
+        func_biom_outputs = []
+        redist_biom_outputs = []
+        for func_fp, redist_fp in zip(func_fps, redist_fps):
+            # Coverting funcitonal files to biom
+            biom_cmd, output = generate_biom_conversion_commands(
+                func_fp, out_dir, level, 'functional')
+            success, msg = _run_commands(
+                qclient, job_id, biom_cmd, msg, ' Functional Biom conversion')
+            if not success:
+                return False, None, msg
+            else:
+                func_biom_outputs.append(output)
+            # Converting redistributed files to biom
+            biom_cmd, output = generate_biom_conversion_commands(
+                redist_fp, out_dir, level, 'redist')
+            redist_biom_outputs.append(output)
+            success, msg = _run_commands(
+                qclient, job_id, biom_cmd, msg, 'Redistribute Biom conversion')
+            if not success:
+                return False, None, msg
+            else:
+                redist_biom_outputs.append(output)
+    func_files_type_name = 'Functional Predictions'
+    redist_files_type_name = 'Taxonomic Predictions'
+    ainfo = [ArtifactInfo(func_files_type_name, 'BIOM', func_biom_outputs),
+             ArtifactInfo(redist_files_type_name, 'BIOM', redist_biom_outputs)]
 
     return True, ainfo, ""

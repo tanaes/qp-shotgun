@@ -150,7 +150,7 @@ def qc_filter(qclient, job_id, parameters, out_dir):
     suffixes = ['%s.R1.trimmed.filtered.fastq.gz',
                 '%s.R2.trimmed.filtered.fastq.gz']
     prg_name = 'Filtering'
-    file_type_name = 'QC_Filter files'
+    file_type_name = 'Filtered files'
     ainfo = _per_sample_ainfo(
         out_dir, samples, suffixes, prg_name, file_type_name, bool(rs))
 

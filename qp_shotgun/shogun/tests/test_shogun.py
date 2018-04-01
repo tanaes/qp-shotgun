@@ -20,7 +20,8 @@ from qp_shotgun.shogun.utils import (
 from qp_shotgun.shogun.shogun import (
     generate_shogun_align_commands, _format_params,
     generate_shogun_assign_taxonomy_commands, generate_fna_file,
-    generate_shogun_functional_commands, generate_biom_conversion_commands)
+    generate_shogun_functional_commands, generate_shogun_redist_commands,
+    generate_biom_conversion_commands)
 
 SHOGUN_PARAMS = {
     'Database': 'database', 'Aligner tool': 'aligner',
@@ -28,12 +29,12 @@ SHOGUN_PARAMS = {
 
 
 class ShogunTests(PluginTestCase):
-    maxDiff = None
 
     def setUp(self):
         plugin("https://localhost:21174", 'register', 'ignored')
 
         out_dir = mkdtemp()
+        self.maxDiff = None
         self.out_dir = out_dir
         self.db_path = os.environ["QC_SHOGUN_DB_DP"]
         self.params = {
@@ -164,6 +165,24 @@ class ShogunTests(PluginTestCase):
 
         self.assertEqual(obs_cmd, exp_cmd)
 
+    def test_generate_shogun_redist_commands(self):
+        out_dir = self.out_dir
+        with TemporaryDirectory(dir=out_dir, prefix='shogun_') as temp_dir:
+
+            exp_cmd = [
+                ('shogun redistribute '
+                 '--database %sshogun --level species --input %s '
+                 '--output %s') %
+                (self.db_path, join(temp_dir, 'profile.tsv'),
+                 join(temp_dir, 'profile.redist.species.tsv'))
+                ]
+            profile_dir = join(temp_dir, 'profile.tsv')
+            params = _format_params(self.params, SHOGUN_PARAMS)
+            obs_cmd, output = generate_shogun_redist_commands(
+                profile_dir, temp_dir, params, 'species')
+
+        self.assertEqual(obs_cmd, exp_cmd)
+
     def test_generate_biom_conversion_commands(self):
         out_dir = self.out_dir
         with TemporaryDirectory(dir=out_dir, prefix='shogun_') as temp_dir:
@@ -173,11 +192,11 @@ class ShogunTests(PluginTestCase):
                  '--table-type="OTU table" '
                  '--process-obs-metadata taxonomy --to-hdf5') %
                 (join(temp_dir, 'profile.tsv'),
-                 join(out_dir, 'otu_table.species.biom'))
+                 join(out_dir, 'otu_table.species.redist.biom'))
                 ]
             profile_fp = join(temp_dir, 'profile.tsv')
-            obs_cmd = generate_biom_conversion_commands(profile_fp, out_dir,
-                                                        'species')
+            obs_cmd, output = generate_biom_conversion_commands(profile_fp, out_dir,
+                                                        'species', 'redist')
 
         self.assertEqual(obs_cmd, exp_cmd)
 
