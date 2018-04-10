@@ -3,7 +3,8 @@ sudo: required
 group: deprecated-2017Q4
 env:
   - PYTHON_VERSION=3.5 COVER_PACKAGE=qp_shotgun/shogun
-  - PYTHON_VERSION=3.5 COVER_PACKAGE="qp_shotgun/humann2 qp_shotgun/qc_filter qp_shotgun/qc_trim"
+  - PYTHON_VERSION=3.5 COVER_PACKAGE=qp_shotgun/humann2
+  - PYTHON_VERSION=3.5 COVER_PACKAGE="qp_shotgun/qc_filter qp_shotgun/qc_trim"
 before_install:
   - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
   - chmod +x miniconda.sh
