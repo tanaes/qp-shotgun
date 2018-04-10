@@ -284,5 +284,6 @@ class ShogunTests(PluginTestCase):
         self.assertEqual(obs_func_fps, exp_func_fps)
         self.assertEqual(obs_redist_fps, exp_redist_fps)
 
+
 if __name__ == '__main__':
     main()

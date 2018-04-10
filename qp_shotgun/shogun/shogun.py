@@ -11,7 +11,6 @@ from .utils import readfq
 from qp_shotgun.utils import (make_read_pairs_per_sample, _run_commands)
 import gzip
 from qiita_client import ArtifactInfo
-from shutil import rmtree, copyfile
 
 
 SHOGUN_PARAMS = {
@@ -241,7 +240,8 @@ def shogun(qclient, job_id, parameters, out_dir):
             biom_cmd, output = generate_biom_conversion_commands(
                 redist_fp, out_dir, level, 'redist')
             success, msg = _run_commands(
-                qclient, job_id, biom_cmd, sys_msg, 'Redistribute Biom conversion')
+                qclient, job_id, biom_cmd, sys_msg,
+                'Redistribute Biom conversion')
             if not success:
                 return False, None, msg
             else:
@@ -257,11 +257,13 @@ def shogun(qclient, job_id, parameters, out_dir):
                 "kegg",
                 "normalized"]
             for biom_in in func_to_biom_fps:
-                biom_in_fp = join(func_fp, "profile.%s.%s.txt" % (level, biom_in))
+                biom_in_fp = join(
+                    func_fp, "profile.%s.%s.txt" % (level, biom_in))
                 biom_cmd, output = generate_biom_conversion_commands(
                     biom_in_fp, out_dir, level, biom_in)
                 success, msg = _run_commands(
-                    qclient, job_id, biom_cmd, sys_msg, ' Functional Biom conversion')
+                    qclient, job_id, biom_cmd, sys_msg,
+                    ' Functional Biom conversion')
                 if not success:
                     return False, None, msg
                 else:
