@@ -29,5 +29,5 @@ Note that:
 
 .. |Build Status| image:: http://kl-ci.ucsd.edu:8080/job/qp-shotgun-job/badge/icon
    :target: http://kl-ci.ucsd.edu:8080/job/qp-shotgun-job/
-.. |Coverage Status| image:: https://coveralls.io/repos/github/qiita-spots/qp-shotgun/badge.svg?branch=master
-   :target: https://coveralls.io/github/qiita-spots/qp-shotgun?branch=master
+.. |Coverage Status| image:: https://codecov.io/gh/qiita-spots/qp-shotgun/branch/master/graph/badge.svg
+   :target: https://codecov.io/gh/qiita-spots/qp-shotgun
