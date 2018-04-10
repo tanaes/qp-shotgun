@@ -32,7 +32,7 @@ install:
   - conda install --yes -c jjhelmus glpk
   - conda install --yes pigz
   - conda install --yes -c bioconda diamond=0.8 bowtie2 fastqc=0.11.5 samtools bedtools
-  - pip install sphinx sphinx-bootstrap-theme codecov biopython
+  - pip install sphinx sphinx-bootstrap-theme nose-timer codecov biopython
   - pip install https://github.com/qiita-spots/qiita_client/archive/master.zip
   - pip install atropos humann2
   - pip install git+https://github.com/knights-lab/SHOGUN.git
