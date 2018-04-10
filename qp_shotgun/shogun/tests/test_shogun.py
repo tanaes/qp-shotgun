@@ -11,21 +11,23 @@ from qiita_client.testing import PluginTestCase
 import os
 from os import remove
 from os.path import exists, isdir, join
-from shutil import rmtree
+from shutil import rmtree, copyfile
 from tempfile import TemporaryDirectory
 from qp_shotgun import plugin
 from tempfile import mkdtemp
+from json import dumps
+from functools import partial
 from qp_shotgun.shogun.utils import (
     get_dbs, get_dbs_list, generate_shogun_dflt_params)
 from qp_shotgun.shogun.shogun import (
     generate_shogun_align_commands, _format_params,
     generate_shogun_assign_taxonomy_commands, generate_fna_file,
     generate_shogun_functional_commands, generate_shogun_redist_commands,
-    generate_biom_conversion_commands)
+    generate_biom_conversion_commands, shogun)
 
 SHOGUN_PARAMS = {
     'Database': 'database', 'Aligner tool': 'aligner',
-    'Taxonomic Level': 'levels', 'Number of threads': 'threads'}
+    'Taxonomy Level': 'levels', 'Number of threads': 'threads'}
 
 
 class ShogunTests(PluginTestCase):
@@ -40,7 +42,7 @@ class ShogunTests(PluginTestCase):
         self.params = {
             'Database': join(self.db_path, 'shogun'),
             'Aligner tool': 'bowtie2',
-            'Taxonomic Level': 'all',
+            'Taxonomy Level': 'all',
             'Number of threads': 1
         }
         self._clean_up_files = []
@@ -156,11 +158,11 @@ class ShogunTests(PluginTestCase):
                  '--database %sshogun --input %s '
                  '--output %s --level species') %
                 (self.db_path, join(temp_dir, 'profile.tsv'),
-                 join(temp_dir, 'profile.functional.species.tsv'))
+                 join(temp_dir, 'functional'))
                 ]
             profile_dir = join(temp_dir, 'profile.tsv')
             params = _format_params(self.params, SHOGUN_PARAMS)
-            obs_cmd = generate_shogun_functional_commands(
+            obs_cmd, output = generate_shogun_functional_commands(
                 profile_dir, temp_dir, params, 'species')
 
         self.assertEqual(obs_cmd, exp_cmd)
@@ -190,19 +192,97 @@ class ShogunTests(PluginTestCase):
                 ('biom convert -i %s '
                  '-o %s '
                  '--table-type="OTU table" '
-                 '--process-obs-metadata taxonomy --to-hdf5') %
+                 '--to-hdf5') %
                 (join(temp_dir, 'profile.tsv'),
                  join(out_dir, 'otu_table.species.redist.biom'))
                 ]
             profile_fp = join(temp_dir, 'profile.tsv')
-            obs_cmd, output = generate_biom_conversion_commands(profile_fp, out_dir,
-                                                        'species', 'redist')
+            obs_cmd, output = generate_biom_conversion_commands(
+                profile_fp, out_dir, 'species', 'redist')
 
         self.assertEqual(obs_cmd, exp_cmd)
 
     def test_shogun(self):
-        pass
+        # generating filepaths
+        in_dir = mkdtemp()
+        self._clean_up_files.append(in_dir)
 
+        fp1_1 = join(in_dir, 'S22205_S104_L001_R1_001.fastq.gz')
+        fp1_2 = join(in_dir, 'S22205_S104_L001_R2_001.fastq.gz')
+        fp2_1 = join(in_dir, 'S22282_S102_L001_R1_001.fastq.gz')
+        fp2_2 = join(in_dir, 'S22282_S102_L001_R2_001.fastq.gz')
+
+        copyfile('support_files/S22205_S104_L001_R1_001.fastq.gz', fp1_1)
+        copyfile('support_files/S22205_S104_L001_R2_001.fastq.gz', fp1_2)
+        copyfile('support_files/S22282_S102_L001_R1_001.fastq.gz', fp2_1)
+        copyfile('support_files/S22282_S102_L001_R2_001.fastq.gz', fp2_2)
+
+        # inserting new prep template
+        prep_info_dict = {
+            'SKB8.640193': {'run_prefix': 'S22205_S104'},
+            'SKD8.640184': {'run_prefix': 'S22282_S102'}}
+        data = {'prep_info': dumps(prep_info_dict),
+                # magic #1 = testing study
+                'study': 1,
+                'data_type': 'Metagenomic'}
+        pid = self.qclient.post('/apitest/prep_template/', data=data)['prep']
+
+        # inserting artifacts
+        data = {
+            'filepaths': dumps([
+                (fp1_1, 'raw_forward_seqs'),
+                (fp1_2, 'raw_reverse_seqs'),
+                (fp2_1, 'raw_forward_seqs'),
+                (fp2_2, 'raw_reverse_seqs')]),
+            'type': "per_sample_FASTQ",
+            'name': "Test Shogun artifact",
+            'prep': pid}
+        aid = self.qclient.post('/apitest/artifact/', data=data)['artifact']
+
+        self.params['input'] = aid
+        data = {'user': 'demo@microbio.me',
+                'command': dumps(['qp-shotgun', '0.0.1', 'Shogun']),
+                'status': 'running',
+                'parameters': dumps(self.params)}
+        jid = self.qclient.post('/apitest/processing_job/', data=data)['job']
+
+        out_dir = mkdtemp()
+        self._clean_up_files.append(out_dir)
+
+        success, ainfo, msg = shogun(self.qclient, jid, self.params, out_dir)
+
+        self.assertEqual("", msg)
+        self.assertTrue(success)
+
+        # we are expecting 2 artifacts in total
+        self.assertEqual(2, len(ainfo))
+
+        obs_func_fps = []
+        obs_redist_fps = []
+        ainfo_func = ainfo[0]
+        ainfo_redist = ainfo[1]
+        self.assertEqual('BIOM', ainfo_func.artifact_type)
+        self.assertEqual('BIOM', ainfo_redist.artifact_type)
+        obs_func_fps = ainfo_func.files
+        obs_redist_fps = ainfo_redist.files
+
+        od = partial(join, out_dir)
+        func_prefix = "species"
+        exp_func_fps = [
+            od("otu_table.%s.kegg.modules.coverage.biom" % func_prefix),
+            od("otu_table.%s.kegg.modules.biom" % func_prefix),
+            od("otu_table.%s.kegg.pathways.coverage.biom" % func_prefix),
+            od("otu_table.%s.kegg.pathways.biom" % func_prefix),
+            od("otu_table.%s.kegg.biom" % func_prefix),
+            od("otu_table.%s.normalized.biom" % func_prefix)]
+
+        exp_redist_fps = [
+            od('otu_table.genus.redist.biom'),
+            od('otu_table.species.redist.biom'),
+            od('otu_table.strain.redist.biom')]
+
+        self.assertEqual(obs_func_fps, exp_func_fps)
+        self.assertEqual(obs_redist_fps, exp_redist_fps)
 
 if __name__ == '__main__':
     main()

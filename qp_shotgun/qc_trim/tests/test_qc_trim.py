@@ -241,8 +241,8 @@ class QC_TrimTests(PluginTestCase):
         fp2_2 = join(in_dir, 'kd_test_2_R2.fastq.gz')
         copyfile('support_files/kd_test_1_R1.fastq.gz', fp1_1)
         copyfile('support_files/kd_test_1_R2.fastq.gz', fp1_2)
-        copyfile('support_files/kd_test_1_R1.fastq.gz', fp2_1)
-        copyfile('support_files/kd_test_1_R2.fastq.gz', fp2_2)
+        copyfile('support_files/kd_test_2_R1.fastq.gz', fp2_1)
+        copyfile('support_files/kd_test_2_R2.fastq.gz', fp2_2)
 
         # inserting new prep template
         prep_info_dict = {
@@ -283,7 +283,7 @@ class QC_TrimTests(PluginTestCase):
         self.assertEqual("", msg)
         self.assertTrue(success)
 
-        # we are expecting 3 artifacts in total
+        # we are expecting 1 artifact in total
         self.assertEqual(1, len(ainfo))
 
         obs_fps = []
