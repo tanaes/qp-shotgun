@@ -15,7 +15,7 @@ from qiita_client import ArtifactInfo
 
 SHOGUN_PARAMS = {
     'Database': 'database', 'Aligner tool': 'aligner',
-    'Taxonomy Level': 'levels', 'Number of threads': 'threads'}
+    'Number of threads': 'threads'}
 
 
 def generate_fna_file(temp_path, samples):

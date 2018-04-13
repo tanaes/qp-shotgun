@@ -25,10 +25,6 @@ opt_params = {
                  default_db],
     # aligner
     'Aligner tool': ['choice:["utree", "burst", "bowtie2"]', 'bowtie2'],
-    # taxonomic levels
-    'Taxonomy Level': ['choice:["kingdom", "phylum", "class", "order", '
-                       '"family", "genus", "species", "strain", "all"]',
-                       'all'],
     # threads
     'Number of threads': ['integer', '1'],
     }

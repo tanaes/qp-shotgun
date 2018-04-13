@@ -50,7 +50,6 @@ def generate_shogun_dflt_params():
         for aligner in ALIGNERS:
             dflt_param_set[db+'_'+aligner] = {'Database': dbs[db],
                                               'Aligner tool': aligner,
-                                              'Taxonomy Level': 'all',
                                               'Number of threads': 1}
 
     return(dflt_param_set)
