@@ -197,7 +197,7 @@ class ShogunTests(PluginTestCase):
 
         self.assertEqual(obs_cmd, exp_cmd)
 
-    def test_shogun_bt2(self):
+    def test_shogun_burst(self):
         # generating filepaths
         in_dir = mkdtemp()
         self._clean_up_files.append(in_dir)
@@ -235,6 +235,7 @@ class ShogunTests(PluginTestCase):
         aid = self.qclient.post('/apitest/artifact/', data=data)['artifact']
 
         self.params['input'] = aid
+        self.params['Aligner tool'] = 'burst'
         data = {'user': 'demo@microbio.me',
                 'command': dumps(['qp-shotgun', '0.0.1', 'Shogun']),
                 'status': 'running',
@@ -279,7 +280,7 @@ class ShogunTests(PluginTestCase):
         self.assertEqual(obs_func_fps, exp_func_fps)
         self.assertEqual(obs_redist_fps, exp_redist_fps)
 
-    def test_shogun_burst(self):
+    def test_shogun_bt2(self):
         # generating filepaths
         in_dir = mkdtemp()
         self._clean_up_files.append(in_dir)
@@ -317,7 +318,6 @@ class ShogunTests(PluginTestCase):
         aid = self.qclient.post('/apitest/artifact/', data=data)['artifact']
 
         self.params['input'] = aid
-        self.params['Aligner tool'] = 'burst'
         data = {'user': 'demo@microbio.me',
                 'command': dumps(['qp-shotgun', '0.0.1', 'Shogun']),
                 'status': 'running',
