@@ -57,7 +57,7 @@ install:
   - wget https://github.com/knights-lab/UTree/releases/download/v2.0c/utree-search_gg
   - chmod 755 utree-search_gg
   - mv utree-search_gg $CONDA_PREFIX/bin
-  - wget https://github.com/knights-lab/BURST/releases/download/v0.99.4a/burst_linux_DB15
+  - wget https://github.com/knights-lab/BURST/releases/download/v0.99.7f/burst_linux_DB15
   - chmod 755 burst_linux_DB15
   - mv burst_linux_DB15 $CONDA_PREFIX/bin/burst15
 before_script:
