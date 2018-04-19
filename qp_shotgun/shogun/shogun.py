@@ -220,7 +220,7 @@ def shogun(qclient, job_id, parameters, out_dir):
 
         # Step 6 functional profile
         sys_msg = "Step 6 of 7: Functional profile with Shogun (%d/{0})"
-        levels = ['species']
+        levels = ['strain']
         func_fp = ''
         for level in levels:
             func_cmd, output = generate_shogun_functional_commands(

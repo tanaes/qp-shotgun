@@ -263,7 +263,7 @@ class ShogunTests(PluginTestCase):
         obs_redist_fps = ainfo_redist.files
 
         od = partial(join, out_dir)
-        func_prefix = "species"
+        func_prefix = "strain"
         exp_func_fps = [
             od("otu_table.%s.kegg.modules.coverage.biom" % func_prefix),
             od("otu_table.%s.kegg.modules.biom" % func_prefix),
