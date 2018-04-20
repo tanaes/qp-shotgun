@@ -10,7 +10,7 @@
 
 import click
 
-from qp_shotgun import plugin
+from qp_shogun import plugin
 
 @click.command()
 @click.option('--env-script', prompt='Environment script',

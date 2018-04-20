@@ -15,12 +15,12 @@ from json import dumps
 from functools import partial
 import os
 from qiita_client.testing import PluginTestCase
-from qp_shotgun import plugin
-from qp_shotgun.qc_filter.qc_filter import (
+from qp_shogun import plugin
+from qp_shogun.qc_filter.qc_filter import (
     generate_qc_filter_commands, qc_filter)
-from qp_shotgun.qc_filter.utils import (
+from qp_shogun.qc_filter.utils import (
     get_dbs, get_dbs_list, generate_qc_filter_dflt_params)
-from qp_shotgun.utils import (_format_qc_params, _per_sample_ainfo)
+from qp_shogun.utils import (_format_qc_params, _per_sample_ainfo)
 
 
 BOWTIE2_PARAMS = {

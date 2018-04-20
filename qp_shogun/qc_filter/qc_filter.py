@@ -8,7 +8,7 @@
 
 from os.path import join
 from tempfile import TemporaryDirectory
-from qp_shotgun.utils import (
+from qp_shogun.utils import (
     _format_qc_params, make_read_pairs_per_sample,
     _run_commands, _per_sample_ainfo)
 

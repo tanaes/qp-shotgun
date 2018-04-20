@@ -42,10 +42,10 @@ setup(name='qp-shotgun',
       author_email="qiita.help@gmail.com",
       url='https://github.com/biocore/qiita',
       test_suite='nose.collector',
-      packages=['qp_shotgun', 'qp_shotgun/qc_trim',
-                'qp_shotgun/qc_filter', 'qp_shotgun/shogun'],
+      packages=['qp_shogun', 'qp_shogun/qc_trim',
+                'qp_shogun/qc_filter', 'qp_shogun/shogun'],
       package_data={
-        'qp_shotgun': [
+        'qp_shogun': [
             'support_files/config_file.cfg',
             'shogun/databases/*']},
       scripts=['scripts/configure_shotgun', 'scripts/start_shotgun'],

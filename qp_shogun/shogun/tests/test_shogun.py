@@ -13,13 +13,13 @@ from os import remove
 from os.path import exists, isdir, join
 from shutil import rmtree, copyfile
 from tempfile import TemporaryDirectory
-from qp_shotgun import plugin
+from qp_shogun import plugin
 from tempfile import mkdtemp
 from json import dumps
 from functools import partial
-from qp_shotgun.shogun.utils import (
+from qp_shogun.shogun.utils import (
     get_dbs, get_dbs_list, generate_shogun_dflt_params)
-from qp_shotgun.shogun.shogun import (
+from qp_shogun.shogun.shogun import (
     generate_shogun_align_commands, _format_params,
     generate_shogun_assign_taxonomy_commands, generate_fna_file,
     generate_shogun_functional_commands, generate_shogun_redist_commands,
