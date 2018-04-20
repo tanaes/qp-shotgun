@@ -29,7 +29,7 @@ install:
   - source activate qp-shogun
   - pip install -U pip
   - conda install --yes pigz
-  - conda install --yes -c bowtie2 fastqc=0.11.5 samtools bedtools
+  - conda install --yes -c bioconda bowtie2 fastqc=0.11.5 samtools bedtools
   - pip install sphinx sphinx-bootstrap-theme nose-timer codecov biopython
   - pip install https://github.com/qiita-spots/qiita_client/archive/master.zip
   - pip install atropos
