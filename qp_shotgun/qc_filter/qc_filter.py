@@ -6,7 +6,6 @@
 # The full license is in the file LICENSE, distributed with this software.
 # -----------------------------------------------------------------------------
 
-import os
 from os.path import join
 from tempfile import TemporaryDirectory
 from qp_shotgun.utils import (
@@ -129,8 +128,7 @@ def qc_filter(qclient, job_id, parameters, out_dir):
     qclient.update_job_step(job_id, "Step 2 of 4: Generating"
                                     " QC_Filter commands")
     # Creating temporary directory for intermediate files
-    temp_path = os.environ['QC_FILTER_TEMP_DP']
-    with TemporaryDirectory(dir=temp_path, prefix='qc_filter_') as temp_dir:
+    with TemporaryDirectory(dir=out_dir, prefix='qc_filter_') as temp_dir:
         rs = fps['raw_reverse_seqs'] if 'raw_reverse_seqs' in fps else []
         commands, samples = generate_qc_filter_commands(fps[
                                                         'raw_forward_seqs'],
@@ -150,7 +148,7 @@ def qc_filter(qclient, job_id, parameters, out_dir):
     suffixes = ['%s.R1.trimmed.filtered.fastq.gz',
                 '%s.R2.trimmed.filtered.fastq.gz']
     prg_name = 'Filtering'
-    file_type_name = 'QC_Filter files'
+    file_type_name = 'Filtered files'
     ainfo = _per_sample_ainfo(
         out_dir, samples, suffixes, prg_name, file_type_name, bool(rs))
 

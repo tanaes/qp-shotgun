@@ -88,9 +88,12 @@ ENV/
 # Rope project settings
 .ropeproject
 
-#extra bowtie files
+# Extra bowtie files
 ._bowtie2
 .adapters
 
-#Redis 
+# Shogun DB
+qp_shotgun/shogun/databases/shogun/
+
+# Redis
 dump.rdb

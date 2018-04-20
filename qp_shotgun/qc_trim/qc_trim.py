@@ -118,7 +118,7 @@ def qc_trim(qclient, job_id, parameters, out_dir):
     msg = "Step 4 of 4: Generating new artifacts (%d/{0})".format(len_cmd)
     suffixes = ['%s.R1.trimmed.fastq.gz', '%s.R2.trimmed.fastq.gz']
     prg_name = 'Atropos'
-    file_type_name = 'QC_Trim files'
+    file_type_name = 'Adapter trimmed files'
     ainfo = _per_sample_ainfo(
         out_dir, samples, suffixes, prg_name, file_type_name, bool(rs))
 
