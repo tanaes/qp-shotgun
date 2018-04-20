@@ -42,7 +42,7 @@ setup(name='qp-shotgun',
       author_email="qiita.help@gmail.com",
       url='https://github.com/biocore/qiita',
       test_suite='nose.collector',
-      packages=['qp_shotgun', 'qp_shotgun/humann2', 'qp_shotgun/qc_trim',
+      packages=['qp_shotgun', 'qp_shotgun/qc_trim',
                 'qp_shotgun/qc_filter', 'qp_shotgun/shogun'],
       package_data={
         'qp_shotgun': [
@@ -50,9 +50,7 @@ setup(name='qp-shotgun',
             'shogun/databases/*']},
       scripts=['scripts/configure_shotgun', 'scripts/start_shotgun'],
       extras_require={'test': ["nose >= 0.10.1", "pep8"]},
-      install_requires=['click >= 3.3', 'future', 'pandas >= 0.15', 'humann2',
+      install_requires=['click >= 3.3', 'future', 'pandas >= 0.15',
                         'h5py >= 2.3.1', 'biom-format'],
-      dependency_links=[('https://bitbucket.org/biobakery/humann2/get/'
-                         '0.9.3.1.tar.gz')],
       classifiers=classifiers
       )

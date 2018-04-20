@@ -93,7 +93,7 @@ ENV/
 .adapters
 
 # Shogun DB
-qp_shotgun/shogun/databases/shogun/
+qp_shogun/shogun/databases/shogun/
 
 # Redis
 dump.rdb

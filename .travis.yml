@@ -2,9 +2,8 @@ language: python
 sudo: required
 group: deprecated-2017Q4
 env:
-  - PYTHON_VERSION=3.5 COVER_PACKAGE=qp_shotgun/shogun
-  - PYTHON_VERSION=3.5 COVER_PACKAGE=qp_shotgun/humann2
-  - PYTHON_VERSION=3.5 COVER_PACKAGE="qp_shotgun/qc_filter qp_shotgun/qc_trim"
+  - PYTHON_VERSION=3.5 COVER_PACKAGE=qp_shogun/shogun
+  - PYTHON_VERSION=3.5 COVER_PACKAGE="qp_shogun/qc_filter qp_shogun/qc_trim"
 before_install:
   - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
   - chmod +x miniconda.sh
@@ -26,34 +25,29 @@ install:
   - export QIITA_SERVER_CERT=${PWD}/miniconda3/envs/qiita/lib/python2.7/site-packages/qiita_core/support_files/server.crt
   - qiita-env make --no-load-ontologies
   - source deactivate
-  # installing qp-shotgun
-  - conda create --yes -n qp-shotgun python=$PYTHON_VERSION pip nose flake8
-  - source activate qp-shotgun
+  # installing qp-shogun
+  - conda create --yes -n qp-shogun python=$PYTHON_VERSION pip nose flake8
+  - source activate qp-shogun
   - pip install -U pip
   - conda install --yes -c jjhelmus glpk
   - conda install --yes pigz
   - conda install --yes -c bioconda diamond=0.8 bowtie2 fastqc=0.11.5 samtools bedtools
   - pip install sphinx sphinx-bootstrap-theme nose-timer codecov biopython
   - pip install https://github.com/qiita-spots/qiita_client/archive/master.zip
-  - pip install atropos humann2
+  - pip install atropos
   - pip install git+https://github.com/knights-lab/SHOGUN.git
   - export QIITA_SERVER_CERT=$PWD/miniconda3/envs/qiita/lib/python2.7/site-packages/qiita_core/support_files/server.crt
   # just making sure we have the latest flake8
   - pip install -U flake8
   - pip install .
-  - export QC_FILTER_DB_DP=$PWD/qp_shotgun/qc_filter/databases/
-  - export QC_SHOGUN_DB_DP=$PWD/qp_shotgun/shogun/databases/
+  - export QC_FILTER_DB_DP=$PWD/qp_shogun/qc_filter/databases/
+  - export QC_SHOGUN_DB_DP=$PWD/qp_shogun/shogun/databases/
   - for file in $(ls $QC_SHOGUN_DB_DP); do tar xvjf $QC_SHOGUN_DB_DP$file -C $QC_SHOGUN_DB_DP; done
   # installing other dependencies
   - wget --quiet https://bitbucket.org/biobakery/metaphlan2/get/default.zip
   - unzip -qq default.zip 'biobakery-metaphlan2*/utils/*' 'biobakery-metaphlan2*/metaphlan2.py'
-  - export HUMANN2_BIN=`which humann2`
-  - export HUMANN2_DIR=`dirname $HUMANN2_BIN`
-  - mv biobakery-metaphlan2*/* $HUMANN2_DIR
-  - mkdir -p $HUMANN2_DIR/db_v20
   - wget --quiet https://github.com/biocore/oecophylla/blob/dev/test_data/test_dbs/mp2_mini.tar.gz?raw=true -O mp2_mini.tar.gz
   - tar zxf mp2_mini.tar.gz
-  - for f in `ls mp2_mini`; do mv mp2_mini/$f  $HUMANN2_DIR/db_v20/${f//mp2_mini/mpa_v20_m200}; done
   - wget https://github.com/knights-lab/UTree/releases/download/v2.0c/utree-search_gg
   - chmod 755 utree-search_gg
   - mv utree-search_gg $CONDA_PREFIX/bin
@@ -65,11 +59,11 @@ before_script:
   - qiita pet webserver start &
   - export QIITA_PID=$!
 script:
-  - source activate qp-shotgun
+  - source activate qp-shogun
   - sleep 10 # give enough time to the webserver to start
-  - configure_shotgun --env-script "source activate qp-shotgun" --server-cert $QIITA_SERVER_CERT
+  - configure_shogun --env-script "source activate qp-shogun" --server-cert $QIITA_SERVER_CERT
   - travis_wait 40 nosetests $COVER_PACKAGE --with-doctest --with-coverage --with-timer -vv --cover-package=$COVER_PACKAGE
-  - flake8 qp_shotgun setup.py scripts
+  - flake8 qp_shogun setup.py scripts
 addons:
   postgresql: "9.3"
 services:
