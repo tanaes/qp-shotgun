@@ -68,6 +68,9 @@ script:
   - source activate qp-shotgun
   - sleep 10 # give enough time to the webserver to start
   - configure_shotgun --env-script "source activate qp-shotgun" --server-cert $QIITA_SERVER_CERT
+  -   # testing BURST
+  - gunzip combined.fna.gz
+  - burst15 --references qp_shotgun/shogun/databases/shogun/burst/5min.edx --queries combined.fna  --output test.b6 --accelerator qp_shotgun/shogun/databases/shogun/burst/5min.acx
   - travis_wait 40 nosetests $COVER_PACKAGE --with-doctest --with-coverage --with-timer -vv --cover-package=$COVER_PACKAGE
   - flake8 qp_shotgun setup.py scripts
 addons:
