@@ -35,7 +35,7 @@ install:
   - conda install --yes -c bioconda diamond=0.8 bowtie2 fastqc=0.11.5 samtools bedtools
   - pip install sphinx sphinx-bootstrap-theme nose-timer codecov biopython
   - pip install https://github.com/qiita-spots/qiita_client/archive/master.zip
-  - pip install atropos humann2
+  - pip install atropos # humann2
   - pip install git+https://github.com/knights-lab/SHOGUN.git
   - export QIITA_SERVER_CERT=$PWD/miniconda3/envs/qiita/lib/python2.7/site-packages/qiita_core/support_files/server.crt
   # just making sure we have the latest flake8
@@ -45,15 +45,15 @@ install:
   - export QC_SHOGUN_DB_DP=$PWD/qp_shotgun/shogun/databases/
   - for file in $(ls $QC_SHOGUN_DB_DP); do tar xvjf $QC_SHOGUN_DB_DP$file -C $QC_SHOGUN_DB_DP; done
   # installing other dependencies
-  - wget --quiet https://bitbucket.org/biobakery/metaphlan2/get/default.zip
-  - unzip -qq default.zip 'biobakery-metaphlan2*/utils/*' 'biobakery-metaphlan2*/metaphlan2.py'
-  - export HUMANN2_BIN=`which humann2`
-  - export HUMANN2_DIR=`dirname $HUMANN2_BIN`
-  - mv biobakery-metaphlan2*/* $HUMANN2_DIR
-  - mkdir -p $HUMANN2_DIR/db_v20
-  - wget --quiet https://github.com/biocore/oecophylla/blob/dev/test_data/test_dbs/mp2_mini.tar.gz?raw=true -O mp2_mini.tar.gz
-  - tar zxf mp2_mini.tar.gz
-  - for f in `ls mp2_mini`; do mv mp2_mini/$f  $HUMANN2_DIR/db_v20/${f//mp2_mini/mpa_v20_m200}; done
+  #- wget --quiet https://bitbucket.org/biobakery/metaphlan2/get/default.zip
+  #- unzip -qq default.zip 'biobakery-metaphlan2*/utils/*' 'biobakery-metaphlan2*/metaphlan2.py'
+  #- export HUMANN2_BIN=`which humann2`
+  #- export HUMANN2_DIR=`dirname $HUMANN2_BIN`
+  #- mv biobakery-metaphlan2*/* $HUMANN2_DIR
+  #- mkdir -p $HUMANN2_DIR/db_v20
+  #- wget --quiet https://github.com/biocore/oecophylla/blob/dev/test_data/test_dbs/mp2_mini.tar.gz?raw=true -O mp2_mini.tar.gz
+  #- tar zxf mp2_mini.tar.gz
+  #- for f in `ls mp2_mini`; do mv mp2_mini/$f  $HUMANN2_DIR/db_v20/${f//mp2_mini/mpa_v20_m200}; done
   - wget https://github.com/knights-lab/UTree/releases/download/v2.0c/utree-search_gg
   - chmod 755 utree-search_gg
   - mv utree-search_gg $CONDA_PREFIX/bin
