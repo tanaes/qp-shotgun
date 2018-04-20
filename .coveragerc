@@ -4,9 +4,9 @@
 omit =
     */test*
     */__init__.py
-source = qp_shotgun
+source = qp_shogun
 branch = True
-include = */qp_shotgun/*
+include = */qp_shogun/*
 
 [report]
 exclude_lines =

@@ -16,11 +16,11 @@ from functools import partial
 
 from qiita_client.testing import PluginTestCase
 
-from qp_shotgun import plugin
-from qp_shotgun.qc_trim.qc_trim import (generate_qc_trim_commands, qc_trim)
-from qp_shotgun.utils import (
+from qp_shogun import plugin
+from qp_shogun.qc_trim.qc_trim import (generate_qc_trim_commands, qc_trim)
+from qp_shogun.utils import (
     _format_qc_params, make_read_pairs_per_sample, _per_sample_ainfo)
-import qp_shotgun.qc_trim as kd
+import qp_shogun.qc_trim as kd
 
 ATROPOS_PARAMS = {
     'adapter': 'Fwd read adapter', 'A': 'Rev read adapter',
@@ -269,7 +269,7 @@ class QC_TrimTests(PluginTestCase):
 
         self.params['input'] = aid
         data = {'user': 'demo@microbio.me',
-                'command': dumps(['qp-shotgun', '0.0.1', 'Atropos v1.1.15']),
+                'command': dumps(['qp-shogun', '0.0.1', 'Atropos v1.1.15']),
                 'status': 'running',
                 'parameters': dumps(self.params)}
         jid = self.qclient.post('/apitest/processing_job/', data=data)['job']

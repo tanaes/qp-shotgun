@@ -8,7 +8,7 @@
 from os.path import join
 from tempfile import TemporaryDirectory
 from .utils import readfq
-from qp_shotgun.utils import (make_read_pairs_per_sample, _run_commands)
+from qp_shogun.utils import (make_read_pairs_per_sample, _run_commands)
 import gzip
 from qiita_client import ArtifactInfo
 

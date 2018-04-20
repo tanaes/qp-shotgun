@@ -33,26 +33,24 @@ with open('README.rst') as f:
 
 classifiers = [s.strip() for s in classes.split('\n') if s]
 
-setup(name='qp-shotgun',
+setup(name='qp-shogun',
       version=__version__,
       long_description=long_description,
       license="BSD",
-      description='Qiita Plugin: Shotgun',
+      description='Qiita Plugin: Shogun',
       author="Qiita development team",
       author_email="qiita.help@gmail.com",
       url='https://github.com/biocore/qiita',
       test_suite='nose.collector',
-      packages=['qp_shotgun', 'qp_shotgun/humann2', 'qp_shotgun/qc_trim',
-                'qp_shotgun/qc_filter', 'qp_shotgun/shogun'],
+      packages=['qp_shogun', 'qp_shogun/qc_trim',
+                'qp_shogun/qc_filter', 'qp_shogun/shogun'],
       package_data={
-        'qp_shotgun': [
+        'qp_shogun': [
             'support_files/config_file.cfg',
             'shogun/databases/*']},
-      scripts=['scripts/configure_shotgun', 'scripts/start_shotgun'],
+      scripts=['scripts/configure_shogun', 'scripts/start_shogun'],
       extras_require={'test': ["nose >= 0.10.1", "pep8"]},
-      install_requires=['click >= 3.3', 'future', 'pandas >= 0.15', 'humann2',
+      install_requires=['click >= 3.3', 'future', 'pandas >= 0.15',
                         'h5py >= 2.3.1', 'biom-format'],
-      dependency_links=[('https://bitbucket.org/biobakery/humann2/get/'
-                         '0.9.3.1.tar.gz')],
       classifiers=classifiers
       )
