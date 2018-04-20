@@ -42,8 +42,8 @@ setup(name='qp-shogun',
       author_email="qiita.help@gmail.com",
       url='https://github.com/biocore/qiita',
       test_suite='nose.collector',
-      packages=['qp_shogun', 'qp_shogun/qc_trim',
-                'qp_shogun/qc_filter', 'qp_shogun/shogun'],
+      packages=['qp_shogun', 'qp_shogun/trim',
+                'qp_shogun/filter', 'qp_shogun/shogun'],
       package_data={
         'qp_shogun': [
             'support_files/config_file.cfg',
