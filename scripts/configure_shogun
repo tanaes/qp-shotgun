@@ -14,13 +14,13 @@ from qp_shogun import plugin
 
 @click.command()
 @click.option('--env-script', prompt='Environment script',
-              default='source activate qp-shotgun')
+              default='source activate qp-shogun')
 @click.option('--server-cert', prompt='Server certificate', default='None')
 def config(env_script, server_cert):
     """Generates the Qiita configuration files"""
     if server_cert == 'None':
         server_cert = None
-    plugin.generate_config(env_script, 'start_shotgun',
+    plugin.generate_config(env_script, 'start_shogun',
                            server_cert=server_cert)
 
 if __name__ == '__main__':

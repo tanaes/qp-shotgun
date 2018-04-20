@@ -33,11 +33,11 @@ with open('README.rst') as f:
 
 classifiers = [s.strip() for s in classes.split('\n') if s]
 
-setup(name='qp-shotgun',
+setup(name='qp-shogun',
       version=__version__,
       long_description=long_description,
       license="BSD",
-      description='Qiita Plugin: Shotgun',
+      description='Qiita Plugin: Shogun',
       author="Qiita development team",
       author_email="qiita.help@gmail.com",
       url='https://github.com/biocore/qiita',
@@ -48,7 +48,7 @@ setup(name='qp-shotgun',
         'qp_shogun': [
             'support_files/config_file.cfg',
             'shogun/databases/*']},
-      scripts=['scripts/configure_shotgun', 'scripts/start_shotgun'],
+      scripts=['scripts/configure_shogun', 'scripts/start_shogun'],
       extras_require={'test': ["nose >= 0.10.1", "pep8"]},
       install_requires=['click >= 3.3', 'future', 'pandas >= 0.15',
                         'h5py >= 2.3.1', 'biom-format'],
