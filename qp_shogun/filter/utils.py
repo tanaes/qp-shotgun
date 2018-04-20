@@ -38,7 +38,7 @@ def get_dbs_list(db_folder):
     return(dbs_formatted)
 
 
-def generate_qc_filter_dflt_params():
+def generate_filter_dflt_params():
     dflt_param_set = {}
     db_parent_path = os.environ["QC_FILTER_DB_DP"]
     # Get a the databases available and the database name

@@ -8,8 +8,8 @@
 
 from qiita_client import QiitaPlugin
 
-from .qc_trim import qc_trim_cmd
-from .qc_filter import qc_filter_cmd
+from .trim import trim_cmd
+from .filter import filter_cmd
 from .shogun import shogun_cmd
 
 
@@ -17,6 +17,6 @@ from .shogun import shogun_cmd
 plugin = QiitaPlugin(
     'qp-shogun', '0.0.1', 'Shogun analysis tools for shotgun data')
 
-plugin.register_command(qc_trim_cmd)
-plugin.register_command(qc_filter_cmd)
+plugin.register_command(trim_cmd)
+plugin.register_command(filter_cmd)
 plugin.register_command(shogun_cmd)

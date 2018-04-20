@@ -8,11 +8,11 @@
 
 from qiita_client import QiitaCommand
 
-from .qc_trim import qc_trim
+from .trim import trim
 
-__all__ = ['qc_trim']
+__all__ = ['trim']
 
-# Define the qc_trim command
+# Define the trim command
 req_params = {'input': ('artifact', ['per_sample_FASTQ'])}
 opt_params = {
     # 3' adapter
@@ -49,6 +49,6 @@ dflt_param_set = {
         }
 }
 
-qc_trim_cmd = QiitaCommand(
-    'Atropos v1.1.15', "Sequence QC - adapter trimming", qc_trim,
+trim_cmd = QiitaCommand(
+    'Atropos v1.1.15', "Sequence QC - adapter trimming", trim,
     req_params, opt_params, outputs, dflt_param_set)
