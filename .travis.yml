@@ -28,7 +28,6 @@ install:
   - conda create --yes -n qp-shogun python=$PYTHON_VERSION pip nose flake8
   - source activate qp-shogun
   - pip install -U pip
-  - conda install --yes -c jjhelmus
   - conda install --yes pigz
   - conda install --yes -c bowtie2 fastqc=0.11.5 samtools bedtools
   - pip install sphinx sphinx-bootstrap-theme nose-timer codecov biopython
