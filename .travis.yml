@@ -2,8 +2,7 @@ language: python
 sudo: required
 group: deprecated-2017Q4
 env:
-  - PYTHON_VERSION=3.5 COVER_PACKAGE=qp_shogun/shogun
-  - PYTHON_VERSION=3.5 COVER_PACKAGE="qp_shogun/qc_filter qp_shogun/qc_trim"
+  - PYTHON_VERSION=3.5 COVER_PACKAGE="qp_shogun/qc_filter qp_shogun/qc_trim qp_shogun/shogun"
 before_install:
   - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
   - chmod +x miniconda.sh
@@ -29,9 +28,9 @@ install:
   - conda create --yes -n qp-shogun python=$PYTHON_VERSION pip nose flake8
   - source activate qp-shogun
   - pip install -U pip
-  - conda install --yes -c jjhelmus glpk
+  - conda install --yes -c jjhelmus
   - conda install --yes pigz
-  - conda install --yes -c bioconda diamond=0.8 bowtie2 fastqc=0.11.5 samtools bedtools
+  - conda install --yes -c bowtie2 fastqc=0.11.5 samtools bedtools
   - pip install sphinx sphinx-bootstrap-theme nose-timer codecov biopython
   - pip install https://github.com/qiita-spots/qiita_client/archive/master.zip
   - pip install atropos
