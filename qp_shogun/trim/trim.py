@@ -22,7 +22,7 @@ ATROPOS_PARAMS = {
 
 
 def generate_trim_commands(forward_seqs, reverse_seqs, map_file,
-                              out_dir, parameters):
+                           out_dir, parameters):
     """Generates the QC_Trim commands
 
     Parameters
@@ -104,8 +104,8 @@ def trim(qclient, job_id, parameters, out_dir):
                                     " QC_Trim commands")
     rs = fps['raw_reverse_seqs'] if 'raw_reverse_seqs' in fps else []
     commands, samples = generate_trim_commands(fps['raw_forward_seqs'],
-                                                  rs, qiime_map, out_dir,
-                                                  parameters)
+                                               rs, qiime_map, out_dir,
+                                               parameters)
 
     # Step 3 execute atropos
     len_cmd = len(commands)

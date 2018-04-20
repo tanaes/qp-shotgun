@@ -277,8 +277,7 @@ class QC_TrimTests(PluginTestCase):
         out_dir = mkdtemp()
         self._clean_up_files.append(out_dir)
 
-        success, ainfo, msg = trim(self.qclient, jid,
-                                      self.params, out_dir)
+        success, ainfo, msg = trim(self.qclient, jid, self.params, out_dir)
 
         self.assertEqual("", msg)
         self.assertTrue(success)

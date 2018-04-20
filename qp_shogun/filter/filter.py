@@ -18,7 +18,7 @@ BOWTIE2_PARAMS = {
 
 
 def generate_filter_commands(forward_seqs, reverse_seqs, map_file,
-                                out_dir, temp_dir, parameters):
+                             out_dir, temp_dir, parameters):
     """Generates the QC_Filter commands
 
     Parameters
@@ -130,10 +130,9 @@ def filter(qclient, job_id, parameters, out_dir):
     # Creating temporary directory for intermediate files
     with TemporaryDirectory(dir=out_dir, prefix='filter_') as temp_dir:
         rs = fps['raw_reverse_seqs'] if 'raw_reverse_seqs' in fps else []
-        commands, samples = generate_filter_commands(fps[
-                                                        'raw_forward_seqs'],
-                                                        rs, qiime_map, out_dir,
-                                                        temp_dir, parameters)
+        commands, samples = generate_filter_commands(fps['raw_forward_seqs'],
+                                                     rs, qiime_map, out_dir,
+                                                     temp_dir, parameters)
 
         # Step 3 execute filtering command
         len_cmd = len(commands)
