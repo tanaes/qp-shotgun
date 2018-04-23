@@ -111,7 +111,7 @@ def make_read_pairs_per_sample(forward_seqs, reverse_seqs, map_file):
     return(samples)
 
 
-def _format_qc_params(parameters, func_params):
+def _format_params(parameters, func_params):
     params = []
     # Loop through all of the commands alphabetically
     for param in sorted(func_params):

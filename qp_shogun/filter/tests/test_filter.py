@@ -16,11 +16,11 @@ from functools import partial
 import os
 from qiita_client.testing import PluginTestCase
 from qp_shogun import plugin
-from qp_shogun.qc_filter.qc_filter import (
-    generate_qc_filter_commands, qc_filter)
-from qp_shogun.qc_filter.utils import (
-    get_dbs, get_dbs_list, generate_qc_filter_dflt_params)
-from qp_shogun.utils import (_format_qc_params, _per_sample_ainfo)
+from qp_shogun.filter.filter import (
+    generate_filter_commands, filter)
+from qp_shogun.filter.utils import (
+    get_dbs, get_dbs_list, generate_filter_dflt_params)
+from qp_shogun.utils import (_format_params, _per_sample_ainfo)
 
 
 BOWTIE2_PARAMS = {
@@ -63,23 +63,23 @@ class QC_FilterTests(PluginTestCase):
 
         self.assertEqual(obs, exp)
 
-    def test_generate_qc_filter_dflt_params(self):
+    def test_generate_filter_dflt_params(self):
         db_path = os.environ["QC_FILTER_DB_DP"]
-        obs = generate_qc_filter_dflt_params()
+        obs = generate_filter_dflt_params()
         exp = {'phix': {'Bowtie2 database to filter': join(db_path, 'phix',
                                                            'phix'),
                         'Number of threads': 4}}
 
         self.assertEqual(obs, exp)
 
-    def test_format_qc_filter_params(self):
+    def test_format_filter_params(self):
         db_path = os.environ["QC_FILTER_DB_DP"]
-        obs = _format_qc_params(self.params, BOWTIE2_PARAMS)
+        obs = _format_params(self.params, BOWTIE2_PARAMS)
         exp = ('-p 1 -x %sphix/phix') % db_path
 
         self.assertEqual(obs, exp)
 
-    def test_generate_qc_filter_analysis_commands_forward_reverse(self):
+    def test_generate_filter_analysis_commands_forward_reverse(self):
         fd, fp = mkstemp()
         close(fd)
         with open(fp, 'w') as f:
@@ -109,7 +109,7 @@ class QC_FilterTests(PluginTestCase):
             ('s1', 'SKB8.640193', 'fastq/s1.fastq.gz', 'fastq/s1.R2.fastq.gz')
             ]
 
-        obs_cmd, obs_sample = generate_qc_filter_commands(
+        obs_cmd, obs_sample = generate_filter_commands(
             ['fastq/s1.fastq.gz'],
             ['fastq/s1.R2.fastq.gz'],
             fp, 'output', 'temp', self.params)
@@ -117,7 +117,7 @@ class QC_FilterTests(PluginTestCase):
         self.assertEqual(obs_cmd, exp_cmd)
         self.assertEqual(obs_sample, exp_sample)
 
-    def test_qc_filter(self):
+    def test_filter(self):
         # generating filepaths
         in_dir = mkdtemp()
         self._clean_up_files.append(in_dir)
@@ -164,8 +164,7 @@ class QC_FilterTests(PluginTestCase):
         out_dir = mkdtemp()
         self._clean_up_files.append(out_dir)
 
-        success, ainfo, msg = qc_filter(self.qclient, jid,
-                                        self.params, out_dir)
+        success, ainfo, msg = filter(self.qclient, jid, self.params, out_dir)
 
         self.assertEqual("", msg)
         self.assertTrue(success)

@@ -17,10 +17,10 @@ from functools import partial
 from qiita_client.testing import PluginTestCase
 
 from qp_shogun import plugin
-from qp_shogun.qc_trim.qc_trim import (generate_qc_trim_commands, qc_trim)
+from qp_shogun.trim.trim import (generate_trim_commands, trim)
 from qp_shogun.utils import (
-    _format_qc_params, make_read_pairs_per_sample, _per_sample_ainfo)
-import qp_shogun.qc_trim as kd
+    _format_params, make_read_pairs_per_sample, _per_sample_ainfo)
+import qp_shogun.trim as kd
 
 ATROPOS_PARAMS = {
     'adapter': 'Fwd read adapter', 'A': 'Rev read adapter',
@@ -39,7 +39,7 @@ class QC_TrimTests(PluginTestCase):
         plugin("https://localhost:21174", 'register', 'ignored')
 
         # to fully test the plugin we need to use the demo reference-db,
-        # which is part of the regular qc_trim install
+        # which is part of the regular trim install
         self.refdb_path = join(dirname(kd.__file__),
                                "tests/data/demo_bowtie2_db/demo_db.1.bt2")
         self.params = {
@@ -63,8 +63,8 @@ class QC_TrimTests(PluginTestCase):
                 else:
                     remove(fp)
 
-    def test_format_qc_trim_params(self):
-        obs = _format_qc_params(self.params, ATROPOS_PARAMS)
+    def test_format_trim_params(self):
+        obs = _format_params(self.params, ATROPOS_PARAMS)
         exp = ('-A GATCGGAAGAGCGTCGTGTAGGGAAAGGAGTGT --adapter GATCGGAAGAGCACA'
                'CGTCTGAACTCCAGTCAC --max-n 80 --minimum-length 80 '
                '--pair-filter any --quality-cutoff 15 --threads 4 --trim-n')
@@ -188,7 +188,7 @@ class QC_TrimTests(PluginTestCase):
         with self.assertRaises(ValueError):
             make_read_pairs_per_sample(fwd_fp, rev_fp, fp)
 
-    def test_generate_qc_trim_analysis_commands_forward_reverse(self):
+    def test_generate_trim_analysis_commands_forward_reverse(self):
         fd, fp = mkstemp()
         close(fd)
         with open(fp, 'w') as f:
@@ -221,7 +221,7 @@ class QC_TrimTests(PluginTestCase):
             ('s2', 'SKD8.640184', 'fastq/s2.fastq.gz', 'fastq/s2.R2.fastq.gz'),
             ('s3', 'SKB7.640196', 'fastq/s3.fastq.gz', 'fastq/s3.R2.fastq.gz')]
 
-        obs_cmd, obs_sample = generate_qc_trim_commands(
+        obs_cmd, obs_sample = generate_trim_commands(
             ['fastq/s1.fastq.gz', 'fastq/s2.fastq.gz', 'fastq/s3.fastq.gz'],
             ['fastq/s1.R2.fastq.gz', 'fastq/s2.R2.fastq.gz',
              'fastq/s3.R2.fastq.gz'],
@@ -230,7 +230,7 @@ class QC_TrimTests(PluginTestCase):
         self.assertEqual(obs_cmd, exp_cmd)
         self.assertEqual(obs_sample, exp_sample)
 
-    def test_qc_trim(self):
+    def test_trim(self):
         # generating filepaths
         in_dir = mkdtemp()
         self._clean_up_files.append(in_dir)
@@ -277,8 +277,7 @@ class QC_TrimTests(PluginTestCase):
         out_dir = mkdtemp()
         self._clean_up_files.append(out_dir)
 
-        success, ainfo, msg = qc_trim(self.qclient, jid,
-                                      self.params, out_dir)
+        success, ainfo, msg = trim(self.qclient, jid, self.params, out_dir)
 
         self.assertEqual("", msg)
         self.assertTrue(success)

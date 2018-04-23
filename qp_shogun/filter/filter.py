@@ -9,7 +9,7 @@
 from os.path import join
 from tempfile import TemporaryDirectory
 from qp_shogun.utils import (
-    _format_qc_params, make_read_pairs_per_sample,
+    _format_params, make_read_pairs_per_sample,
     _run_commands, _per_sample_ainfo)
 
 BOWTIE2_PARAMS = {
@@ -17,8 +17,8 @@ BOWTIE2_PARAMS = {
     'p': 'Number of threads'}
 
 
-def generate_qc_filter_commands(forward_seqs, reverse_seqs, map_file,
-                                out_dir, temp_dir, parameters):
+def generate_filter_commands(forward_seqs, reverse_seqs, map_file,
+                             out_dir, temp_dir, parameters):
     """Generates the QC_Filter commands
 
     Parameters
@@ -53,7 +53,7 @@ def generate_qc_filter_commands(forward_seqs, reverse_seqs, map_file,
 
     cmds = []
 
-    param_string = _format_qc_params(parameters, BOWTIE2_PARAMS)
+    param_string = _format_params(parameters, BOWTIE2_PARAMS)
     threads = parameters['Number of threads']
 
     for run_prefix, sample, f_fp, r_fp in samples:
@@ -91,7 +91,7 @@ def generate_qc_filter_commands(forward_seqs, reverse_seqs, map_file,
     return cmds, samples
 
 
-def qc_filter(qclient, job_id, parameters, out_dir):
+def filter(qclient, job_id, parameters, out_dir):
     """Run filtering using Bowtie2 with the given parameters
 
     Parameters
@@ -128,12 +128,11 @@ def qc_filter(qclient, job_id, parameters, out_dir):
     qclient.update_job_step(job_id, "Step 2 of 4: Generating"
                                     " QC_Filter commands")
     # Creating temporary directory for intermediate files
-    with TemporaryDirectory(dir=out_dir, prefix='qc_filter_') as temp_dir:
+    with TemporaryDirectory(dir=out_dir, prefix='filter_') as temp_dir:
         rs = fps['raw_reverse_seqs'] if 'raw_reverse_seqs' in fps else []
-        commands, samples = generate_qc_filter_commands(fps[
-                                                        'raw_forward_seqs'],
-                                                        rs, qiime_map, out_dir,
-                                                        temp_dir, parameters)
+        commands, samples = generate_filter_commands(fps['raw_forward_seqs'],
+                                                     rs, qiime_map, out_dir,
+                                                     temp_dir, parameters)
 
         # Step 3 execute filtering command
         len_cmd = len(commands)
