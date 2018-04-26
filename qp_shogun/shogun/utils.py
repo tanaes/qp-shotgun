@@ -13,10 +13,7 @@
 
 import os
 from os.path import join, isdir
-from biom import load_table
 import pandas as pd
-from io import StringIO
-import numpy as np
 from biom import Table
 
 ALIGNERS = ["utree", "burst", "bowtie2"]
@@ -109,7 +106,7 @@ def shogun_db_functional_parser(db_path):
 
 def shogun_parse_enzyme_table(f):
     md = pd.read_csv(
-        f, sep='\t', header=None ,error_bad_lines=False, warn_bad_lines=False)
+        f, sep='\t', header=None, error_bad_lines=False, warn_bad_lines=False)
     md.set_index(0, inplace=True)
     metadata = {}
     for i, row in md.iterrows():
@@ -140,8 +137,8 @@ def shogun_parse_pathway_table(f):
     return(metadata)
 
 
-def import_shogun_biom(
-    f, annotation_table=None, annotation_type=None, names_to_taxonomy=False):
+def import_shogun_biom(f, annotation_table=None,
+                       annotation_type=None, names_to_taxonomy=False):
     import_funcs = {'module': shogun_parse_module_table,
                     'pathway': shogun_parse_pathway_table,
                     'enzyme': shogun_parse_enzyme_table}

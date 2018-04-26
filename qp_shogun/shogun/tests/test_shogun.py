@@ -28,7 +28,7 @@ from qp_shogun.shogun.shogun import (
     generate_shogun_align_commands, _format_params,
     generate_shogun_assign_taxonomy_commands, generate_fna_file,
     generate_shogun_functional_commands, generate_shogun_redist_commands,
-    run_shogun_to_biom, shogun)
+    shogun)
 
 SHOGUN_PARAMS = {
     'Database': 'database', 'Aligner tool': 'aligner',
@@ -52,26 +52,26 @@ class ShogunTests(PluginTestCase):
         self._clean_up_files = []
         self._clean_up_files.append(out_dir)
         self.enzymes = ('K00001\t'
-                    '"1. Oxidoreductases"\t'
-                    '"1.1  Acting on the CH-OH group of donors"\t'
-                    '"1.1.1  With NAD+ or NADP+ as acceptor"\t'
-                    '"1.1.1.1  alcohol dehydrogenase"\n'
-                    'K00002\t'
-                    '"1. Oxidoreductases"\t'
-                    '"1.1  Acting on the CH-OH group of donors"\t'
-                    '"1.1.1  With NAD+ or NADP+ as acceptor"\t'
-                    '"1.1.1.2  alcohol dehydrogenase (NADP+)"\n'
-                    'K00003\t'
-                    '"1. Oxidoreductases"\t'
-                    '"1.1  Acting on the CH-OH group of donors"\t'
-                    '"1.1.1  With NAD+ or NADP+ as acceptor"\t'
-                    '"1.1.1.3  homoserine dehydrogenase"')
+                        '"1. Oxidoreductases"\t'
+                        '"1.1  Acting on the CH-OH group of donors"\t'
+                        '"1.1.1  With NAD+ or NADP+ as acceptor"\t'
+                        '"1.1.1.1  alcohol dehydrogenase"\n'
+                        'K00002\t'
+                        '"1. Oxidoreductases"\t'
+                        '"1.1  Acting on the CH-OH group of donors"\t'
+                        '"1.1.1  With NAD+ or NADP+ as acceptor"\t'
+                        '"1.1.1.2  alcohol dehydrogenase (NADP+)"\n'
+                        'K00003\t'
+                        '"1. Oxidoreductases"\t'
+                        '"1.1  Acting on the CH-OH group of donors"\t'
+                        '"1.1.1  With NAD+ or NADP+ as acceptor"\t'
+                        '"1.1.1.3  homoserine dehydrogenase"')
 
         self.enz_md = {
-            'K00001': {'taxonomy':['1. Oxidoreductases',
-                                   '1.1  Acting on the CH-OH group of donors',
-                                   '1.1.1  With NAD+ or NADP+ as acceptor',
-                                   '1.1.1.1  alcohol dehydrogenase']},
+            'K00001': {'taxonomy': ['1. Oxidoreductases',
+                                    '1.1  Acting on the CH-OH group of donors',
+                                    '1.1.1  With NAD+ or NADP+ as acceptor',
+                                    '1.1.1.1  alcohol dehydrogenase']},
             'K00002': {'taxonomy': ['1. Oxidoreductases',
                                     '1.1  Acting on the CH-OH group of donors',
                                     '1.1.1  With NAD+ or NADP+ as acceptor',
@@ -81,24 +81,25 @@ class ShogunTests(PluginTestCase):
                                     '1.1.1  With NAD+ or NADP+ as acceptor',
                                     '1.1.1.3  homoserine dehydrogenase']}}
 
-        self.modules = ('K00003\t'
-                   '"Pathway module"\t'
-                   '"Nucleotide and amino acid metabolism"\t'
-                   '"Cysteine and methionine metabolism"\t'
-                   '"M00017  Methionine biosynthesis,'
-                   ' apartate => homoserine => methionine [PATH:map00270]"\n'
-                   'K00003\t'
-                   '"Pathway module"\t'
-                   '"Nucleotide and amino acid metabolism"\t'
-                   '"Serine and threonine metabolism"\t'
-                   '"M00018  Threonine biosynthesis, '
-                   'apartate => homoserine => threonine [PATH:map00260]"\n'
-                   'K00133\t'
-                   '"Pathway module"\t'
-                   '"Nucleotide and amino acid metabolism"\t'
-                   '"Cysteine and methionine metabolism"\t'
-                   '"M00017  Methionine biosynthesis,'
-                   ' apartate => homoserine => methionine [PATH:map00270]"')
+        self.modules = (
+            'K00003\t'
+            '"Pathway module"\t'
+            '"Nucleotide and amino acid metabolism"\t'
+            '"Cysteine and methionine metabolism"\t'
+            '"M00017  Methionine biosynthesis,'
+            ' apartate => homoserine => methionine [PATH:map00270]"\n'
+            'K00003\t'
+            '"Pathway module"\t'
+            '"Nucleotide and amino acid metabolism"\t'
+            '"Serine and threonine metabolism"\t'
+            '"M00018  Threonine biosynthesis, '
+            'apartate => homoserine => threonine [PATH:map00260]"\n'
+            'K00133\t'
+            '"Pathway module"\t'
+            '"Nucleotide and amino acid metabolism"\t'
+            '"Cysteine and methionine metabolism"\t'
+            '"M00017  Methionine biosynthesis,'
+            ' apartate => homoserine => methionine [PATH:map00270]"')
 
         self.mod_md = {
             'M00017': {'taxonomy': ['Pathway module',
@@ -115,23 +116,23 @@ class ShogunTests(PluginTestCase):
                                     'threonine [PATH:map00260]']}}
 
         self.pathways = ('K00271\t'
-                    '"Enzymes"\t'
-                    '"1. Oxidoreductases"\t'
-                    '"1.4  Acting on the CH-NH2 group of donors"\t'
-                    '"1.4.1  With NAD+ or NADP+ as acceptor"\t'
-                    '"1.4.1.23  valine dehydrogenase (NAD+)"\n'
-                    'K00272\t'
-                    '"Enzymes"\t'
-                    '"1. Oxidoreductases"\t'
-                    '"1.4  Acting on the CH-NH2 group of donors"\t'
-                    '"1.4.3  With oxygen as acceptor"\t'
-                    '"1.4.3.1  D-aspartate oxidase"\n'
-                    'K00273\t'
-                    '"Enzymes"\t'
-                    '"1. Oxidoreductases"\t'
-                    '"1.4  Acting on the CH-NH2 group of donors"\t'
-                    '"1.4.3  With oxygen as acceptor"\t'
-                    '"1.4.3.3  D-amino-acid oxidase"')
+                         '"Enzymes"\t'
+                         '"1. Oxidoreductases"\t'
+                         '"1.4  Acting on the CH-NH2 group of donors"\t'
+                         '"1.4.1  With NAD+ or NADP+ as acceptor"\t'
+                         '"1.4.1.23  valine dehydrogenase (NAD+)"\n'
+                         'K00272\t'
+                         '"Enzymes"\t'
+                         '"1. Oxidoreductases"\t'
+                         '"1.4  Acting on the CH-NH2 group of donors"\t'
+                         '"1.4.3  With oxygen as acceptor"\t'
+                         '"1.4.3.1  D-aspartate oxidase"\n'
+                         'K00273\t'
+                         '"Enzymes"\t'
+                         '"1. Oxidoreductases"\t'
+                         '"1.4  Acting on the CH-NH2 group of donors"\t'
+                         '"1.4.3  With oxygen as acceptor"\t'
+                         '"1.4.3.3  D-amino-acid oxidase"')
 
         self.path_md = {
             '1.4.1  With NAD+ or NADP+ as acceptor': {
@@ -201,7 +202,8 @@ class ShogunTests(PluginTestCase):
         exp = {
             'enzyme': join(db_path, '%s-enzyme-annotations.txt' % func_prefix),
             'module': join(db_path, '%s-module-annotations.txt' % func_prefix),
-            'pathway': join(db_path,'%s-pathway-annotations.txt' % func_prefix)}
+            'pathway': join(db_path, '%s-pathway-annotations.txt'
+                            % func_prefix)}
         obs = shogun_db_functional_parser(db_path)
 
         self.assertEqual(obs, exp)
@@ -237,6 +239,8 @@ class ShogunTests(PluginTestCase):
                           '2563'])
 
         obs_biom = import_shogun_biom(StringIO(shogun_table))
+        self.assertEqual(exp_biom, obs_biom)
+
         tax_metadata = {'k__Archaea': {
                             'taxonomy': ['k__Archaea']},
                         'k__Archaea;p__Crenarchaeota': {
@@ -247,8 +251,8 @@ class ShogunTests(PluginTestCase):
                                          'p__Crenarchaeota',
                                          'c__Thermoprotei']}}
         exp_biom_tax = Table(np.array([[26, 25],
-                                   [3, 5],
-                                   [1, 25]]),
+                                       [3, 5],
+                                       [1, 25]]),
                              ['k__Archaea',
                               'k__Archaea;p__Crenarchaeota',
                               'k__Archaea;p__Crenarchaeota;c__Thermoprotei'],
@@ -260,11 +264,10 @@ class ShogunTests(PluginTestCase):
 
         self.assertEqual(exp_biom_tax, obs_biom_tax)
 
-
         # test modules
         module_table = ('#MODULE ID\t1450\t2563\n'
-                'M00017\t26\t25\n'
-                'M00018\t3\t5\n')
+                        'M00017\t26\t25\n'
+                        'M00018\t3\t5\n')
 
         exp_m_biom = Table(np.array([[26, 25],
                                      [3, 5]]),
@@ -279,8 +282,8 @@ class ShogunTests(PluginTestCase):
 
         # test pathways
         path_table = ('#PATHWAY ID\t1450\t2563\n'
-                        '1.4.1  With NAD+ or NADP+ as acceptor\t26\t25\n'
-                        '1.4.3  With oxygen as acceptor\t3\t5\n')
+                      '1.4.1  With NAD+ or NADP+ as acceptor\t26\t25\n'
+                      '1.4.3  With oxygen as acceptor\t3\t5\n')
 
         exp_p_biom = Table(np.array([[26, 25],
                                      [3, 5]]),
@@ -316,9 +319,9 @@ class ShogunTests(PluginTestCase):
 
         # test empty
         empty_table = ('#KEGG ID\t1450\t2563\n')
-        exp_empty_biom = Table(np.zeros((0,2)),
-                           [],
-                           ['1450', '2563'])
+        exp_empty_biom = Table(np.zeros((0, 2)),
+                               [],
+                               ['1450', '2563'])
         obs_empty_biom = import_shogun_biom(
             StringIO(empty_table), annotation_table=StringIO(self.enzymes),
             annotation_type='enzyme')

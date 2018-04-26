@@ -11,7 +11,7 @@ from .utils import readfq, import_shogun_biom, shogun_db_functional_parser
 from qp_shogun.utils import (make_read_pairs_per_sample, _run_commands)
 import gzip
 from qiita_client import ArtifactInfo
-from biom import Table, util
+from biom import util
 
 SHOGUN_PARAMS = {
     'Database': 'database', 'Aligner tool': 'aligner',
@@ -126,10 +126,10 @@ def generate_shogun_redist_commands(profile_dir, temp_dir,
 def run_shogun_to_biom(in_fp, biom_in, out_dir, level, version):
     if version == 'redist':
         output_fp = join(out_dir, 'otu_table.%s.%s.biom'
-                        % (level, version))
+                         % (level, version))
     else:
         output_fp = join(out_dir, 'otu_table.%s.%s.%s.biom'
-                        % (level, version, biom_in[0]))
+                         % (level, version, biom_in[0]))
     tb = import_shogun_biom(in_fp, biom_in[1],
                             biom_in[2], biom_in[3])
     with util.biom_open(output_fp, 'w') as f:
@@ -246,10 +246,11 @@ def shogun(qclient, job_id, parameters, out_dir):
         for level in levels:
 
             func_to_biom_fps = [
-                ["kegg.modules.coverage", func_db_fp['module'], 'module', False],
+                ["kegg.modules.coverage", func_db_fp['module'],
+                 'module', False],
                 ["kegg.modules", func_db_fp['module'], 'module', False],
                 ["kegg.pathways.coverage", func_db_fp['pathway'],
-                'pathway', False],
+                 'pathway', False],
                 ["kegg.pathways", func_db_fp['pathway'], 'pathway', False],
                 ["kegg", func_db_fp['enzyme'], 'enzyme', True],
                 ["normalized", func_db_fp['enzyme'], 'pathway', True]]
