@@ -108,7 +108,8 @@ def shogun_db_functional_parser(db_path):
 
 
 def shogun_parse_enzyme_table(f):
-    md = pd.read_csv(f, sep='\t', header=None)
+    md = pd.read_csv(
+        f, sep='\t', header=None ,error_bad_lines=False, warn_bad_lines=False)
     md.set_index(0, inplace=True)
     metadata = {}
     for i, row in md.iterrows():
@@ -117,7 +118,8 @@ def shogun_parse_enzyme_table(f):
 
 
 def shogun_parse_module_table(f):
-    md = pd.read_csv(f, sep='\t', header=None)
+    md = pd.read_csv(
+        f, sep='\t', header=None, error_bad_lines=False, warn_bad_lines=False)
     metadata = {}
     for i, row in md.iterrows():
         module = row[4].split('  ')[0]
@@ -128,7 +130,8 @@ def shogun_parse_module_table(f):
 
 
 def shogun_parse_pathway_table(f):
-    md = pd.read_csv(f, sep='\t', header=None)
+    md = pd.read_csv(
+        f, sep='\t', header=None, error_bad_lines=False, warn_bad_lines=False)
     metadata = {}
     for i, row in md.iterrows():
         pathway = row[4]
