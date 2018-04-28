@@ -126,10 +126,10 @@ def generate_shogun_redist_commands(profile_dir, temp_dir,
 def run_shogun_to_biom(in_fp, biom_in, out_dir, level, version):
     if version == 'redist':
         output_fp = join(out_dir, 'otu_table.%s.%s.biom'
-                         % (level, version))
+                         % (version, level))
     else:
         output_fp = join(out_dir, 'otu_table.%s.%s.%s.biom'
-                         % (level, version, biom_in[0]))
+                         % (version, level, biom_in[0]))
     tb = import_shogun_biom(in_fp, biom_in[1],
                             biom_in[2], biom_in[3])
     with util.biom_open(output_fp, 'w') as f:

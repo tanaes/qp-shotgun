@@ -474,7 +474,7 @@ class ShogunTests(PluginTestCase):
         obs_redist_fps = ainfo_redist.files
 
         od = partial(join, out_dir)
-        func_prefix = "species.func"
+        func_prefix = "func.species"
         exp_func_fps = [
             od("otu_table.%s.kegg.modules.coverage.biom" % func_prefix),
             od("otu_table.%s.kegg.modules.biom" % func_prefix),
@@ -484,9 +484,9 @@ class ShogunTests(PluginTestCase):
             od("otu_table.%s.normalized.biom" % func_prefix)]
 
         exp_redist_fps = [
-            od('otu_table.genus.redist.biom'),
-            od('otu_table.species.redist.biom'),
-            od('otu_table.strain.redist.biom')]
+            od('otu_table.redist.genus.biom'),
+            od('otu_table.redist.species.biom'),
+            od('otu_table.redist.strain.biom')]
 
         self.assertEqual(obs_func_fps, exp_func_fps)
         self.assertEqual(obs_redist_fps, exp_redist_fps)
@@ -639,7 +639,7 @@ class ShogunTests(PluginTestCase):
         obs_redist_fps = ainfo_redist.files
 
         od = partial(join, out_dir)
-        func_prefix = "species.func"
+        func_prefix = "func.species"
         exp_func_fps = [
             od("otu_table.%s.kegg.modules.coverage.biom" % func_prefix),
             od("otu_table.%s.kegg.modules.biom" % func_prefix),
@@ -649,9 +649,9 @@ class ShogunTests(PluginTestCase):
             od("otu_table.%s.normalized.biom" % func_prefix)]
 
         exp_redist_fps = [
-            od('otu_table.genus.redist.biom'),
-            od('otu_table.species.redist.biom'),
-            od('otu_table.strain.redist.biom')]
+            od('otu_table.redist.genus.biom'),
+            od('otu_table.redist.species.biom'),
+            od('otu_table.redist.strain.biom')]
 
         self.assertEqual(obs_func_fps, exp_func_fps)
         self.assertEqual(obs_redist_fps, exp_redist_fps)
