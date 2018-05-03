@@ -13,6 +13,8 @@
 
 import os
 from os.path import join, isdir
+import pandas as pd
+from biom import Table
 
 ALIGNERS = ["utree", "burst", "bowtie2"]
 
@@ -87,3 +89,73 @@ def readfq(fp):  # this is a generator function
             if last:  # reach EOF before reading enough quality
                 yield name, seq, None  # yield a fasta record instead
                 break
+
+
+def shogun_db_functional_parser(db_path):
+    # Metadata file path
+    md_fp = join(db_path, 'metadata.yaml')
+    metadata = pd.read_csv(md_fp, sep=':', index_col=0)
+    func_prefix = metadata.loc['function'].values[0].strip()
+    fp_array = {
+        'enzyme': join(db_path, '%s-enzyme-annotations.txt' % func_prefix),
+        'module': join(db_path, '%s-module-annotations.txt' % func_prefix),
+        'pathway': join(db_path, '%s-pathway-annotations.txt' % func_prefix)}
+
+    return fp_array
+
+
+def shogun_parse_enzyme_table(f):
+    md = pd.read_csv(
+        f, sep='\t', header=None, error_bad_lines=False, warn_bad_lines=False)
+    md.set_index(0, inplace=True)
+    metadata = {}
+    for i, row in md.iterrows():
+        metadata[i] = {'taxonomy': [x for x in row.values]}
+    return(metadata)
+
+
+def shogun_parse_module_table(f):
+    md = pd.read_csv(
+        f, sep='\t', header=None, error_bad_lines=False, warn_bad_lines=False)
+    metadata = {}
+    for i, row in md.iterrows():
+        module = row[4].split('  ')[0]
+        name = row[4].split('  ')[1]
+        if module not in metadata:
+            metadata[module] = {'taxonomy': [row[1], row[2], row[3], name]}
+    return(metadata)
+
+
+def shogun_parse_pathway_table(f):
+    md = pd.read_csv(
+        f, sep='\t', header=None, error_bad_lines=False, warn_bad_lines=False)
+    metadata = {}
+    for i, row in md.iterrows():
+        pathway = row[4]
+        if pathway not in metadata:
+            metadata[pathway] = {'taxonomy': [row[1], row[2], row[3]]}
+    return(metadata)
+
+
+def import_shogun_biom(f, annotation_table=None,
+                       annotation_type=None, names_to_taxonomy=False):
+    import_funcs = {'module': shogun_parse_module_table,
+                    'pathway': shogun_parse_pathway_table,
+                    'enzyme': shogun_parse_enzyme_table}
+
+    table = pd.read_csv(f, sep='\t', index_col=0)
+
+    bt = Table(table.values,
+               observation_ids=list(map(str, table.index)),
+               sample_ids=list(map(str, table.columns)))
+
+    if names_to_taxonomy:
+        metadata = {
+            x: {'taxonomy': x.split(';')} for x in bt.ids(axis='observation')}
+        bt.add_metadata(metadata, axis='observation')
+
+    if annotation_table is not None:
+        metadata = import_funcs[annotation_type](annotation_table)
+        bt.add_metadata(metadata, axis='observation')
+
+    return(bt)

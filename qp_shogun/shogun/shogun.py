@@ -7,11 +7,11 @@
 # -----------------------------------------------------------------------------
 from os.path import join
 from tempfile import TemporaryDirectory
-from .utils import readfq
+from .utils import readfq, import_shogun_biom, shogun_db_functional_parser
 from qp_shogun.utils import (make_read_pairs_per_sample, _run_commands)
 import gzip
 from qiita_client import ArtifactInfo
-
+from biom import util
 
 SHOGUN_PARAMS = {
     'Database': 'database', 'Aligner tool': 'aligner',
@@ -123,18 +123,19 @@ def generate_shogun_redist_commands(profile_dir, temp_dir,
     return cmds, output
 
 
-def generate_biom_conversion_commands(input_fp, output_dir, level, version):
-    cmds = []
-    output = join(output_dir, 'otu_table.%s.%s.biom' % (level, version))
-    cmds.append(
-        'biom convert -i {input} '
-        '-o {output} '
-        '--table-type="OTU table" '
-        '--to-hdf5'.format(
-            input=input_fp,
-            output=output))
+def run_shogun_to_biom(in_fp, biom_in, out_dir, level, version):
+    if version == 'redist':
+        output_fp = join(out_dir, 'otu_table.%s.%s.biom'
+                         % (version, level))
+    else:
+        output_fp = join(out_dir, 'otu_table.%s.%s.%s.biom'
+                         % (version, level, biom_in[0]))
+    tb = import_shogun_biom(in_fp, biom_in[1],
+                            biom_in[2], biom_in[3])
+    with util.biom_open(output_fp, 'w') as f:
+        tb.to_hdf5(f, "shogun")
 
-    return cmds, output
+    return output_fp
 
 
 def shogun(qclient, job_id, parameters, out_dir):
@@ -201,7 +202,6 @@ def shogun(qclient, job_id, parameters, out_dir):
             temp_dir, parameters)
         success, msg = _run_commands(
             qclient, job_id, assign_cmd, sys_msg, 'Shogun taxonomy assignment')
-
         if not success:
             return False, None, msg
 
@@ -237,37 +237,31 @@ def shogun(qclient, job_id, parameters, out_dir):
         # Converting redistributed files to biom
         redist_levels = ['genus', 'species', 'strain']
         for redist_fp, level in zip(redist_fps, redist_levels):
-            biom_cmd, output = generate_biom_conversion_commands(
-                redist_fp, out_dir, level, 'redist')
-            success, msg = _run_commands(
-                qclient, job_id, biom_cmd, sys_msg,
-                'Redistribute Biom conversion')
-            if not success:
-                return False, None, msg
-            else:
-                redist_biom_outputs.append(output)
+            biom_in = ["redist", None, '', True]
+            output = run_shogun_to_biom(
+                redist_fp, biom_in, out_dir, level, 'redist')
+            redist_biom_outputs.append(output)
         # Coverting funcitonal files to biom
+        func_db_fp = shogun_db_functional_parser(parameters['database'])
         for level in levels:
 
             func_to_biom_fps = [
-                "kegg.modules.coverage",
-                "kegg.modules",
-                "kegg.pathways.coverage",
-                "kegg.pathways",
-                "kegg",
-                "normalized"]
+                ["kegg.modules.coverage", func_db_fp['module'],
+                 'module', False],
+                ["kegg.modules", func_db_fp['module'], 'module', False],
+                ["kegg.pathways.coverage", func_db_fp['pathway'],
+                 'pathway', False],
+                ["kegg.pathways", func_db_fp['pathway'], 'pathway', False],
+                ["kegg", func_db_fp['enzyme'], 'enzyme', True],
+                ["normalized", func_db_fp['enzyme'], 'pathway', True]]
+
             for biom_in in func_to_biom_fps:
-                biom_in_fp = join(
-                    func_fp, "profile.%s.%s.txt" % (level, biom_in))
-                biom_cmd, output = generate_biom_conversion_commands(
-                    biom_in_fp, out_dir, level, biom_in)
-                success, msg = _run_commands(
-                    qclient, job_id, biom_cmd, sys_msg,
-                    ' Functional Biom conversion')
-                if not success:
-                    return False, None, msg
-                else:
-                    func_biom_outputs.append(output)
+                biom_in_fp = join(func_fp, "profile.%s.%s.txt"
+                                  % (level, biom_in[0]))
+                output = run_shogun_to_biom(biom_in_fp, biom_in, out_dir,
+                                            level, 'func')
+                func_biom_outputs.append(output)
+
     func_files_type_name = 'Functional Predictions'
     redist_files_type_name = 'Taxonomic Predictions'
     ainfo = [ArtifactInfo(func_files_type_name, 'BIOM', func_biom_outputs),

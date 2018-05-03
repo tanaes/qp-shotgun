@@ -17,13 +17,18 @@ from qp_shogun import plugin
 from tempfile import mkdtemp
 from json import dumps
 from functools import partial
+from biom import Table
+import numpy as np
+from io import StringIO
 from qp_shogun.shogun.utils import (
-    get_dbs, get_dbs_list, generate_shogun_dflt_params)
+    get_dbs, get_dbs_list, generate_shogun_dflt_params,
+    import_shogun_biom, shogun_db_functional_parser, shogun_parse_module_table,
+    shogun_parse_enzyme_table, shogun_parse_pathway_table)
 from qp_shogun.shogun.shogun import (
     generate_shogun_align_commands, _format_params,
     generate_shogun_assign_taxonomy_commands, generate_fna_file,
     generate_shogun_functional_commands, generate_shogun_redist_commands,
-    generate_biom_conversion_commands, shogun)
+    shogun)
 
 SHOGUN_PARAMS = {
     'Database': 'database', 'Aligner tool': 'aligner',
@@ -46,6 +51,98 @@ class ShogunTests(PluginTestCase):
         }
         self._clean_up_files = []
         self._clean_up_files.append(out_dir)
+        self.enzymes = ('K00001\t'
+                        '"1. Oxidoreductases"\t'
+                        '"1.1  Acting on the CH-OH group of donors"\t'
+                        '"1.1.1  With NAD+ or NADP+ as acceptor"\t'
+                        '"1.1.1.1  alcohol dehydrogenase"\n'
+                        'K00002\t'
+                        '"1. Oxidoreductases"\t'
+                        '"1.1  Acting on the CH-OH group of donors"\t'
+                        '"1.1.1  With NAD+ or NADP+ as acceptor"\t'
+                        '"1.1.1.2  alcohol dehydrogenase (NADP+)"\n'
+                        'K00003\t'
+                        '"1. Oxidoreductases"\t'
+                        '"1.1  Acting on the CH-OH group of donors"\t'
+                        '"1.1.1  With NAD+ or NADP+ as acceptor"\t'
+                        '"1.1.1.3  homoserine dehydrogenase"')
+
+        self.enz_md = {
+            'K00001': {'taxonomy': ['1. Oxidoreductases',
+                                    '1.1  Acting on the CH-OH group of donors',
+                                    '1.1.1  With NAD+ or NADP+ as acceptor',
+                                    '1.1.1.1  alcohol dehydrogenase']},
+            'K00002': {'taxonomy': ['1. Oxidoreductases',
+                                    '1.1  Acting on the CH-OH group of donors',
+                                    '1.1.1  With NAD+ or NADP+ as acceptor',
+                                    '1.1.1.2  alcohol dehydrogenase (NADP+)']},
+            'K00003': {'taxonomy': ['1. Oxidoreductases',
+                                    '1.1  Acting on the CH-OH group of donors',
+                                    '1.1.1  With NAD+ or NADP+ as acceptor',
+                                    '1.1.1.3  homoserine dehydrogenase']}}
+
+        self.modules = (
+            'K00003\t'
+            '"Pathway module"\t'
+            '"Nucleotide and amino acid metabolism"\t'
+            '"Cysteine and methionine metabolism"\t'
+            '"M00017  Methionine biosynthesis,'
+            ' apartate => homoserine => methionine [PATH:map00270]"\n'
+            'K00003\t'
+            '"Pathway module"\t'
+            '"Nucleotide and amino acid metabolism"\t'
+            '"Serine and threonine metabolism"\t'
+            '"M00018  Threonine biosynthesis, '
+            'apartate => homoserine => threonine [PATH:map00260]"\n'
+            'K00133\t'
+            '"Pathway module"\t'
+            '"Nucleotide and amino acid metabolism"\t'
+            '"Cysteine and methionine metabolism"\t'
+            '"M00017  Methionine biosynthesis,'
+            ' apartate => homoserine => methionine [PATH:map00270]"')
+
+        self.mod_md = {
+            'M00017': {'taxonomy': ['Pathway module',
+                                    'Nucleotide and amino acid metabolism',
+                                    'Cysteine and methionine metabolism',
+                                    'Methionine biosynthesis,' +
+                                    ' apartate => homoserine => ' +
+                                    'methionine [PATH:map00270]']},
+            'M00018': {'taxonomy': ['Pathway module',
+                                    'Nucleotide and amino acid metabolism',
+                                    'Serine and threonine metabolism',
+                                    'Threonine biosynthesis,' +
+                                    ' apartate => homoserine => ' +
+                                    'threonine [PATH:map00260]']}}
+
+        self.pathways = ('K00271\t'
+                         '"Enzymes"\t'
+                         '"1. Oxidoreductases"\t'
+                         '"1.4  Acting on the CH-NH2 group of donors"\t'
+                         '"1.4.1  With NAD+ or NADP+ as acceptor"\t'
+                         '"1.4.1.23  valine dehydrogenase (NAD+)"\n'
+                         'K00272\t'
+                         '"Enzymes"\t'
+                         '"1. Oxidoreductases"\t'
+                         '"1.4  Acting on the CH-NH2 group of donors"\t'
+                         '"1.4.3  With oxygen as acceptor"\t'
+                         '"1.4.3.1  D-aspartate oxidase"\n'
+                         'K00273\t'
+                         '"Enzymes"\t'
+                         '"1. Oxidoreductases"\t'
+                         '"1.4  Acting on the CH-NH2 group of donors"\t'
+                         '"1.4.3  With oxygen as acceptor"\t'
+                         '"1.4.3.3  D-amino-acid oxidase"')
+
+        self.path_md = {
+            '1.4.1  With NAD+ or NADP+ as acceptor': {
+                'taxonomy': ['Enzymes',
+                             '1. Oxidoreductases',
+                             '1.4  Acting on the CH-NH2 group of donors']},
+            '1.4.3  With oxygen as acceptor': {
+                'taxonomy': ['Enzymes',
+                             '1. Oxidoreductases',
+                             '1.4  Acting on the CH-NH2 group of donors']}}
 
     def tearDown(self):
         for fp in self._clean_up_files:
@@ -98,6 +195,138 @@ class ShogunTests(PluginTestCase):
             obs = generate_fna_file(fp, sample)
 
         self.assertEqual(obs, exp)
+
+    def test_shogun_db_functional_parser(self):
+        db_path = self.params['Database']
+        func_prefix = 'function/ko'
+        exp = {
+            'enzyme': join(db_path, '%s-enzyme-annotations.txt' % func_prefix),
+            'module': join(db_path, '%s-module-annotations.txt' % func_prefix),
+            'pathway': join(db_path, '%s-pathway-annotations.txt'
+                            % func_prefix)}
+        obs = shogun_db_functional_parser(db_path)
+
+        self.assertEqual(obs, exp)
+
+    def test_shogun_parse_enzyme_table(self):
+        out_table = shogun_parse_enzyme_table(StringIO(self.enzymes))
+
+        self.assertDictEqual(self.enz_md, out_table)
+
+    def test_shogun_parse_module_table(self):
+        out_table = shogun_parse_module_table(StringIO(self.modules))
+
+        self.assertDictEqual(self.mod_md, out_table)
+
+    def test_shogun_parse_pathway_table(self):
+        out_table = shogun_parse_pathway_table(StringIO(self.pathways))
+
+        self.assertDictEqual(self.path_md, out_table)
+
+    def test_import_shogun_biom(self):
+        shogun_table = ('#OTU ID\t1450\t2563\n'
+                        'k__Archaea\t26\t25\n'
+                        'k__Archaea;p__Crenarchaeota\t3\t5\n'
+                        'k__Archaea;p__Crenarchaeota;c__Thermoprotei\t1\t25\n')
+
+        exp_biom = Table(np.array([[26, 25],
+                                   [3, 5],
+                                   [1, 25]]),
+                         ['k__Archaea',
+                          'k__Archaea;p__Crenarchaeota',
+                          'k__Archaea;p__Crenarchaeota;c__Thermoprotei'],
+                         ['1450',
+                          '2563'])
+
+        obs_biom = import_shogun_biom(StringIO(shogun_table))
+        self.assertEqual(exp_biom, obs_biom)
+
+        tax_metadata = {'k__Archaea': {
+                            'taxonomy': ['k__Archaea']},
+                        'k__Archaea;p__Crenarchaeota': {
+                            'taxonomy': ['k__Archaea',
+                                         'p__Crenarchaeota']},
+                        'k__Archaea;p__Crenarchaeota;c__Thermoprotei': {
+                            'taxonomy': ['k__Archaea',
+                                         'p__Crenarchaeota',
+                                         'c__Thermoprotei']}}
+        exp_biom_tax = Table(np.array([[26, 25],
+                                       [3, 5],
+                                       [1, 25]]),
+                             ['k__Archaea',
+                              'k__Archaea;p__Crenarchaeota',
+                              'k__Archaea;p__Crenarchaeota;c__Thermoprotei'],
+                             ['1450',
+                              '2563'])
+        exp_biom_tax.add_metadata(tax_metadata, axis='observation')
+        obs_biom_tax = import_shogun_biom(
+            StringIO(shogun_table), names_to_taxonomy=True)
+
+        self.assertEqual(exp_biom_tax, obs_biom_tax)
+
+        # test modules
+        module_table = ('#MODULE ID\t1450\t2563\n'
+                        'M00017\t26\t25\n'
+                        'M00018\t3\t5\n')
+
+        exp_m_biom = Table(np.array([[26, 25],
+                                     [3, 5]]),
+                           ['M00017', 'M00018'],
+                           ['1450', '2563'])
+        exp_m_biom.add_metadata(self.mod_md, axis='observation')
+        obs_m_biom = import_shogun_biom(
+            StringIO(module_table), annotation_table=StringIO(self.modules),
+            annotation_type='module')
+
+        self.assertEqual(exp_m_biom, obs_m_biom)
+
+        # test pathways
+        path_table = ('#PATHWAY ID\t1450\t2563\n'
+                      '1.4.1  With NAD+ or NADP+ as acceptor\t26\t25\n'
+                      '1.4.3  With oxygen as acceptor\t3\t5\n')
+
+        exp_p_biom = Table(np.array([[26, 25],
+                                     [3, 5]]),
+                           ['1.4.1  With NAD+ or NADP+ as acceptor',
+                            '1.4.3  With oxygen as acceptor'],
+                           ['1450', '2563'])
+
+        exp_p_biom.add_metadata(self.path_md, axis='observation')
+        obs_p_biom = import_shogun_biom(
+            StringIO(path_table), annotation_table=StringIO(self.pathways),
+            annotation_type='pathway')
+
+        self.assertEqual(exp_p_biom, obs_p_biom)
+
+        # test enzymes
+        enzyme_table = ('#KEGG ID\t1450\t2563\n'
+                        'K00001\t26\t25\n'
+                        'K00002\t3\t5\n'
+                        'K00003\t1\t25\n')
+        exp_e_biom = Table(np.array([[26, 25],
+                                     [3, 5],
+                                     [1, 25]]),
+                           ['K00001',
+                            'K00002',
+                            'K00003'],
+                           ['1450', '2563'])
+        exp_e_biom.add_metadata(self.enz_md, axis='observation')
+        obs_e_biom = import_shogun_biom(
+            StringIO(enzyme_table), annotation_table=StringIO(self.enzymes),
+            annotation_type='enzyme')
+
+        self.assertEqual(exp_e_biom, obs_e_biom)
+
+        # test empty
+        empty_table = ('#KEGG ID\t1450\t2563\n')
+        exp_empty_biom = Table(np.zeros((0, 2)),
+                               [],
+                               ['1450', '2563'])
+        obs_empty_biom = import_shogun_biom(
+            StringIO(empty_table), annotation_table=StringIO(self.enzymes),
+            annotation_type='enzyme')
+
+        self.assertEqual(exp_empty_biom, obs_empty_biom)
 
     def test_format_shogun_params(self):
         obs = _format_params(self.params, SHOGUN_PARAMS)
@@ -180,23 +409,6 @@ class ShogunTests(PluginTestCase):
 
         self.assertEqual(obs_cmd, exp_cmd)
 
-    def test_generate_biom_conversion_commands(self):
-        out_dir = self.out_dir
-        with TemporaryDirectory(dir=out_dir, prefix='shogun_') as temp_dir:
-            exp_cmd = [
-                ('biom convert -i %s '
-                 '-o %s '
-                 '--table-type="OTU table" '
-                 '--to-hdf5') %
-                (join(temp_dir, 'profile.tsv'),
-                 join(out_dir, 'otu_table.species.redist.biom'))
-                ]
-            profile_fp = join(temp_dir, 'profile.tsv')
-            obs_cmd, output = generate_biom_conversion_commands(
-                profile_fp, out_dir, 'species', 'redist')
-
-        self.assertEqual(obs_cmd, exp_cmd)
-
     def test_shogun_bt2(self):
         # generating filepaths
         in_dir = mkdtemp()
@@ -262,7 +474,7 @@ class ShogunTests(PluginTestCase):
         obs_redist_fps = ainfo_redist.files
 
         od = partial(join, out_dir)
-        func_prefix = "species"
+        func_prefix = "func.species"
         exp_func_fps = [
             od("otu_table.%s.kegg.modules.coverage.biom" % func_prefix),
             od("otu_table.%s.kegg.modules.biom" % func_prefix),
@@ -272,94 +484,95 @@ class ShogunTests(PluginTestCase):
             od("otu_table.%s.normalized.biom" % func_prefix)]
 
         exp_redist_fps = [
-            od('otu_table.genus.redist.biom'),
-            od('otu_table.species.redist.biom'),
-            od('otu_table.strain.redist.biom')]
+            od('otu_table.redist.genus.biom'),
+            od('otu_table.redist.species.biom'),
+            od('otu_table.redist.strain.biom')]
 
         self.assertEqual(obs_func_fps, exp_func_fps)
         self.assertEqual(obs_redist_fps, exp_redist_fps)
 
-#    def test_shogun_burst(self):
-#        # generating filepaths
-#        in_dir = mkdtemp()
-#        self._clean_up_files.append(in_dir)
+    def test_shogun_burst(self):
+        # generating filepaths
+        in_dir = mkdtemp()
+        self._clean_up_files.append(in_dir)
 
-#        fp1_1 = join(in_dir, 'S22205_S104_L001_R1_001.fastq.gz')
-#        fp1_2 = join(in_dir, 'S22205_S104_L001_R2_001.fastq.gz')
-#        fp2_1 = join(in_dir, 'S22282_S102_L001_R1_001.fastq.gz')
-#        fp2_2 = join(in_dir, 'S22282_S102_L001_R2_001.fastq.gz')
+        fp1_1 = join(in_dir, 'S22205_S104_L001_R1_001.fastq.gz')
+        fp1_2 = join(in_dir, 'S22205_S104_L001_R2_001.fastq.gz')
+        fp2_1 = join(in_dir, 'S22282_S102_L001_R1_001.fastq.gz')
+        fp2_2 = join(in_dir, 'S22282_S102_L001_R2_001.fastq.gz')
 
-#        copyfile('support_files/S22205_S104_L001_R1_001.fastq.gz', fp1_1)
-#        copyfile('support_files/S22205_S104_L001_R2_001.fastq.gz', fp1_2)
-#        copyfile('support_files/S22282_S102_L001_R1_001.fastq.gz', fp2_1)
-#        copyfile('support_files/S22282_S102_L001_R2_001.fastq.gz', fp2_2)
+        copyfile('support_files/S22205_S104_L001_R1_001.fastq.gz', fp1_1)
+        copyfile('support_files/S22205_S104_L001_R2_001.fastq.gz', fp1_2)
+        copyfile('support_files/S22282_S102_L001_R1_001.fastq.gz', fp2_1)
+        copyfile('support_files/S22282_S102_L001_R2_001.fastq.gz', fp2_2)
 
-#        # inserting new prep template
-#        prep_info_dict = {
-#            'SKB8.640193': {'run_prefix': 'S22205_S104'},
-#            'SKD8.640184': {'run_prefix': 'S22282_S102'}}
-#        data = {'prep_info': dumps(prep_info_dict),
-#                # magic #1 = testing study
-#                'study': 1,
-#                'data_type': 'Metagenomic'}
-#        pid = self.qclient.post('/apitest/prep_template/', data=data)['prep']
+        # inserting new prep template
+        prep_info_dict = {
+           'SKB8.640193': {'run_prefix': 'S22205_S104'},
+           'SKD8.640184': {'run_prefix': 'S22282_S102'}}
+        data = {'prep_info': dumps(prep_info_dict),
+                # magic #1 = testing study
+                'study': 1,
+                'data_type': 'Metagenomic'}
+        pid = self.qclient.post('/apitest/prep_template/', data=data)['prep']
 
-#        # inserting artifacts
-#        data = {
-#            'filepaths': dumps([
-#                (fp1_2, 'raw_reverse_seqs'),
-#                (fp2_1, 'raw_forward_seqs'),
-#                (fp2_2, 'raw_reverse_seqs')]),
-#            'type': "per_sample_FASTQ",
-#            'name': "Test Shogun artifact",
-#            'prep': pid}
-#        aid = self.qclient.post('/apitest/artifact/', data=data)['artifact']
+        # inserting artifacts
+        data = {
+           'filepaths': dumps([
+               (fp1_1, 'raw_forward_seqs'),
+               (fp1_2, 'raw_reverse_seqs'),
+               (fp2_1, 'raw_forward_seqs'),
+               (fp2_2, 'raw_reverse_seqs')]),
+           'type': "per_sample_FASTQ",
+           'name': "Test Shogun artifact",
+           'prep': pid}
+        aid = self.qclient.post('/apitest/artifact/', data=data)['artifact']
 
-#        self.params['input'] = aid
-#        self.params['Aligner tool'] = 'burst'
-#        data = {'user': 'demo@microbio.me',
-#                'command': dumps(['qp-shogun', '0.0.1', 'Shogun']),
-#                'status': 'running',
-#                'parameters': dumps(self.params)}
-#        jid = self.qclient.post('/apitest/processing_job/', data=data)['job']
+        self.params['input'] = aid
+        self.params['Aligner tool'] = 'burst'
+        data = {'user': 'demo@microbio.me',
+                'command': dumps(['qp-shogun', '0.0.1', 'Shogun']),
+                'status': 'running',
+                'parameters': dumps(self.params)}
+        jid = self.qclient.post('/apitest/processing_job/', data=data)['job']
 
-#        out_dir = mkdtemp()
-#        self._clean_up_files.append(out_dir)
+        out_dir = mkdtemp()
+        self._clean_up_files.append(out_dir)
 
-#        success, ainfo, msg = shogun(self.qclient, jid, self.params, out_dir)
+        success, ainfo, msg = shogun(self.qclient, jid, self.params, out_dir)
 
-#        self.assertEqual("", msg)
-#        self.assertTrue(success)
+        self.assertEqual("", msg)
+        self.assertTrue(success)
 
-#        # we are expecting 2 artifacts in total
-#        self.assertEqual(2, len(ainfo))
+        # we are expecting 2 artifacts in total
+        self.assertEqual(2, len(ainfo))
 
-#        obs_func_fps = []
-#        obs_redist_fps = []
-#        ainfo_func = ainfo[0]
-#        ainfo_redist = ainfo[1]
-#        self.assertEqual('BIOM', ainfo_func.artifact_type)
-#        self.assertEqual('BIOM', ainfo_redist.artifact_type)
-#        obs_func_fps = ainfo_func.files
-#        obs_redist_fps = ainfo_redist.files
+        obs_func_fps = []
+        obs_redist_fps = []
+        ainfo_func = ainfo[0]
+        ainfo_redist = ainfo[1]
+        self.assertEqual('BIOM', ainfo_func.artifact_type)
+        self.assertEqual('BIOM', ainfo_redist.artifact_type)
+        obs_func_fps = ainfo_func.files
+        obs_redist_fps = ainfo_redist.files
 
-#        od = partial(join, out_dir)
-#        func_prefix = "species"
-#        exp_func_fps = [
-#            od("otu_table.%s.kegg.modules.coverage.biom" % func_prefix),
-#            od("otu_table.%s.kegg.modules.biom" % func_prefix),
-#            od("otu_table.%s.kegg.pathways.coverage.biom" % func_prefix),
-#            od("otu_table.%s.kegg.pathways.biom" % func_prefix),
-#            od("otu_table.%s.kegg.biom" % func_prefix),
-#            od("otu_table.%s.normalized.biom" % func_prefix)]
+        od = partial(join, out_dir)
+        func_prefix = "func.species"
+        exp_func_fps = [
+           od("otu_table.%s.kegg.modules.coverage.biom" % func_prefix),
+           od("otu_table.%s.kegg.modules.biom" % func_prefix),
+           od("otu_table.%s.kegg.pathways.coverage.biom" % func_prefix),
+           od("otu_table.%s.kegg.pathways.biom" % func_prefix),
+           od("otu_table.%s.kegg.biom" % func_prefix),
+           od("otu_table.%s.normalized.biom" % func_prefix)]
 
-#        exp_redist_fps = [
-#            od('otu_table.genus.redist.biom'),
-#            od('otu_table.species.redist.biom'),
-#            od('otu_table.strain.redist.biom')]
+        exp_redist_fps = [
+           od('otu_table.redist.genus.biom'),
+           od('otu_table.redist.species.biom'),
+           od('otu_table.redist.strain.biom')]
 
-#        self.assertEqual(obs_func_fps, exp_func_fps)
-#        self.assertEqual(obs_redist_fps, exp_redist_fps)
+        self.assertEqual(obs_func_fps, exp_func_fps)
+        self.assertEqual(obs_redist_fps, exp_redist_fps)
 
     def test_shogun_utree(self):
         # generating filepaths
@@ -427,7 +640,7 @@ class ShogunTests(PluginTestCase):
         obs_redist_fps = ainfo_redist.files
 
         od = partial(join, out_dir)
-        func_prefix = "species"
+        func_prefix = "func.species"
         exp_func_fps = [
             od("otu_table.%s.kegg.modules.coverage.biom" % func_prefix),
             od("otu_table.%s.kegg.modules.biom" % func_prefix),
@@ -437,9 +650,9 @@ class ShogunTests(PluginTestCase):
             od("otu_table.%s.normalized.biom" % func_prefix)]
 
         exp_redist_fps = [
-            od('otu_table.genus.redist.biom'),
-            od('otu_table.species.redist.biom'),
-            od('otu_table.strain.redist.biom')]
+            od('otu_table.redist.genus.biom'),
+            od('otu_table.redist.species.biom'),
+            od('otu_table.redist.strain.biom')]
 
         self.assertEqual(obs_func_fps, exp_func_fps)
         self.assertEqual(obs_redist_fps, exp_redist_fps)
