@@ -60,8 +60,8 @@ def generate_trim_commands(forward_seqs, reverse_seqs, map_file,
 
     for run_prefix, sample, f_fp, r_fp in samples:
         cmds.append('atropos trim %s -o %s -p %s -pe1 %s -pe2 %s'
-                    % (param_string, join(out_dir, '%s.R1.trimmed.fastq.gz' %
-                       sample), join(out_dir, '%s.R2.trimmed.fastq.gz' %
+                    % (param_string, join(out_dir, '%s.R1.fastq.gz' %
+                       sample), join(out_dir, '%s.R2.fastq.gz' %
                        sample), f_fp, r_fp))
     return cmds, samples
 
@@ -116,7 +116,7 @@ def trim(qclient, job_id, parameters, out_dir):
 
     # Step 4 generating artifacts
     msg = "Step 4 of 4: Generating new artifacts (%d/{0})".format(len_cmd)
-    suffixes = ['%s.R1.trimmed.fastq.gz', '%s.R2.trimmed.fastq.gz']
+    suffixes = ['%s.R1.fastq.gz', '%s.R2.fastq.gz']
     prg_name = 'Atropos'
     file_type_name = 'Adapter trimmed files'
     ainfo = _per_sample_ainfo(

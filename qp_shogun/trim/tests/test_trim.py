@@ -199,20 +199,20 @@ class QC_TrimTests(PluginTestCase):
             'atropos trim -A GATCGGAAGAGCGTCGTGTAGGGAAAGGAGTGT '
             '--adapter GATCGGAAGAGCACACGTCTGAACTCCAGTCAC --max-n 80 '
             '--minimum-length 80 --pair-filter any --quality-cutoff 15 '
-            '--threads 4 --trim-n -o output/SKB8.640193.R1.trimmed.fastq.gz '
-            '-p output/SKB8.640193.R2.trimmed.fastq.gz -pe1 fastq/s1.fastq.gz '
+            '--threads 4 --trim-n -o output/SKB8.640193.R1.fastq.gz '
+            '-p output/SKB8.640193.R2.fastq.gz -pe1 fastq/s1.fastq.gz '
             '-pe2 fastq/s1.R2.fastq.gz',
             'atropos trim -A GATCGGAAGAGCGTCGTGTAGGGAAAGGAGTGT '
             '--adapter GATCGGAAGAGCACACGTCTGAACTCCAGTCAC --max-n 80 '
             '--minimum-length 80 --pair-filter any --quality-cutoff 15 '
-            '--threads 4 --trim-n -o output/SKD8.640184.R1.trimmed.fastq.gz '
-            '-p output/SKD8.640184.R2.trimmed.fastq.gz -pe1 fastq/s2.fastq.gz '
+            '--threads 4 --trim-n -o output/SKD8.640184.R1.fastq.gz '
+            '-p output/SKD8.640184.R2.fastq.gz -pe1 fastq/s2.fastq.gz '
             '-pe2 fastq/s2.R2.fastq.gz',
             'atropos trim -A GATCGGAAGAGCGTCGTGTAGGGAAAGGAGTGT '
             '--adapter GATCGGAAGAGCACACGTCTGAACTCCAGTCAC --max-n 80 '
             '--minimum-length 80 --pair-filter any --quality-cutoff 15 '
-            '--threads 4 --trim-n -o output/SKB7.640196.R1.trimmed.fastq.gz '
-            '-p output/SKB7.640196.R2.trimmed.fastq.gz -pe1 fastq/s3.fastq.gz '
+            '--threads 4 --trim-n -o output/SKB7.640196.R1.fastq.gz '
+            '-p output/SKB7.640196.R2.fastq.gz -pe1 fastq/s3.fastq.gz '
             '-pe2 fastq/s3.R2.fastq.gz'
             ]
 
@@ -293,10 +293,10 @@ class QC_TrimTests(PluginTestCase):
 
         # ftype = 'per_sample_FASTQ'
         exp_fps = [
-            [od('1.SKB7.640196.R1.trimmed.fastq.gz'),
-             od('1.SKB7.640196.R2.trimmed.fastq.gz'),
-             od('1.SKB8.640193.R1.trimmed.fastq.gz'),
-             od('1.SKB8.640193.R2.trimmed.fastq.gz')]]
+            [(od('1.SKB7.640196.R1.fastq.gz'), 'raw_forward_seqs'),
+             (od('1.SKB7.640196.R2.fastq.gz'), 'raw_reverse_seqs'),
+             (od('1.SKB8.640193.R1.fastq.gz'), 'raw_forward_seqs'),
+             (od('1.SKB8.640193.R2.fastq.gz'), 'raw_reverse_seqs')]]
         self.assertEqual(exp_fps, obs_fps)
 
     def test_per_sample_ainfo_error(self):
