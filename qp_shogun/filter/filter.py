@@ -76,16 +76,16 @@ def generate_filter_commands(forward_seqs, reverse_seqs, map_file,
                             sam_un_op=join(temp_dir,
                                            '%s.unsorted.bam' % sample),
                             bedtools_op_one=join(temp_dir,
-                                                 '%s.R1.trimmed.filtered.fastq'
+                                                 '%s.R1.fastq'
                                                  % sample),
                             bedtools_op_two=join(temp_dir,
-                                                 '%s.R2.trimmed.filtered.fastq'
+                                                 '%s.R2.fastq'
                                                  % sample),
                             gz_op_one=join(out_dir,
-                                           '%s.R1.trimmed.filtered.fastq.gz'
+                                           '%s.R1.fastq.gz'
                                            % sample),
                             gz_op_two=join(out_dir,
-                                           '%s.R2.trimmed.filtered.fastq.gz'
+                                           '%s.R2.fastq.gz'
                                            % sample)))
 
     return cmds, samples
@@ -144,8 +144,8 @@ def filter(qclient, job_id, parameters, out_dir):
 
     # Step 4 generating artifacts
     msg = "Step 4 of 4: Generating new artifacts (%d/{0})".format(len_cmd)
-    suffixes = ['%s.R1.trimmed.filtered.fastq.gz',
-                '%s.R2.trimmed.filtered.fastq.gz']
+    suffixes = ['%s.R1.fastq.gz',
+                '%s.R2.fastq.gz']
     prg_name = 'Filtering'
     file_type_name = 'Filtered files'
     ainfo = _per_sample_ainfo(

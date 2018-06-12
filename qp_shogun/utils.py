@@ -157,7 +157,15 @@ def _per_sample_ainfo(
         for suff in suffixes:
             fname = smd(suff % rp)
             if exists(fname):
-                files.append(fname)
+                if fname.endswith('R1.fastq.gz'):
+                    ftype = 'raw_forward_seqs'
+                elif fname.endswith('R2.fastq.gz'):
+                    ftype = 'raw_reverse_seqs'
+                else:
+                    # this should never happen and it's not really possible
+                    # to reproduce so no tests!
+                    raise ValueError('File %s has an unexpected name' % fname)
+                files.append((fname, ftype))
             else:
                 missing_files.append(fname)
 

@@ -96,13 +96,13 @@ class QC_FilterTests(PluginTestCase):
              '-o temp/SKB8.640193.bam temp/SKB8.640193.unsorted.bam; '
 
              'bedtools bamtofastq -i temp/SKB8.640193.bam -fq '
-             'temp/SKB8.640193.R1.trimmed.filtered.fastq -fq2 '
-             'temp/SKB8.640193.R2.trimmed.filtered.fastq; '
+             'temp/SKB8.640193.R1.fastq -fq2 '
+             'temp/SKB8.640193.R2.fastq; '
 
-             'pigz -p 1 -c temp/SKB8.640193.R1.trimmed.filtered.fastq > '
-             'output/SKB8.640193.R1.trimmed.filtered.fastq.gz; '
-             'pigz -p 1 -c temp/SKB8.640193.R2.trimmed.filtered.fastq > '
-             'output/SKB8.640193.R2.trimmed.filtered.fastq.gz;') % db_path
+             'pigz -p 1 -c temp/SKB8.640193.R1.fastq > '
+             'output/SKB8.640193.R1.fastq.gz; '
+             'pigz -p 1 -c temp/SKB8.640193.R2.fastq > '
+             'output/SKB8.640193.R2.fastq.gz;') % db_path
             ]
 
         exp_sample = [
@@ -178,12 +178,11 @@ class QC_FilterTests(PluginTestCase):
             obs_fps.append(a.files)
         od = partial(join, out_dir)
 
-        # ftype = 'per_sample_FASTQ'
         exp_fps = [
-            [od('1.SKB7.640196.R1.trimmed.filtered.fastq.gz'),
-             od('1.SKB7.640196.R2.trimmed.filtered.fastq.gz'),
-             od('1.SKB8.640193.R1.trimmed.filtered.fastq.gz'),
-             od('1.SKB8.640193.R2.trimmed.filtered.fastq.gz')]]
+            [(od('1.SKB7.640196.R1.fastq.gz'), 'raw_forward_seqs'),
+             (od('1.SKB7.640196.R2.fastq.gz'), 'raw_reverse_seqs'),
+             (od('1.SKB8.640193.R1.fastq.gz'), 'raw_forward_seqs'),
+             (od('1.SKB8.640193.R2.fastq.gz'), 'raw_reverse_seqs')]]
         self.assertEqual(exp_fps, obs_fps)
 
     def test_per_sample_ainfo_error(self):
