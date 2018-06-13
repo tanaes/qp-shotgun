@@ -162,8 +162,8 @@ def _per_sample_ainfo(
                 elif fname.endswith('R2.fastq.gz'):
                     ftype = 'raw_reverse_seqs'
                 else:
-                    # this should never happen and it's not really possible
-                    # to reproduce so no tests!
+                    # this should never happen unless you both specify and
+                    # create files with unexpected extension types
                     raise ValueError('File %s has an unexpected name' % fname)
                 files.append((fname, ftype))
             else:

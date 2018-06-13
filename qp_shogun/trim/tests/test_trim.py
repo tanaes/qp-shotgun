@@ -305,10 +305,20 @@ class QC_TrimTests(PluginTestCase):
         makedirs(join(in_dir, 'sampleA'))
         makedirs(join(in_dir, 'sampleB'))
 
-        # Paired-end
+        # Paired-end with files missing
         with self.assertRaises(ValueError):
             _per_sample_ainfo(in_dir, (('sampleA', None, None, None),
                                        ('sampleB', None, None, None)), [],
+                              'Atropos', 'QC_Trim Files', True)
+
+        # Test giving it the wrong exension but extant files
+        open(join(in_dir, 'sampleA.foo'), 'w').close()
+        open(join(in_dir, 'sampleB.foo'), 'w').close()
+
+        with self.assertRaises(ValueError):
+            _per_sample_ainfo(in_dir, ((None, 'sampleA', None, None),
+                                       (None, 'sampleB', None, None)),
+                              ['%s.foo'],
                               'Atropos', 'QC_Trim Files', True)
 
 
