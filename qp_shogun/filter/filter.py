@@ -70,7 +70,8 @@ def generate_filter_commands(forward_seqs, reverse_seqs, map_file,
 
                     .format(params=param_string, thrds=threads,
                             fwd_ip=f_fp, rev_ip=r_fp,
-                            bow_op=join(temp_dir, '%s.unsorted.bam' % run_prefix),
+                            bow_op=join(temp_dir, '%s.unsorted.bam'
+                                        % run_prefix),
                             sample_path=join(temp_dir, '%s' % run_prefix),
                             sam_op=join(temp_dir, '%s.bam' % run_prefix),
                             sam_un_op=join(temp_dir,
