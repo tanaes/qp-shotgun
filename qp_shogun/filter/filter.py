@@ -70,23 +70,23 @@ def generate_filter_commands(forward_seqs, reverse_seqs, map_file,
 
                     .format(params=param_string, thrds=threads,
                             fwd_ip=f_fp, rev_ip=r_fp,
-                            bow_op=join(temp_dir, '%s.unsorted.bam' % sample),
-                            sample_path=join(temp_dir, '%s' % sample),
-                            sam_op=join(temp_dir, '%s.bam' % sample),
+                            bow_op=join(temp_dir, '%s.unsorted.bam' % run_prefix),
+                            sample_path=join(temp_dir, '%s' % run_prefix),
+                            sam_op=join(temp_dir, '%s.bam' % run_prefix),
                             sam_un_op=join(temp_dir,
-                                           '%s.unsorted.bam' % sample),
+                                           '%s.unsorted.bam' % run_prefix),
                             bedtools_op_one=join(temp_dir,
                                                  '%s.R1.fastq'
-                                                 % sample),
+                                                 % run_prefix),
                             bedtools_op_two=join(temp_dir,
                                                  '%s.R2.fastq'
-                                                 % sample),
+                                                 % run_prefix),
                             gz_op_one=join(out_dir,
                                            '%s.R1.fastq.gz'
-                                           % sample),
+                                           % run_prefix),
                             gz_op_two=join(out_dir,
                                            '%s.R2.fastq.gz'
-                                           % sample)))
+                                           % run_prefix)))
 
     return cmds, samples
 

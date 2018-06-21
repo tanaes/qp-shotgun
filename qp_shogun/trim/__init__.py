@@ -28,11 +28,11 @@ opt_params = {
     # maximum Ns to drop sequence
     'Maximum number of N bases in a read to keep it': ['integer', '80'],
     # trim Ns on end of read
-    'Trim Ns on ends of reads': ['boolean', 'True'],
+    'Trim Ns on ends of reads': ['boolean', True],
     # Threads used
     'Number of threads used': ['integer', '4'],
     # NextSeq-specific quality trimming
-    'NextSeq-specific quality trimming': ['boolean', 'False'],
+    'NextSeq-specific quality trimming': ['boolean', False],
     }
 outputs = {'Adapter trimmed files': 'per_sample_FASTQ'}
 dflt_param_set = {
