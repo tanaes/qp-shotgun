@@ -122,9 +122,9 @@ def _format_params(parameters, func_params):
         # Check for single letter commands
         if len(param) == 1:
             dash = '-'
-        if value is 'True':
+        if value is True:
             params.append('%s%s' % (dash, param))
-        elif value is 'False':
+        elif value is False:
             continue
         elif value and value != 'default':
             params.append('%s%s %s' % (dash, param, value))
@@ -153,7 +153,7 @@ def _per_sample_ainfo(
     files = []
     missing_files = []
     smd = partial(join, out_dir)
-    for _, rp, _, _ in samples:
+    for rp, _, _, _ in samples:
         for suff in suffixes:
             fname = smd(suff % rp)
             if exists(fname):

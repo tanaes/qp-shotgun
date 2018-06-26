@@ -49,8 +49,8 @@ class QC_TrimTests(PluginTestCase):
                        'Minimum trimmed read length': '80',
                        'Pair-end read required to match': 'any',
                        'Maximum number of N bases in a read to keep it': '80',
-                       'Trim Ns on ends of reads': 'True',
-                       'NextSeq-specific quality trimming': 'False',
+                       'Trim Ns on ends of reads': True,
+                       'NextSeq-specific quality trimming': False,
                        'Number of threads used': '4'
         }
         self._clean_up_files = []
@@ -199,20 +199,20 @@ class QC_TrimTests(PluginTestCase):
             'atropos trim -A GATCGGAAGAGCGTCGTGTAGGGAAAGGAGTGT '
             '--adapter GATCGGAAGAGCACACGTCTGAACTCCAGTCAC --max-n 80 '
             '--minimum-length 80 --pair-filter any --quality-cutoff 15 '
-            '--threads 4 --trim-n -o output/SKB8.640193.R1.fastq.gz '
-            '-p output/SKB8.640193.R2.fastq.gz -pe1 fastq/s1.fastq.gz '
+            '--threads 4 --trim-n -o output/s1.R1.fastq.gz '
+            '-p output/s1.R2.fastq.gz -pe1 fastq/s1.fastq.gz '
             '-pe2 fastq/s1.R2.fastq.gz',
             'atropos trim -A GATCGGAAGAGCGTCGTGTAGGGAAAGGAGTGT '
             '--adapter GATCGGAAGAGCACACGTCTGAACTCCAGTCAC --max-n 80 '
             '--minimum-length 80 --pair-filter any --quality-cutoff 15 '
-            '--threads 4 --trim-n -o output/SKD8.640184.R1.fastq.gz '
-            '-p output/SKD8.640184.R2.fastq.gz -pe1 fastq/s2.fastq.gz '
+            '--threads 4 --trim-n -o output/s2.R1.fastq.gz '
+            '-p output/s2.R2.fastq.gz -pe1 fastq/s2.fastq.gz '
             '-pe2 fastq/s2.R2.fastq.gz',
             'atropos trim -A GATCGGAAGAGCGTCGTGTAGGGAAAGGAGTGT '
             '--adapter GATCGGAAGAGCACACGTCTGAACTCCAGTCAC --max-n 80 '
             '--minimum-length 80 --pair-filter any --quality-cutoff 15 '
-            '--threads 4 --trim-n -o output/SKB7.640196.R1.fastq.gz '
-            '-p output/SKB7.640196.R2.fastq.gz -pe1 fastq/s3.fastq.gz '
+            '--threads 4 --trim-n -o output/s3.R1.fastq.gz '
+            '-p output/s3.R2.fastq.gz -pe1 fastq/s3.fastq.gz '
             '-pe2 fastq/s3.R2.fastq.gz'
             ]
 
@@ -293,10 +293,10 @@ class QC_TrimTests(PluginTestCase):
 
         # ftype = 'per_sample_FASTQ'
         exp_fps = [
-            [(od('1.SKB7.640196.R1.fastq.gz'), 'raw_forward_seqs'),
-             (od('1.SKB7.640196.R2.fastq.gz'), 'raw_reverse_seqs'),
-             (od('1.SKB8.640193.R1.fastq.gz'), 'raw_forward_seqs'),
-             (od('1.SKB8.640193.R2.fastq.gz'), 'raw_reverse_seqs')]]
+            [(od('kd_test_1.R1.fastq.gz'), 'raw_forward_seqs'),
+             (od('kd_test_1.R2.fastq.gz'), 'raw_reverse_seqs'),
+             (od('kd_test_2.R1.fastq.gz'), 'raw_forward_seqs'),
+             (od('kd_test_2.R2.fastq.gz'), 'raw_reverse_seqs')]]
         self.assertEqual(exp_fps, obs_fps)
 
     def test_per_sample_ainfo_error(self):

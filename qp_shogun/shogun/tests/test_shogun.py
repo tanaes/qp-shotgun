@@ -409,6 +409,7 @@ class ShogunTests(PluginTestCase):
 
         self.assertEqual(obs_cmd, exp_cmd)
 
+    # Testing shogun with bowtie2
     def test_shogun_bt2(self):
         # generating filepaths
         in_dir = mkdtemp()
