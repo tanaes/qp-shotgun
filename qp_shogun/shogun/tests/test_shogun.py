@@ -462,35 +462,29 @@ class ShogunTests(PluginTestCase):
         self.assertEqual("", msg)
         self.assertTrue(success)
 
-        # we are expecting 2 artifacts in total
-        self.assertEqual(2, len(ainfo))
+        # we are expecting 9 artifacts in total
+        self.assertEqual(9, len(ainfo))
 
-        obs_func_fps = []
-        obs_redist_fps = []
-        ainfo_func = ainfo[0]
-        ainfo_redist = ainfo[1]
-        self.assertEqual('BIOM', ainfo_func.artifact_type)
-        self.assertEqual('BIOM', ainfo_redist.artifact_type)
-        obs_func_fps = ainfo_func.files
-        obs_redist_fps = ainfo_redist.files
+        # check that all ainfos should be BIOM
+        obs_fps = []
+        for a in ainfo:
+            self.assertEqual('BIOM', a.artifact_type)
+            obs_fps.extend(a.files)
 
         od = partial(join, out_dir)
-        func_prefix = "func.species"
-        exp_func_fps = [
-            od("otu_table.%s.kegg.modules.coverage.biom" % func_prefix),
-            od("otu_table.%s.kegg.modules.biom" % func_prefix),
-            od("otu_table.%s.kegg.pathways.coverage.biom" % func_prefix),
-            od("otu_table.%s.kegg.pathways.biom" % func_prefix),
-            od("otu_table.%s.kegg.biom" % func_prefix),
-            od("otu_table.%s.normalized.biom" % func_prefix)]
-
-        exp_redist_fps = [
-            od('otu_table.redist.genus.biom'),
-            od('otu_table.redist.species.biom'),
-            od('otu_table.redist.strain.biom')]
-
-        self.assertEqual(obs_func_fps, exp_func_fps)
-        self.assertEqual(obs_redist_fps, exp_redist_fps)
+        # check that all file paths are there
+        exp_fps = [
+            (od('otu_table.redist.genus.biom'), 'biom'),
+            (od('otu_table.redist.species.biom'), 'biom'),
+            (od('otu_table.redist.strain.biom'), 'biom'),
+            (od('otu_table.func.species.kegg.modules.coverage.biom'), 'biom'),
+            (od('otu_table.func.species.kegg.modules.biom'), 'biom'),
+            (od('otu_table.func.species.kegg.pathways.coverage.biom'), 'biom'),
+            (od('otu_table.func.species.kegg.pathways.biom'), 'biom'),
+            (od('otu_table.func.species.kegg.biom'), 'biom'),
+            (od('otu_table.func.species.normalized.biom'), 'biom')
+        ]
+        self.assertCountEqual(obs_fps, exp_fps)
 
     def test_shogun_burst(self):
         # generating filepaths
@@ -545,35 +539,29 @@ class ShogunTests(PluginTestCase):
         self.assertEqual("", msg)
         self.assertTrue(success)
 
-        # we are expecting 2 artifacts in total
-        self.assertEqual(2, len(ainfo))
+        # we are expecting 9 artifacts in total
+        self.assertEqual(9, len(ainfo))
 
-        obs_func_fps = []
-        obs_redist_fps = []
-        ainfo_func = ainfo[0]
-        ainfo_redist = ainfo[1]
-        self.assertEqual('BIOM', ainfo_func.artifact_type)
-        self.assertEqual('BIOM', ainfo_redist.artifact_type)
-        obs_func_fps = ainfo_func.files
-        obs_redist_fps = ainfo_redist.files
+        # check that all ainfos should be BIOM
+        obs_fps = []
+        for a in ainfo:
+            self.assertEqual('BIOM', a.artifact_type)
+            obs_fps.extend(a.files)
 
         od = partial(join, out_dir)
-        func_prefix = "func.species"
-        exp_func_fps = [
-           od("otu_table.%s.kegg.modules.coverage.biom" % func_prefix),
-           od("otu_table.%s.kegg.modules.biom" % func_prefix),
-           od("otu_table.%s.kegg.pathways.coverage.biom" % func_prefix),
-           od("otu_table.%s.kegg.pathways.biom" % func_prefix),
-           od("otu_table.%s.kegg.biom" % func_prefix),
-           od("otu_table.%s.normalized.biom" % func_prefix)]
-
-        exp_redist_fps = [
-           od('otu_table.redist.genus.biom'),
-           od('otu_table.redist.species.biom'),
-           od('otu_table.redist.strain.biom')]
-
-        self.assertEqual(obs_func_fps, exp_func_fps)
-        self.assertEqual(obs_redist_fps, exp_redist_fps)
+        # check that all file paths are there
+        exp_fps = [
+            (od('otu_table.redist.genus.biom'), 'biom'),
+            (od('otu_table.redist.species.biom'), 'biom'),
+            (od('otu_table.redist.strain.biom'), 'biom'),
+            (od('otu_table.func.species.kegg.modules.coverage.biom'), 'biom'),
+            (od('otu_table.func.species.kegg.modules.biom'), 'biom'),
+            (od('otu_table.func.species.kegg.pathways.coverage.biom'), 'biom'),
+            (od('otu_table.func.species.kegg.pathways.biom'), 'biom'),
+            (od('otu_table.func.species.kegg.biom'), 'biom'),
+            (od('otu_table.func.species.normalized.biom'), 'biom')
+        ]
+        self.assertCountEqual(obs_fps, exp_fps)
 
     def test_shogun_utree(self):
         # generating filepaths
@@ -628,35 +616,29 @@ class ShogunTests(PluginTestCase):
         self.assertEqual("", msg)
         self.assertTrue(success)
 
-        # we are expecting 2 artifacts in total
-        self.assertEqual(2, len(ainfo))
+        # we are expecting 9 artifacts in total
+        self.assertEqual(9, len(ainfo))
 
-        obs_func_fps = []
-        obs_redist_fps = []
-        ainfo_func = ainfo[0]
-        ainfo_redist = ainfo[1]
-        self.assertEqual('BIOM', ainfo_func.artifact_type)
-        self.assertEqual('BIOM', ainfo_redist.artifact_type)
-        obs_func_fps = ainfo_func.files
-        obs_redist_fps = ainfo_redist.files
+        # check that all ainfos should be BIOM
+        obs_fps = []
+        for a in ainfo:
+            self.assertEqual('BIOM', a.artifact_type)
+            obs_fps.extend(a.files)
 
         od = partial(join, out_dir)
-        func_prefix = "func.species"
-        exp_func_fps = [
-            od("otu_table.%s.kegg.modules.coverage.biom" % func_prefix),
-            od("otu_table.%s.kegg.modules.biom" % func_prefix),
-            od("otu_table.%s.kegg.pathways.coverage.biom" % func_prefix),
-            od("otu_table.%s.kegg.pathways.biom" % func_prefix),
-            od("otu_table.%s.kegg.biom" % func_prefix),
-            od("otu_table.%s.normalized.biom" % func_prefix)]
-
-        exp_redist_fps = [
-            od('otu_table.redist.genus.biom'),
-            od('otu_table.redist.species.biom'),
-            od('otu_table.redist.strain.biom')]
-
-        self.assertEqual(obs_func_fps, exp_func_fps)
-        self.assertEqual(obs_redist_fps, exp_redist_fps)
+        # check that all file paths are there
+        exp_fps = [
+            (od('otu_table.redist.genus.biom'), 'biom'),
+            (od('otu_table.redist.species.biom'), 'biom'),
+            (od('otu_table.redist.strain.biom'), 'biom'),
+            (od('otu_table.func.species.kegg.modules.coverage.biom'), 'biom'),
+            (od('otu_table.func.species.kegg.modules.biom'), 'biom'),
+            (od('otu_table.func.species.kegg.pathways.coverage.biom'), 'biom'),
+            (od('otu_table.func.species.kegg.pathways.biom'), 'biom'),
+            (od('otu_table.func.species.kegg.biom'), 'biom'),
+            (od('otu_table.func.species.normalized.biom'), 'biom')
+        ]
+        self.assertCountEqual(obs_fps, exp_fps)
 
 
 if __name__ == '__main__':
