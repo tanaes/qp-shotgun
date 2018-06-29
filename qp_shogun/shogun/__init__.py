@@ -28,7 +28,28 @@ opt_params = {
     # threads
     'Number of threads': ['integer', '1'],
     }
-outputs = {'Functional Predictions': 'BIOM', 'Taxonomic Predictions': 'BIOM'}
+outputs = {
+    'Functional Predictions - genus, KEGG Modules Coverage': 'BIOM',
+    'Functional Predictions - genus, KEGG Modules': 'BIOM',
+    'Functional Predictions - genus, KEGG Pathways Coverage': 'BIOM',
+    'Functional Predictions - genus, KEGG Pathways': 'BIOM',
+    'Functional Predictions - genus, KEGG': 'BIOM',
+    'Functional Predictions - genus, Normalized': 'BIOM',
+    'Functional Predictions - species, KEGG Modules Coverage': 'BIOM',
+    'Functional Predictions - species, KEGG Modules': 'BIOM',
+    'Functional Predictions - species, KEGG Pathways Coverage': 'BIOM',
+    'Functional Predictions - species, KEGG Pathways': 'BIOM',
+    'Functional Predictions - species, KEGG': 'BIOM',
+    'Functional Predictions - species, Normalized': 'BIOM',
+    'Functional Predictions - strain, KEGG Modules Coverage': 'BIOM',
+    'Functional Predictions - strain, KEGG Modules': 'BIOM',
+    'Functional Predictions - strain, KEGG Pathways Coverage': 'BIOM',
+    'Functional Predictions - strain, KEGG Pathways': 'BIOM',
+    'Functional Predictions - strain, KEGG': 'BIOM',
+    'Functional Predictions - strain, Normalized': 'BIOM',
+    'Taxonomic Predictions - genus': 'BIOM',
+    'Taxonomic Predictions - species': 'BIOM',
+    'Taxonomic Predictions - strain': 'BIOM'}
 dflt_param_set = generate_shogun_dflt_params()
 
 shogun_cmd = QiitaCommand(

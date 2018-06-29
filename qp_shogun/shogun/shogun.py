@@ -175,6 +175,7 @@ def shogun(qclient, job_id, parameters, out_dir):
     qclient.update_job_step(
         job_id, "Step 2 of 7: Converting to FNA for Shogun")
 
+    ainfo = []
     with TemporaryDirectory(dir=out_dir, prefix='shogun_') as temp_dir:
         rs = fps['raw_reverse_seqs'] if 'raw_reverse_seqs' in fps else []
         samples = make_read_pairs_per_sample(
@@ -232,19 +233,17 @@ def shogun(qclient, job_id, parameters, out_dir):
                 return False, None, msg
         # Step 6 functional profile
         sys_msg = "Step 7 of 7: Converting results to BIOM (%d/{0})"
-        func_biom_outputs = []
-        redist_biom_outputs = []
         # Converting redistributed files to biom
         redist_levels = ['genus', 'species', 'strain']
         for redist_fp, level in zip(redist_fps, redist_levels):
             biom_in = ["redist", None, '', True]
             output = run_shogun_to_biom(
                 redist_fp, biom_in, out_dir, level, 'redist')
-            redist_biom_outputs.append(output)
+            aname = 'Taxonomic Predictions - %s' % level
+            ainfo.append(ArtifactInfo(aname, 'BIOM', [(output, 'biom')]))
         # Coverting funcitonal files to biom
         func_db_fp = shogun_db_functional_parser(parameters['database'])
         for level in levels:
-
             func_to_biom_fps = [
                 ["kegg.modules.coverage", func_db_fp['module'],
                  'module', False],
@@ -260,11 +259,22 @@ def shogun(qclient, job_id, parameters, out_dir):
                                   % (level, biom_in[0]))
                 output = run_shogun_to_biom(biom_in_fp, biom_in, out_dir,
                                             level, 'func')
-                func_biom_outputs.append(output)
-
-    func_files_type_name = 'Functional Predictions'
-    redist_files_type_name = 'Taxonomic Predictions'
-    ainfo = [ArtifactInfo(func_files_type_name, 'BIOM', func_biom_outputs),
-             ArtifactInfo(redist_files_type_name, 'BIOM', redist_biom_outputs)]
+                if biom_in[0] == 'kegg.modules.coverage':
+                    atype = 'KEGG Modules Coverage'
+                elif biom_in[0] == 'kegg.modules':
+                    atype = 'KEGG Modules'
+                elif biom_in[0] == 'kegg.pathways.coverage':
+                    atype = 'KEGG Pathways Coverage'
+                elif biom_in[0] == 'kegg.pathways':
+                    atype = 'KEGG Pathways'
+                elif biom_in[0] == 'kegg':
+                    atype = 'KEGG'
+                elif biom_in[0] == 'normalized':
+                    atype = 'Normalized'
+                else:
+                    # this should never happen but adding for completeness
+                    return False, None, "Not a valid format: %s" % biom_in[0]
+                aname = 'Functional Predictions - %s, %s' % (level, atype)
+                ainfo.append(ArtifactInfo(aname, 'BIOM', [(output, 'biom')]))
 
     return True, ainfo, ""
