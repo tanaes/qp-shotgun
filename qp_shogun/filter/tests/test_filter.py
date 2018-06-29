@@ -37,7 +37,7 @@ class QC_FilterTests(PluginTestCase):
         self.params = {
                        'Bowtie2 database to filter': join(db_path,
                                                           'phix/phix'),
-                       'Number of threads': '1'
+                       'Number of threads': '5'
         }
         self._clean_up_files = []
 
@@ -68,7 +68,7 @@ class QC_FilterTests(PluginTestCase):
         obs = generate_filter_dflt_params()
         exp = {'phix': {'Bowtie2 database to filter': join(db_path, 'phix',
                                                            'phix'),
-                        'Number of threads': 4}}
+                        'Number of threads': 5}}
 
         self.assertEqual(obs, exp)
 

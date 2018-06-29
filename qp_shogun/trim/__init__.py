@@ -30,7 +30,7 @@ opt_params = {
     # trim Ns on end of read
     'Trim Ns on ends of reads': ['boolean', True],
     # Threads used
-    'Number of threads used': ['integer', '4'],
+    'Number of threads used': ['integer', '5'],
     # NextSeq-specific quality trimming
     'NextSeq-specific quality trimming': ['boolean', False],
     }
@@ -45,7 +45,7 @@ dflt_param_set = {
         'Maximum number of N bases in a read to keep it': 80,
         'Trim Ns on ends of reads': True,
         'NextSeq-specific quality trimming': False,
-        'Number of threads used': 4
+        'Number of threads used': 5
         }
 }
 

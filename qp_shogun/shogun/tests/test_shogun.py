@@ -16,7 +16,6 @@ from tempfile import TemporaryDirectory
 from qp_shogun import plugin
 from tempfile import mkdtemp
 from json import dumps
-from functools import partial
 from biom import Table
 import numpy as np
 from io import StringIO
@@ -47,7 +46,7 @@ class ShogunTests(PluginTestCase):
         self.params = {
             'Database': join(self.db_path, 'shogun'),
             'Aligner tool': 'bowtie2',
-            'Number of threads': 1
+            'Number of threads': 5
         }
         self._clean_up_files = []
         self._clean_up_files.append(out_dir)
@@ -172,15 +171,15 @@ class ShogunTests(PluginTestCase):
             'shogun_bowtie2': {
                 'Database': join(self.db_path, 'shogun'),
                 'Aligner tool': 'bowtie2',
-                'Number of threads': 1},
+                'Number of threads': 5},
             'shogun_utree': {
                 'Database': join(self.db_path, 'shogun'),
                 'Aligner tool': 'utree',
-                'Number of threads': 1},
+                'Number of threads': 5},
             'shogun_burst': {
                 'Database': join(self.db_path, 'shogun'),
                 'Aligner tool': 'burst',
-                'Number of threads': 1}}
+                'Number of threads': 5}}
 
         self.assertEqual(obs, exp)
 
@@ -333,7 +332,7 @@ class ShogunTests(PluginTestCase):
         exp = {
             'database': join(self.db_path, 'shogun'),
             'aligner': 'bowtie2',
-            'threads': 1
+            'threads': 5
         }
 
         self.assertEqual(obs, exp)
@@ -343,7 +342,7 @@ class ShogunTests(PluginTestCase):
         with TemporaryDirectory(dir=out_dir, prefix='shogun_') as temp_dir:
 
             exp_cmd = [
-                ('shogun align --aligner bowtie2 --threads 1 '
+                ('shogun align --aligner bowtie2 --threads 5 '
                  '--database %sshogun --input %s/combined.fna '
                  '--output %s') %
                 (self.db_path, temp_dir, temp_dir)
@@ -462,29 +461,12 @@ class ShogunTests(PluginTestCase):
         self.assertEqual("", msg)
         self.assertTrue(success)
 
-        # we are expecting 9 artifacts in total
-        self.assertEqual(9, len(ainfo))
-
-        # check that all ainfos should be BIOM
-        obs_fps = []
-        for a in ainfo:
-            self.assertEqual('BIOM', a.artifact_type)
-            obs_fps.extend(a.files)
-
-        od = partial(join, out_dir)
-        # check that all file paths are there
-        exp_fps = [
-            (od('otu_table.redist.genus.biom'), 'biom'),
-            (od('otu_table.redist.species.biom'), 'biom'),
-            (od('otu_table.redist.strain.biom'), 'biom'),
-            (od('otu_table.func.species.kegg.modules.coverage.biom'), 'biom'),
-            (od('otu_table.func.species.kegg.modules.biom'), 'biom'),
-            (od('otu_table.func.species.kegg.pathways.coverage.biom'), 'biom'),
-            (od('otu_table.func.species.kegg.pathways.biom'), 'biom'),
-            (od('otu_table.func.species.kegg.biom'), 'biom'),
-            (od('otu_table.func.species.normalized.biom'), 'biom')
-        ]
-        self.assertCountEqual(obs_fps, exp_fps)
+        # we are expecting 1 artifacts in total
+        self.assertEqual(1, len(ainfo))
+        ainfo = ainfo[0]
+        self.assertEqual(ainfo.artifact_type, 'BIOM')
+        exp = [(join(out_dir, 'otu_table.alignment.shogun.biom'), 'biom')]
+        self.assertCountEqual(ainfo.files, exp)
 
     def test_shogun_burst(self):
         # generating filepaths
@@ -539,29 +521,12 @@ class ShogunTests(PluginTestCase):
         self.assertEqual("", msg)
         self.assertTrue(success)
 
-        # we are expecting 9 artifacts in total
-        self.assertEqual(9, len(ainfo))
-
-        # check that all ainfos should be BIOM
-        obs_fps = []
-        for a in ainfo:
-            self.assertEqual('BIOM', a.artifact_type)
-            obs_fps.extend(a.files)
-
-        od = partial(join, out_dir)
-        # check that all file paths are there
-        exp_fps = [
-            (od('otu_table.redist.genus.biom'), 'biom'),
-            (od('otu_table.redist.species.biom'), 'biom'),
-            (od('otu_table.redist.strain.biom'), 'biom'),
-            (od('otu_table.func.species.kegg.modules.coverage.biom'), 'biom'),
-            (od('otu_table.func.species.kegg.modules.biom'), 'biom'),
-            (od('otu_table.func.species.kegg.pathways.coverage.biom'), 'biom'),
-            (od('otu_table.func.species.kegg.pathways.biom'), 'biom'),
-            (od('otu_table.func.species.kegg.biom'), 'biom'),
-            (od('otu_table.func.species.normalized.biom'), 'biom')
-        ]
-        self.assertCountEqual(obs_fps, exp_fps)
+        # we are expecting 1 artifacts in total
+        self.assertEqual(1, len(ainfo))
+        ainfo = ainfo[0]
+        self.assertEqual(ainfo.artifact_type, 'BIOM')
+        exp = [(join(out_dir, 'otu_table.alignment.shogun.biom'), 'biom')]
+        self.assertCountEqual(ainfo.files, exp)
 
     def test_shogun_utree(self):
         # generating filepaths
@@ -616,29 +581,12 @@ class ShogunTests(PluginTestCase):
         self.assertEqual("", msg)
         self.assertTrue(success)
 
-        # we are expecting 9 artifacts in total
-        self.assertEqual(9, len(ainfo))
-
-        # check that all ainfos should be BIOM
-        obs_fps = []
-        for a in ainfo:
-            self.assertEqual('BIOM', a.artifact_type)
-            obs_fps.extend(a.files)
-
-        od = partial(join, out_dir)
-        # check that all file paths are there
-        exp_fps = [
-            (od('otu_table.redist.genus.biom'), 'biom'),
-            (od('otu_table.redist.species.biom'), 'biom'),
-            (od('otu_table.redist.strain.biom'), 'biom'),
-            (od('otu_table.func.species.kegg.modules.coverage.biom'), 'biom'),
-            (od('otu_table.func.species.kegg.modules.biom'), 'biom'),
-            (od('otu_table.func.species.kegg.pathways.coverage.biom'), 'biom'),
-            (od('otu_table.func.species.kegg.pathways.biom'), 'biom'),
-            (od('otu_table.func.species.kegg.biom'), 'biom'),
-            (od('otu_table.func.species.normalized.biom'), 'biom')
-        ]
-        self.assertCountEqual(obs_fps, exp_fps)
+        # we are expecting 1 artifacts in total
+        self.assertEqual(1, len(ainfo))
+        ainfo = ainfo[0]
+        self.assertEqual(ainfo.artifact_type, 'BIOM')
+        exp = [(join(out_dir, 'otu_table.alignment.shogun.biom'), 'biom')]
+        self.assertCountEqual(ainfo.files, exp)
 
 
 if __name__ == '__main__':

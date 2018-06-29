@@ -51,7 +51,7 @@ class QC_TrimTests(PluginTestCase):
                        'Maximum number of N bases in a read to keep it': '80',
                        'Trim Ns on ends of reads': True,
                        'NextSeq-specific quality trimming': False,
-                       'Number of threads used': '4'
+                       'Number of threads used': '5'
         }
         self._clean_up_files = []
 
