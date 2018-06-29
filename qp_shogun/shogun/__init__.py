@@ -28,7 +28,7 @@ opt_params = {
     # threads
     'Number of threads': ['integer', '5'],
     }
-outputs = {'Shogun Alignment': 'BIOM'}
+outputs = {'Shogun Alignment Profile': 'BIOM'}
 dflt_param_set = generate_shogun_dflt_params()
 
 shogun_cmd = QiitaCommand(

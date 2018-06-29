@@ -209,9 +209,10 @@ def shogun(qclient, job_id, parameters, out_dir):
         sys_msg = "Step 5 of 5: Converting output to BIOM"
         qclient.update_job_step(job_id, msg)
         output = run_shogun_to_biom(profile_fp, [None, None, None, True],
-                                    out_dir, 'shogun')
+                                    out_dir, 'profile')
 
-        ainfo = [ArtifactInfo('Shogun Alignment', 'BIOM', [(output, 'biom')])]
+        ainfo = [ArtifactInfo('Shogun Alignment Profile', 'BIOM',
+                              [(output, 'biom')])]
 
     return True, ainfo, ""
 

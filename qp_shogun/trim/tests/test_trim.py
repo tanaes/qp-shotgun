@@ -67,7 +67,7 @@ class QC_TrimTests(PluginTestCase):
         obs = _format_params(self.params, ATROPOS_PARAMS)
         exp = ('-A GATCGGAAGAGCGTCGTGTAGGGAAAGGAGTGT --adapter GATCGGAAGAGCACA'
                'CGTCTGAACTCCAGTCAC --max-n 80 --minimum-length 80 '
-               '--pair-filter any --quality-cutoff 15 --threads 4 --trim-n')
+               '--pair-filter any --quality-cutoff 15 --threads 5 --trim-n')
         self.assertEqual(obs, exp)
 
     def test_make_read_pairs_per_sample_match_fwd_rev(self):
@@ -199,19 +199,19 @@ class QC_TrimTests(PluginTestCase):
             'atropos trim -A GATCGGAAGAGCGTCGTGTAGGGAAAGGAGTGT '
             '--adapter GATCGGAAGAGCACACGTCTGAACTCCAGTCAC --max-n 80 '
             '--minimum-length 80 --pair-filter any --quality-cutoff 15 '
-            '--threads 4 --trim-n -o output/s1.R1.fastq.gz '
+            '--threads 5 --trim-n -o output/s1.R1.fastq.gz '
             '-p output/s1.R2.fastq.gz -pe1 fastq/s1.fastq.gz '
             '-pe2 fastq/s1.R2.fastq.gz',
             'atropos trim -A GATCGGAAGAGCGTCGTGTAGGGAAAGGAGTGT '
             '--adapter GATCGGAAGAGCACACGTCTGAACTCCAGTCAC --max-n 80 '
             '--minimum-length 80 --pair-filter any --quality-cutoff 15 '
-            '--threads 4 --trim-n -o output/s2.R1.fastq.gz '
+            '--threads 5 --trim-n -o output/s2.R1.fastq.gz '
             '-p output/s2.R2.fastq.gz -pe1 fastq/s2.fastq.gz '
             '-pe2 fastq/s2.R2.fastq.gz',
             'atropos trim -A GATCGGAAGAGCGTCGTGTAGGGAAAGGAGTGT '
             '--adapter GATCGGAAGAGCACACGTCTGAACTCCAGTCAC --max-n 80 '
             '--minimum-length 80 --pair-filter any --quality-cutoff 15 '
-            '--threads 4 --trim-n -o output/s3.R1.fastq.gz '
+            '--threads 5 --trim-n -o output/s3.R1.fastq.gz '
             '-p output/s3.R2.fastq.gz -pe1 fastq/s3.fastq.gz '
             '-pe2 fastq/s3.R2.fastq.gz'
             ]

@@ -465,7 +465,7 @@ class ShogunTests(PluginTestCase):
         self.assertEqual(1, len(ainfo))
         ainfo = ainfo[0]
         self.assertEqual(ainfo.artifact_type, 'BIOM')
-        exp = [(join(out_dir, 'otu_table.alignment.shogun.biom'), 'biom')]
+        exp = [(join(out_dir, 'otu_table.alignment.profile.biom'), 'biom')]
         self.assertCountEqual(ainfo.files, exp)
 
     def test_shogun_burst(self):
@@ -525,7 +525,7 @@ class ShogunTests(PluginTestCase):
         self.assertEqual(1, len(ainfo))
         ainfo = ainfo[0]
         self.assertEqual(ainfo.artifact_type, 'BIOM')
-        exp = [(join(out_dir, 'otu_table.alignment.shogun.biom'), 'biom')]
+        exp = [(join(out_dir, 'otu_table.alignment.profile.biom'), 'biom')]
         self.assertCountEqual(ainfo.files, exp)
 
     def test_shogun_utree(self):
@@ -585,7 +585,7 @@ class ShogunTests(PluginTestCase):
         self.assertEqual(1, len(ainfo))
         ainfo = ainfo[0]
         self.assertEqual(ainfo.artifact_type, 'BIOM')
-        exp = [(join(out_dir, 'otu_table.alignment.shogun.biom'), 'biom')]
+        exp = [(join(out_dir, 'otu_table.alignment.profile.biom'), 'biom')]
         self.assertCountEqual(ainfo.files, exp)
 
 

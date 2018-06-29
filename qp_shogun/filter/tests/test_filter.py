@@ -75,7 +75,7 @@ class QC_FilterTests(PluginTestCase):
     def test_format_filter_params(self):
         db_path = os.environ["QC_FILTER_DB_DP"]
         obs = _format_params(self.params, BOWTIE2_PARAMS)
-        exp = ('-p 1 -x %sphix/phix') % db_path
+        exp = ('-p 5 -x %sphix/phix') % db_path
 
         self.assertEqual(obs, exp)
 
@@ -88,7 +88,7 @@ class QC_FilterTests(PluginTestCase):
         db_path = os.environ["QC_FILTER_DB_DP"]
 
         exp_cmd = [
-            ('bowtie2 -p 1 -x %sphix/phix --very-sensitive '
+            ('bowtie2 -p 5 -x %sphix/phix --very-sensitive '
              '-1 fastq/s1.fastq.gz -2 fastq/s1.R2.fastq.gz | '
              'samtools view -f 12 -F 256 -b -o temp/s1.unsorted.bam; '
 
@@ -99,9 +99,9 @@ class QC_FilterTests(PluginTestCase):
              'temp/s1.R1.fastq -fq2 '
              'temp/s1.R2.fastq; '
 
-             'pigz -p 1 -c temp/s1.R1.fastq > '
+             'pigz -p 5 -c temp/s1.R1.fastq > '
              'output/s1.R1.fastq.gz; '
-             'pigz -p 1 -c temp/s1.R2.fastq > '
+             'pigz -p 5 -c temp/s1.R2.fastq > '
              'output/s1.R2.fastq.gz;') % db_path
             ]
 
