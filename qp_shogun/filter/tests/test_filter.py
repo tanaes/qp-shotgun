@@ -92,7 +92,7 @@ class QC_FilterTests(PluginTestCase):
              '-1 fastq/s1.fastq.gz -2 fastq/s1.R2.fastq.gz | '
              'samtools view -f 12 -F 256 -b -o temp/s1.unsorted.bam; '
 
-             'samtools sort -T temp/s1 -@ 1 -n '
+             'samtools sort -T temp/s1 -@ 5 -n '
              '-o temp/s1.bam temp/s1.unsorted.bam; '
 
              'bedtools bamtofastq -i temp/s1.bam -fq '
