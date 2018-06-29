@@ -20,7 +20,7 @@ req_params = {'input': ('artifact', ['per_sample_FASTQ'])}
 opt_params = {
     'Bowtie2 database to filter': ["choice: [%s]" % default_db_list,
                                    default_db],
-    'Number of threads': ['integer', '4']
+    'Number of threads': ['integer', '5']
     }
 outputs = {'Filtered files': 'per_sample_FASTQ'}
 dflt_param_set = generate_filter_dflt_params()

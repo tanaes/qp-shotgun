@@ -46,6 +46,6 @@ def generate_filter_dflt_params():
     # Create dict with command options per database
     for db in dbs:
         dflt_param_set[db] = {'Bowtie2 database to filter': dbs[db],
-                              'Number of threads': 4}
+                              'Number of threads': 5}
 
     return(dflt_param_set)

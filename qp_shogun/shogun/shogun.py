@@ -7,7 +7,7 @@
 # -----------------------------------------------------------------------------
 from os.path import join
 from tempfile import TemporaryDirectory
-from .utils import readfq, import_shogun_biom, shogun_db_functional_parser
+from .utils import readfq, import_shogun_biom
 from qp_shogun.utils import (make_read_pairs_per_sample, _run_commands)
 import gzip
 from qiita_client import ArtifactInfo
@@ -123,8 +123,8 @@ def generate_shogun_redist_commands(profile_dir, temp_dir,
     return cmds, output
 
 
-def run_shogun_to_biom(in_fp, biom_in, out_dir, level, version):
-    if version == 'redist':
+def run_shogun_to_biom(in_fp, biom_in, out_dir, level, version='alignment'):
+    if version in ('redist', 'alignment'):
         output_fp = join(out_dir, 'otu_table.%s.%s.biom'
                          % (version, level))
     else:
@@ -158,7 +158,7 @@ def shogun(qclient, job_id, parameters, out_dir):
         The results of the job
     """
     # Step 1 get the rest of the information need to run Atropos
-    qclient.update_job_step(job_id, "Step 1 of 7: Collecting information")
+    qclient.update_job_step(job_id, "Step 1 of 5: Collecting information")
     artifact_id = parameters['input']
     del parameters['input']
 
@@ -173,9 +173,8 @@ def shogun(qclient, job_id, parameters, out_dir):
 
     # Step 2 converting to fna
     qclient.update_job_step(
-        job_id, "Step 2 of 7: Converting to FNA for Shogun")
+        job_id, "Step 2 of 5: Converting to FNA for Shogun")
 
-    ainfo = []
     with TemporaryDirectory(dir=out_dir, prefix='shogun_') as temp_dir:
         rs = fps['raw_reverse_seqs'] if 'raw_reverse_seqs' in fps else []
         samples = make_read_pairs_per_sample(
@@ -188,9 +187,10 @@ def shogun(qclient, job_id, parameters, out_dir):
         parameters = _format_params(parameters, SHOGUN_PARAMS)
 
         # Step 3 align
-        sys_msg = "Step 3 of 7: Aligning FNA with Shogun (%d/{0})"
         align_cmd = generate_shogun_align_commands(
             comb_fp, temp_dir, parameters)
+        sys_msg = "Step 3 of 5: Aligning FNA with Shogun (%d/{0})".format(
+            len(align_cmd))
         success, msg = _run_commands(
             qclient, job_id, align_cmd, sys_msg, 'Shogun Align')
 
@@ -198,7 +198,7 @@ def shogun(qclient, job_id, parameters, out_dir):
             return False, None, msg
 
         # Step 4 taxonomic profile
-        sys_msg = "Step 4 of 7: Taxonomic profile with Shogun (%d/{0})"
+        sys_msg = "Step 4 of 5: Taxonomic profile with Shogun (%d/{0})"
         assign_cmd, profile_fp = generate_shogun_assign_taxonomy_commands(
             temp_dir, parameters)
         success, msg = _run_commands(
@@ -206,75 +206,88 @@ def shogun(qclient, job_id, parameters, out_dir):
         if not success:
             return False, None, msg
 
-        # Step 5 redistribute profile
-        sys_msg = "Step 5 of 7: Redistributed profile with Shogun (%d/{0})"
-        levels = ['genus', 'species', 'strain']
-        redist_fps = []
-        for level in levels:
-            redist_cmd, output = generate_shogun_redist_commands(
-                profile_fp, temp_dir, parameters, level)
-            redist_fps.append(output)
-            success, msg = _run_commands(
-                qclient, job_id, redist_cmd, sys_msg, 'Shogun redistribute')
-            if not success:
-                return False, None, msg
+        sys_msg = "Step 5 of 5: Converting output to BIOM"
+        qclient.update_job_step(job_id, msg)
+        output = run_shogun_to_biom(profile_fp, [None, None, None, True],
+                                    out_dir, 'profile')
 
-        # Step 6 functional profile
-        sys_msg = "Step 6 of 7: Functional profile with Shogun (%d/{0})"
-        levels = ['species']
-        func_fp = ''
-        for level in levels:
-            func_cmd, output = generate_shogun_functional_commands(
-                profile_fp, temp_dir, parameters, level)
-            func_fp = output
-            success, msg = _run_commands(
-                qclient, job_id, func_cmd, sys_msg, 'Shogun functional')
-            if not success:
-                return False, None, msg
-        # Step 6 functional profile
-        sys_msg = "Step 7 of 7: Converting results to BIOM (%d/{0})"
-        # Converting redistributed files to biom
-        redist_levels = ['genus', 'species', 'strain']
-        for redist_fp, level in zip(redist_fps, redist_levels):
-            biom_in = ["redist", None, '', True]
-            output = run_shogun_to_biom(
-                redist_fp, biom_in, out_dir, level, 'redist')
-            aname = 'Taxonomic Predictions - %s' % level
-            ainfo.append(ArtifactInfo(aname, 'BIOM', [(output, 'biom')]))
-        # Coverting funcitonal files to biom
-        func_db_fp = shogun_db_functional_parser(parameters['database'])
-        for level in levels:
-            func_to_biom_fps = [
-                ["kegg.modules.coverage", func_db_fp['module'],
-                 'module', False],
-                ["kegg.modules", func_db_fp['module'], 'module', False],
-                ["kegg.pathways.coverage", func_db_fp['pathway'],
-                 'pathway', False],
-                ["kegg.pathways", func_db_fp['pathway'], 'pathway', False],
-                ["kegg", func_db_fp['enzyme'], 'enzyme', True],
-                ["normalized", func_db_fp['enzyme'], 'pathway', True]]
-
-            for biom_in in func_to_biom_fps:
-                biom_in_fp = join(func_fp, "profile.%s.%s.txt"
-                                  % (level, biom_in[0]))
-                output = run_shogun_to_biom(biom_in_fp, biom_in, out_dir,
-                                            level, 'func')
-                if biom_in[0] == 'kegg.modules.coverage':
-                    atype = 'KEGG Modules Coverage'
-                elif biom_in[0] == 'kegg.modules':
-                    atype = 'KEGG Modules'
-                elif biom_in[0] == 'kegg.pathways.coverage':
-                    atype = 'KEGG Pathways Coverage'
-                elif biom_in[0] == 'kegg.pathways':
-                    atype = 'KEGG Pathways'
-                elif biom_in[0] == 'kegg':
-                    atype = 'KEGG'
-                elif biom_in[0] == 'normalized':
-                    atype = 'Normalized'
-                else:
-                    # this should never happen but adding for completeness
-                    return False, None, "Not a valid format: %s" % biom_in[0]
-                aname = 'Functional Predictions - %s, %s' % (level, atype)
-                ainfo.append(ArtifactInfo(aname, 'BIOM', [(output, 'biom')]))
+        ainfo = [ArtifactInfo('Shogun Alignment Profile', 'BIOM',
+                              [(output, 'biom')])]
 
     return True, ainfo, ""
+
+#
+# This code is not currently needed but it will be used for analysis, so
+# leaving here to avoid having to rewrite it
+#
+
+# # Step 5 redistribute profile
+# sys_msg = "Step 5 of 7: Redistributed profile with Shogun (%d/{0})"
+# levels = ['genus', 'species', 'strain']
+# redist_fps = []
+# for level in levels:
+#     redist_cmd, output = generate_shogun_redist_commands(
+#         profile_fp, temp_dir, parameters, level)
+#     redist_fps.append(output)
+#     success, msg = _run_commands(
+#         qclient, job_id, redist_cmd, sys_msg, 'Shogun redistribute')
+#     if not success:
+#         return False, None, msg
+#
+# # Step 6 functional profile
+# sys_msg = "Step 6 of 7: Functional profile with Shogun (%d/{0})"
+# levels = ['species']
+# func_fp = ''
+# for level in levels:
+#     func_cmd, output = generate_shogun_functional_commands(
+#         profile_fp, temp_dir, parameters, level)
+#     func_fp = output
+#     success, msg = _run_commands(
+#         qclient, job_id, func_cmd, sys_msg, 'Shogun functional')
+#     if not success:
+#         return False, None, msg
+# # Step 6 functional profile
+# sys_msg = "Step 7 of 7: Converting results to BIOM (%d/{0})"
+# # Converting redistributed files to biom
+# redist_levels = ['genus', 'species', 'strain']
+# for redist_fp, level in zip(redist_fps, redist_levels):
+#     biom_in = ["redist", None, '', True]
+#     output = run_shogun_to_biom(
+#         redist_fp, biom_in, out_dir, level, 'redist')
+#     aname = 'Taxonomic Predictions - %s' % level
+#     ainfo.append(ArtifactInfo(aname, 'BIOM', [(output, 'biom')]))
+# # Coverting funcitonal files to biom
+# func_db_fp = shogun_db_functional_parser(parameters['database'])
+# for level in levels:
+#     func_to_biom_fps = [
+#         ["kegg.modules.coverage", func_db_fp['module'],
+#          'module', False],
+#         ["kegg.modules", func_db_fp['module'], 'module', False],
+#         ["kegg.pathways.coverage", func_db_fp['pathway'],
+#          'pathway', False],
+#         ["kegg.pathways", func_db_fp['pathway'], 'pathway', False],
+#         ["kegg", func_db_fp['enzyme'], 'enzyme', True],
+#         ["normalized", func_db_fp['enzyme'], 'pathway', True]]
+#
+#     for biom_in in func_to_biom_fps:
+#         biom_in_fp = join(func_fp, "profile.%s.%s.txt"
+#                           % (level, biom_in[0]))
+#         output = run_shogun_to_biom(biom_in_fp, biom_in, out_dir,
+#                                     level, 'func')
+#         if biom_in[0] == 'kegg.modules.coverage':
+#             atype = 'KEGG Modules Coverage'
+#         elif biom_in[0] == 'kegg.modules':
+#             atype = 'KEGG Modules'
+#         elif biom_in[0] == 'kegg.pathways.coverage':
+#             atype = 'KEGG Pathways Coverage'
+#         elif biom_in[0] == 'kegg.pathways':
+#             atype = 'KEGG Pathways'
+#         elif biom_in[0] == 'kegg':
+#             atype = 'KEGG'
+#         elif biom_in[0] == 'normalized':
+#             atype = 'Normalized'
+#         else:
+#             # this should never happen but adding for completeness
+#             return False, None, "Not a valid format: %s" % biom_in[0]
+#         aname = 'Functional Predictions - %s, %s' % (level, atype)
+#         ainfo.append(ArtifactInfo(aname, 'BIOM', [(output, 'biom')]))

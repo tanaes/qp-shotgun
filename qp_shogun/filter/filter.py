@@ -137,7 +137,7 @@ def filter(qclient, job_id, parameters, out_dir):
 
         # Step 3 execute filtering command
         len_cmd = len(commands)
-        msg = "Step 3 of 4: Executing QC_Trim job (%d/{0})".format(len_cmd)
+        msg = "Step 3 of 4: Executing QC_Filter job (%d/{0})".format(len_cmd)
         success, msg = _run_commands(
             qclient, job_id, commands, msg, 'QC_Filter')
         if not success:

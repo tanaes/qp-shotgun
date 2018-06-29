@@ -37,7 +37,7 @@ class QC_FilterTests(PluginTestCase):
         self.params = {
                        'Bowtie2 database to filter': join(db_path,
                                                           'phix/phix'),
-                       'Number of threads': '1'
+                       'Number of threads': '5'
         }
         self._clean_up_files = []
 
@@ -68,14 +68,14 @@ class QC_FilterTests(PluginTestCase):
         obs = generate_filter_dflt_params()
         exp = {'phix': {'Bowtie2 database to filter': join(db_path, 'phix',
                                                            'phix'),
-                        'Number of threads': 4}}
+                        'Number of threads': 5}}
 
         self.assertEqual(obs, exp)
 
     def test_format_filter_params(self):
         db_path = os.environ["QC_FILTER_DB_DP"]
         obs = _format_params(self.params, BOWTIE2_PARAMS)
-        exp = ('-p 1 -x %sphix/phix') % db_path
+        exp = ('-p 5 -x %sphix/phix') % db_path
 
         self.assertEqual(obs, exp)
 
@@ -88,20 +88,20 @@ class QC_FilterTests(PluginTestCase):
         db_path = os.environ["QC_FILTER_DB_DP"]
 
         exp_cmd = [
-            ('bowtie2 -p 1 -x %sphix/phix --very-sensitive '
+            ('bowtie2 -p 5 -x %sphix/phix --very-sensitive '
              '-1 fastq/s1.fastq.gz -2 fastq/s1.R2.fastq.gz | '
              'samtools view -f 12 -F 256 -b -o temp/s1.unsorted.bam; '
 
-             'samtools sort -T temp/s1 -@ 1 -n '
+             'samtools sort -T temp/s1 -@ 5 -n '
              '-o temp/s1.bam temp/s1.unsorted.bam; '
 
              'bedtools bamtofastq -i temp/s1.bam -fq '
              'temp/s1.R1.fastq -fq2 '
              'temp/s1.R2.fastq; '
 
-             'pigz -p 1 -c temp/s1.R1.fastq > '
+             'pigz -p 5 -c temp/s1.R1.fastq > '
              'output/s1.R1.fastq.gz; '
-             'pigz -p 1 -c temp/s1.R2.fastq > '
+             'pigz -p 5 -c temp/s1.R2.fastq > '
              'output/s1.R2.fastq.gz;') % db_path
             ]
 
