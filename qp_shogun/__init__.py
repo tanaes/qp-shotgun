@@ -15,7 +15,7 @@ from .shogun import shogun_cmd
 
 # Initialize the plugin
 plugin = QiitaPlugin(
-    'qp-shogun', '0.0.1', 'Shogun analysis tools for shotgun data')
+    'qp-shogun', '0.1.0', 'Shogun analysis tools for shotgun data')
 
 plugin.register_command(trim_cmd)
 plugin.register_command(filter_cmd)
