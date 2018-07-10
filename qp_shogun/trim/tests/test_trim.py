@@ -269,7 +269,7 @@ class QC_TrimTests(PluginTestCase):
 
         self.params['input'] = aid
         data = {'user': 'demo@microbio.me',
-                'command': dumps(['qp-shogun', '0.1.0', 'Atropos v1.1.15']),
+                'command': dumps(['qp-shogun', '0.1.1', 'Atropos v1.1.15']),
                 'status': 'running',
                 'parameters': dumps(self.params)}
         jid = self.qclient.post('/apitest/processing_job/', data=data)['job']
