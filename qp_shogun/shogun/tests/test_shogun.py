@@ -44,7 +44,7 @@ class ShogunTests(PluginTestCase):
         self.out_dir = out_dir
         self.db_path = os.environ["QC_SHOGUN_DB_DP"]
         self.params = {
-            'Database': join(self.db_path, 'shogun'),
+            'Database': join(self.db_path, 'ref82'),
             'Aligner tool': 'bowtie2',
             'Number of threads': 5
         }
@@ -154,14 +154,14 @@ class ShogunTests(PluginTestCase):
     def test_get_dbs(self):
         db_path = self.db_path
         obs = get_dbs(db_path)
-        exp = {'shogun': join(db_path, 'shogun')}
+        exp = {'shogun': join(db_path, 'ref82')}
 
         self.assertEqual(obs, exp)
 
     def test_get_dbs_list(self):
         db_path = self.db_path
         obs = get_dbs_list(db_path)
-        exp = join(join('"'+db_path, 'shogun')+'"')
+        exp = join(join('"'+db_path, ref82)+'"')
 
         self.assertEqual(obs, exp)
 
@@ -169,15 +169,15 @@ class ShogunTests(PluginTestCase):
         obs = generate_shogun_dflt_params()
         exp = {
             'shogun_bowtie2': {
-                'Database': join(self.db_path, 'shogun'),
+                'Database': join(self.db_path, 'ref82'),
                 'Aligner tool': 'bowtie2',
                 'Number of threads': 5},
             'shogun_utree': {
-                'Database': join(self.db_path, 'shogun'),
+                'Database': join(self.db_path, 'ref82'),
                 'Aligner tool': 'utree',
                 'Number of threads': 5},
             'shogun_burst': {
-                'Database': join(self.db_path, 'shogun'),
+                'Database': join(self.db_path, 'ref82'),
                 'Aligner tool': 'burst',
                 'Number of threads': 5}}
 
@@ -330,7 +330,7 @@ class ShogunTests(PluginTestCase):
     def test_format_shogun_params(self):
         obs = _format_params(self.params, SHOGUN_PARAMS)
         exp = {
-            'database': join(self.db_path, 'shogun'),
+            'database': join(self.db_path, 'ref82'),
             'aligner': 'bowtie2',
             'threads': 5
         }
