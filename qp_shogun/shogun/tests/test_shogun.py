@@ -154,29 +154,29 @@ class ShogunTests(PluginTestCase):
     def test_get_dbs(self):
         db_path = self.db_path
         obs = get_dbs(db_path)
-        exp = {'shogun': join(db_path, 'ref82')}
+        exp = {'ref82': join(db_path, 'ref82')}
 
         self.assertEqual(obs, exp)
 
     def test_get_dbs_list(self):
         db_path = self.db_path
         obs = get_dbs_list(db_path)
-        exp = join(join('"'+db_path, ref82)+'"')
+        exp = join(join('"'+db_path, 'ref82')+'"')
 
         self.assertEqual(obs, exp)
 
     def test_generate_shogun_dflt_params(self):
         obs = generate_shogun_dflt_params()
         exp = {
-            'shogun_bowtie2': {
+            'ref82_bowtie2': {
                 'Database': join(self.db_path, 'ref82'),
                 'Aligner tool': 'bowtie2',
                 'Number of threads': 5},
-            'shogun_utree': {
+            'ref82_utree': {
                 'Database': join(self.db_path, 'ref82'),
                 'Aligner tool': 'utree',
                 'Number of threads': 5},
-            'shogun_burst': {
+            'ref82_burst': {
                 'Database': join(self.db_path, 'ref82'),
                 'Aligner tool': 'burst',
                 'Number of threads': 5}}
@@ -343,7 +343,7 @@ class ShogunTests(PluginTestCase):
 
             exp_cmd = [
                 ('shogun align --aligner bowtie2 --threads 5 '
-                 '--database %sshogun --input %s/combined.fna '
+                 '--database %sref82 --input %s/combined.fna '
                  '--output %s') %
                 (self.db_path, temp_dir, temp_dir)
                 ]
@@ -360,7 +360,7 @@ class ShogunTests(PluginTestCase):
 
             exp_cmd = [
                 ('shogun assign_taxonomy --aligner bowtie2 '
-                 '--database %sshogun --input %s/alignment.bowtie2.sam '
+                 '--database %sref82 --input %s/alignment.bowtie2.sam '
                  '--output %s/profile.tsv') %
                 (self.db_path, temp_dir, temp_dir)
                 ]
@@ -378,7 +378,7 @@ class ShogunTests(PluginTestCase):
 
             exp_cmd = [
                 ('shogun functional '
-                 '--database %sshogun --input %s '
+                 '--database %sref82 --input %s '
                  '--output %s --level species') %
                 (self.db_path, join(temp_dir, 'profile.tsv'),
                  join(temp_dir, 'functional'))
@@ -396,7 +396,7 @@ class ShogunTests(PluginTestCase):
 
             exp_cmd = [
                 ('shogun redistribute '
-                 '--database %sshogun --level species --input %s '
+                 '--database %sref82 --level species --input %s '
                  '--output %s') %
                 (self.db_path, join(temp_dir, 'profile.tsv'),
                  join(temp_dir, 'profile.redist.species.tsv'))
