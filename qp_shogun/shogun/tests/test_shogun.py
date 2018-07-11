@@ -448,7 +448,7 @@ class ShogunTests(PluginTestCase):
 
         self.params['input'] = aid
         data = {'user': 'demo@microbio.me',
-                'command': dumps(['qp-shogun', '0.1.1', 'Shogun']),
+                'command': dumps(['qp-shogun', '0.1.2', 'Shogun']),
                 'status': 'running',
                 'parameters': dumps(self.params)}
         jid = self.qclient.post('/apitest/processing_job/', data=data)['job']
@@ -508,7 +508,7 @@ class ShogunTests(PluginTestCase):
         self.params['input'] = aid
         self.params['Aligner tool'] = 'burst'
         data = {'user': 'demo@microbio.me',
-                'command': dumps(['qp-shogun', '0.1.1', 'Shogun']),
+                'command': dumps(['qp-shogun', '0.1.2', 'Shogun']),
                 'status': 'running',
                 'parameters': dumps(self.params)}
         jid = self.qclient.post('/apitest/processing_job/', data=data)['job']
@@ -568,7 +568,7 @@ class ShogunTests(PluginTestCase):
         self.params['input'] = aid
         self.params['Aligner tool'] = 'utree'
         data = {'user': 'demo@microbio.me',
-                'command': dumps(['qp-shogun', '0.1.1', 'Shogun']),
+                'command': dumps(['qp-shogun', '0.1.2', 'Shogun']),
                 'status': 'running',
                 'parameters': dumps(self.params)}
         jid = self.qclient.post('/apitest/processing_job/', data=data)['job']
