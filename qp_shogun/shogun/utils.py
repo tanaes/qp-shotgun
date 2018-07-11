@@ -47,12 +47,18 @@ def generate_shogun_dflt_params():
     db_parent_path = os.environ["QC_SHOGUN_DB_DP"]
     # Get a the databases available and the database name
     dbs = get_dbs(db_parent_path)
+    align_dirs = {"utree": "utree",
+                  "burst": "burst",
+                  "bowtie2": "bt2"}
     # Create dict with command options per database
     for db in dbs:
         for aligner in ALIGNERS:
-            dflt_param_set[db+'_'+aligner] = {'Database': dbs[db],
-                                              'Aligner tool': aligner,
-                                              'Number of threads': 5}
+            # Don't create param sets for db representations that don't exist
+            # This enables BURST to be disabled for specific (large) refs
+            if isdir(join(dbs[db],align_dirs[aligner])):
+                dflt_param_set[db+'_'+aligner] = {'Database': dbs[db],
+                                                  'Aligner tool': aligner,
+                                                  'Number of threads': 1}
 
     return(dflt_param_set)
 
