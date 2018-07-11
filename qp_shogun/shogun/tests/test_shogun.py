@@ -44,7 +44,7 @@ class ShogunTests(PluginTestCase):
         self.out_dir = out_dir
         self.db_path = os.environ["QC_SHOGUN_DB_DP"]
         self.params = {
-            'Database': join(self.db_path, 'shogun'),
+            'Database': join(self.db_path, 'ref82'),
             'Aligner tool': 'bowtie2',
             'Number of threads': 5
         }
@@ -154,30 +154,30 @@ class ShogunTests(PluginTestCase):
     def test_get_dbs(self):
         db_path = self.db_path
         obs = get_dbs(db_path)
-        exp = {'shogun': join(db_path, 'shogun')}
+        exp = {'ref82': join(db_path, 'ref82')}
 
         self.assertEqual(obs, exp)
 
     def test_get_dbs_list(self):
         db_path = self.db_path
         obs = get_dbs_list(db_path)
-        exp = join(join('"'+db_path, 'shogun')+'"')
+        exp = join(join('"'+db_path, 'ref82')+'"')
 
         self.assertEqual(obs, exp)
 
     def test_generate_shogun_dflt_params(self):
         obs = generate_shogun_dflt_params()
         exp = {
-            'shogun_bowtie2': {
-                'Database': join(self.db_path, 'shogun'),
+            'ref82_bowtie2': {
+                'Database': join(self.db_path, 'ref82'),
                 'Aligner tool': 'bowtie2',
                 'Number of threads': 5},
-            'shogun_utree': {
-                'Database': join(self.db_path, 'shogun'),
+            'ref82_utree': {
+                'Database': join(self.db_path, 'ref82'),
                 'Aligner tool': 'utree',
                 'Number of threads': 5},
-            'shogun_burst': {
-                'Database': join(self.db_path, 'shogun'),
+            'ref82_burst': {
+                'Database': join(self.db_path, 'ref82'),
                 'Aligner tool': 'burst',
                 'Number of threads': 5}}
 
@@ -330,7 +330,7 @@ class ShogunTests(PluginTestCase):
     def test_format_shogun_params(self):
         obs = _format_params(self.params, SHOGUN_PARAMS)
         exp = {
-            'database': join(self.db_path, 'shogun'),
+            'database': join(self.db_path, 'ref82'),
             'aligner': 'bowtie2',
             'threads': 5
         }
@@ -343,7 +343,7 @@ class ShogunTests(PluginTestCase):
 
             exp_cmd = [
                 ('shogun align --aligner bowtie2 --threads 5 '
-                 '--database %sshogun --input %s/combined.fna '
+                 '--database %sref82 --input %s/combined.fna '
                  '--output %s') %
                 (self.db_path, temp_dir, temp_dir)
                 ]
@@ -360,7 +360,7 @@ class ShogunTests(PluginTestCase):
 
             exp_cmd = [
                 ('shogun assign_taxonomy --aligner bowtie2 '
-                 '--database %sshogun --input %s/alignment.bowtie2.sam '
+                 '--database %sref82 --input %s/alignment.bowtie2.sam '
                  '--output %s/profile.tsv') %
                 (self.db_path, temp_dir, temp_dir)
                 ]
@@ -378,7 +378,7 @@ class ShogunTests(PluginTestCase):
 
             exp_cmd = [
                 ('shogun functional '
-                 '--database %sshogun --input %s '
+                 '--database %sref82 --input %s '
                  '--output %s --level species') %
                 (self.db_path, join(temp_dir, 'profile.tsv'),
                  join(temp_dir, 'functional'))
@@ -396,7 +396,7 @@ class ShogunTests(PluginTestCase):
 
             exp_cmd = [
                 ('shogun redistribute '
-                 '--database %sshogun --level species --input %s '
+                 '--database %sref82 --level species --input %s '
                  '--output %s') %
                 (self.db_path, join(temp_dir, 'profile.tsv'),
                  join(temp_dir, 'profile.redist.species.tsv'))

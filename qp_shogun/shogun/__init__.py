@@ -16,7 +16,7 @@ from os import environ
 __all__ = ['Shogun']
 
 # Define the shogun command
-default_db = join(environ["QC_SHOGUN_DB_DP"], 'shogun')
+default_db = join(environ["QC_SHOGUN_DB_DP"], 'ref82')
 default_db_list = get_dbs_list(environ["QC_SHOGUN_DB_DP"])
 req_params = {'input': ('artifact', ['per_sample_FASTQ'])}
 opt_params = {
